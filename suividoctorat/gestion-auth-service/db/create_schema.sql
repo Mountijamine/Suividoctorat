@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `last_name` VARCHAR(255) DEFAULT NULL,
   `phone` VARCHAR(255) DEFAULT NULL,
   `accept_terms` TINYINT(1) DEFAULT 0,
+  `requested_profile` VARCHAR(255) DEFAULT NULL,
+  `approved` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_users_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -29,3 +31,12 @@ ON DUPLICATE KEY UPDATE email = VALUES(email);
 
 INSERT INTO user_roles (user_id, roles) VALUES (1, 'ROLE_ADMIN')
 ON DUPLICATE KEY UPDATE roles = roles;
+
+-- If you already have an existing `users` table, run the ALTER statements below
+-- to add the new columns required by the application (requested_profile, approved):
+-- ALTER TABLE users ADD COLUMN requested_profile VARCHAR(255) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN approved TINYINT(1) NOT NULL DEFAULT 0;
+
+-- Optionally, if you want to add audit fields for approval later, you can run:
+-- ALTER TABLE users ADD COLUMN approved_by VARCHAR(255) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN approved_at DATETIME DEFAULT NULL;

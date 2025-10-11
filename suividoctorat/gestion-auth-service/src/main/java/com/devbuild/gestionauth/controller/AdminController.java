@@ -23,6 +23,13 @@ public class AdminController {
     public String users(Model model) {
         model.addAttribute("users", userService.findAllUsers());
         model.addAttribute("roles", Role.values());
+        java.util.Map<String, String> roleLabels = new java.util.HashMap<>();
+        roleLabels.put("ROLE_CANDIDAT", "Candidat");
+        roleLabels.put("ROLE_ENCADRANT", "Encadrant");
+        roleLabels.put("ROLE_PERSONNEL", "Personnel administratif");
+        roleLabels.put("ROLE_ADMIN", "Administrateur");
+        roleLabels.put("ROLE_USER", "Utilisateur");
+        model.addAttribute("roleLabels", roleLabels);
         return "admin/users";
     }
 
