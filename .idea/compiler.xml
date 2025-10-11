@@ -7,8 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="doctorant-service" />
+        <module name="gestion-auth-service" />
         <module name="auth-service" />
+        <module name="soutenance-service" />
+        <module name="inscription-service" />
         <module name="gateway" />
+        <module name="notification-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
