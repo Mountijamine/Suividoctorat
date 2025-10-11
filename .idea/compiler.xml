@@ -10,24 +10,17 @@
         <module name="auth-service" />
         <module name="gateway" />
       </profile>
-      <profile name="Annotation profile for suividoctorat" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
-        </processorPath>
-        <module name="common" />
-      </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="common" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="auth-service" options="-parameters" />
-      <module name="common" options="-parameters" />
-      <module name="doctorant-service" options="-parameters" />
-      <module name="gateway" options="-parameters" />
+      <module name="auth-service" options="" />
+      <module name="common" options="" />
+      <module name="doctorant-service" options="" />
+      <module name="gateway" options="" />
     </option>
   </component>
 </project>

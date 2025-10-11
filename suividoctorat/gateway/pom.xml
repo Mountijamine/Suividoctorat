@@ -9,6 +9,8 @@
         <relativePath>..</relativePath>
     </parent>
     <artifactId>gateway</artifactId>
+    <packaging>jar</packaging>
+    <name>gateway</name>
 
     <dependencies>
         <dependency>
@@ -20,5 +22,14 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -1,7 +1,0 @@
-<h2>Doctorants</h2>
-<div *ngIf="loading">Loading...</div>
-<div *ngIf="error" style="color:darkred">{{error}}</div>
-<ul>
-  <li *ngFor="let d of doctorants">{{d.nom}} {{d.prenom}} — {{d.email}}</li>
-</ul>
-<button class="button" (click)="load()">Reload</button>

@@ -1,6 +1,6 @@
-package com.devbuild.common.model;
+package com.devbuild.doctorant.dto;
 
-public class Doctorant {
+public class DoctorantDto {
     private Long id;
     private String nom;
     private String prenom;
