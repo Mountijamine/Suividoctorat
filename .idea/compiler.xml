@@ -6,13 +6,17 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="doctorant-service" />
-        <module name="auth-service" />
+        <module name="gestion-auth-service" />
+        <module name="soutenance-service" />
+        <module name="inscription-service" />
         <module name="gateway" />
+        <module name="notification-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="auth-service" target="17" />
       <module name="common" target="17" />
+      <module name="doctorant-service" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
