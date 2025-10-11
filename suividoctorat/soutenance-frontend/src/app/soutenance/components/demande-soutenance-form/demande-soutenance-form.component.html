@@ -1,0 +1,164 @@
+<!-- demande-soutenance-form.component.html -->
+<div class="soutenance-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Demande de Soutenance de Thèse</mat-card-title>
+      <mat-card-subtitle>Remplissez le formulaire et uploadez les documents requis</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="soutenanceForm" (ngSubmit)="onSubmit()">
+        <!-- Thesis Information -->
+        <div class="form-section">
+          <h3>Informations de la Thèse</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Titre de la thèse</mat-label>
+            <input matInput formControlName="titreThese" required>
+            <mat-error *ngIf="soutenanceForm.get('titreThese')?.hasError('required')">
+              Le titre est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Sujet de recherche</mat-label>
+            <textarea matInput formControlName="sujet" rows="3" required></textarea>
+            <mat-error *ngIf="soutenanceForm.get('sujet')?.hasError('required')">
+              Le sujet est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Date souhaitée de soutenance</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="dateSouhaitee" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Student Information -->
+        <div class="form-section" formGroupName="doctorant">
+          <h3>Informations du Doctorant</h3>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="doctorantNom" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Prénom</mat-label>
+              <input matInput formControlName="doctorantPrenom" required>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="doctorantEmail" required>
+            <mat-error *ngIf="soutenanceForm.get('doctorantEmail')?.hasError('email')">
+              Email invalide
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Director Information -->
+        <div class="form-section">
+          <h3>Informations du Directeur de Thèse</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nom du directeur</mat-label>
+            <input matInput formControlName="directeurNom" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email du directeur</mat-label>
+            <input matInput type="email" formControlName="directeurEmail" required>
+          </mat-form-field>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="form-section" formGroupName="prerequis">
+          <h3>Prérequis</h3>
+          
+          <div class="prerequis-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre d'articles Q1/Q2</mat-label>
+              <input matInput type="number" formControlName="nombreArticlesQ1Q2" min="0">
+              <mat-hint>Minimum requis: {{ prerequisRequirements.MIN_ARTICLES }}</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre de conférences</mat-label>
+              <input matInput type="number" formControlName="nombreConferences" min="0">
+              <mat-hint>Minimum requis: {{ prerequisRequirements.MIN_CONFERENCES }}</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Heures de formation</mat-label>
+              <input matInput type="number" formControlName="heuresFormation" min="0">
+              <mat-hint>Minimum requis: {{ prerequisRequirements.MIN_HEURES_FORMATION }}h</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <!-- Prerequisites Validation Alert -->
+          <mat-card [class.success]="isPrerequisValid()" [class.warning]="!isPrerequisValid()" class="prerequis-status">
+            <mat-icon>{{ isPrerequisValid() ? 'check_circle' : 'warning' }}</mat-icon>
+            <span>{{ getPrerequisValidationMessage() }}</span>
+          </mat-card>
+        </div>
+
+        <!-- Document Upload -->
+        <div class="form-section">
+          <h3>Documents Requis</h3>
+          
+          <div class="documents-upload">
+            <div *ngFor="let type of documentTypes" class="document-item">
+              <mat-card>
+                <div class="document-header">
+                  <span class="document-label">{{ typeDocumentLabels[type] }}</span>
+                  <mat-icon *ngIf="uploadedFiles.has(type)" color="primary">check_circle</mat-icon>
+                </div>
+                
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  (change)="onFileSelected(type, $event)"
+                  #fileInput
+                  style="display: none"
+                >
+                
+                <button
+                  mat-raised-button
+                  type="button"
+                  [color]="uploadedFiles.has(type) ? 'primary' : 'accent'"
+                  (click)="fileInput.click()">
+                  <mat-icon>{{ uploadedFiles.has(type) ? 'edit' : 'upload' }}</mat-icon>
+                  {{ uploadedFiles.has(type) ? 'Modifier' : 'Choisir un fichier' }}
+                </button>
+
+                <span *ngIf="uploadedFiles.has(type)" class="file-name">
+                  {{ uploadedFiles.get(type)?.name }}
+                </span>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onCancel()" [disabled]="isSubmitting">
+            Annuler
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="soutenanceForm.invalid || !isPrerequisValid() || isSubmitting">
+            <mat-icon>send</mat-icon>
+            {{ isSubmitting ? 'Envoi en cours...' : 'Soumettre la demande' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,26 @@
+<!-- soutenance-checklist.component.html -->
+<div class="checklist-container">
+  <h3>Validation des Prérequis</h3>
+  
+  <div class="progress-bar">
+    <div class="progress-fill" [style.width.%]="getCompletionPercentage()"></div>
+    <span class="progress-text">{{ getCompletionPercentage() }}% complété</span>
+  </div>
+
+  <div class="checklist-items">
+    <div class="checklist-item" [class.completed]="prerequis?.nombreArticlesQ1Q2 >= MIN_ARTICLES">
+      <span class="icon">{{ prerequis?.nombreArticlesQ1Q2 >= MIN_ARTICLES ? '✓' : '○' }}</span>
+      <span class="label">Articles Q1/Q2: {{ prerequis?.nombreArticlesQ1Q2 || 0 }} / {{ MIN_ARTICLES }}</span>
+    </div>
+
+    <div class="checklist-item" [class.completed]="prerequis?.nombreConferences >= MIN_CONFERENCES">
+      <span class="icon">{{ prerequis?.nombreConferences >= MIN_CONFERENCES ? '✓' : '○' }}</span>
+      <span class="label">Conférences: {{ prerequis?.nombreConferences || 0 }} / {{ MIN_CONFERENCES }}</span>
+    </div>
+
+    <div class="checklist-item" [class.completed]="prerequis?.heuresFormation >= MIN_HEURES_FORMATION">
+      <span class="icon">{{ prerequis?.heuresFormation >= MIN_HEURES_FORMATION ? '✓' : '○' }}</span>
+      <span class="label">Formation: {{ prerequis?.heuresFormation || 0 }}h / {{ MIN_HEURES_FORMATION }}h</span>
+    </div>
+  </div>
+</div>

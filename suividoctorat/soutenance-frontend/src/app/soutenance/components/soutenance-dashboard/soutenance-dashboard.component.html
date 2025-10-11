@@ -1,0 +1,86 @@
+<!-- soutenance-dashboard.component.html -->
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Mes Demandes de Soutenance</h1>
+    <button mat-raised-button color="primary" (click)="createNewDemande()">
+      <mat-icon>add</mat-icon>
+      Nouvelle Demande
+    </button>
+  </div>
+
+  <mat-card *ngIf="loading" class="loading-card">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <p>Chargement...</p>
+  </mat-card>
+
+  <mat-card *ngIf="!loading && soutenances.length === 0" class="empty-state">
+    <mat-icon>info</mat-icon>
+    <h2>Aucune demande de soutenance</h2>
+    <p>Vous n'avez pas encore soumis de demande de soutenance.</p>
+    <button mat-raised-button color="primary" (click)="createNewDemande()">
+      Créer une demande
+    </button>
+  </mat-card>
+
+  <div *ngIf="!loading && soutenances.length > 0" class="soutenances-grid">
+    <mat-card *ngFor="let soutenance of soutenances" class="soutenance-card">
+      <mat-card-header>
+        <mat-card-title>{{ soutenance.titreThese }}</mat-card-title>
+        <mat-card-subtitle>{{ soutenance.sujet }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="soutenance-info">
+          <div class="info-item">
+            <mat-icon>event</mat-icon>
+            <span>Date souhaitée: {{ soutenance.dateSouhaitee | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="soutenance.dateDefense">
+            <mat-icon>schedule</mat-icon>
+            <span>Soutenance: {{ soutenance.dateDefense | date:'dd/MM/yyyy' }} à {{ soutenance.heureDefense }}</span>
+          </div>
+
+          <div class="info-item">
+            <mat-icon>person</mat-icon>
+            <span>Directeur: {{ soutenance.directeurNom }}</span>
+          </div>
+
+          <mat-chip [color]="getStatutColor(soutenance.statut)" class="statut-chip">
+            {{ getStatutLabel(soutenance.statut) }}
+          </mat-chip>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="progress-tracker">
+          <div class="progress-step" [class.completed]="['SOUMISE', 'VALIDEE', 'AUTORISEE', 'PLANIFIEE', 'TERMINEE'].includes(soutenance.statut)">
+            <mat-icon>check_circle</mat-icon>
+            <span>Soumise</span>
+          </div>
+          <div class="progress-line" [class.completed]="['VALIDEE', 'AUTORISEE', 'PLANIFIEE', 'TERMINEE'].includes(soutenance.statut)"></div>
+          <div class="progress-step" [class.completed]="['VALIDEE', 'AUTORISEE', 'PLANIFIEE', 'TERMINEE'].includes(soutenance.statut)">
+            <mat-icon>verified</mat-icon>
+            <span>Validée</span>
+          </div>
+          <div class="progress-line" [class.completed]="['AUTORISEE', 'PLANIFIEE', 'TERMINEE'].includes(soutenance.statut)"></div>
+          <div class="progress-step" [class.completed]="['AUTORISEE', 'PLANIFIEE', 'TERMINEE'].includes(soutenance.statut)">
+            <mat-icon>assignment_turned_in</mat-icon>
+            <span>Autorisée</span>
+          </div>
+          <div class="progress-line" [class.completed]="['PLANIFIEE', 'TERMINEE'].includes(soutenance.statut)"></div>
+          <div class="progress-step" [class.completed]="['PLANIFIEE', 'TERMINEE'].includes(soutenance.statut)">
+            <mat-icon>event_available</mat-icon>
+            <span>Planifiée</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button color="primary" (click)="viewDetails(soutenance.id!)">
+          <mat-icon>visibility</mat-icon>
+          Voir détails
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

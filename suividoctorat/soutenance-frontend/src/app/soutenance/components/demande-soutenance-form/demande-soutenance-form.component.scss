@@ -1,0 +1,131 @@
+/* demande-soutenance-form.component.scss */
+.soutenance-form-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+mat-card {
+  margin-bottom: 1rem;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+
+  h3 {
+    color: #3f51b5;
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.prerequis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.prerequis-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  margin-top: 1rem;
+
+  &.success {
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    
+    mat-icon {
+      color: #4caf50;
+    }
+  }
+
+  &.warning {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+    
+    mat-icon {
+      color: #ff9800;
+    }
+  }
+}
+
+.documents-upload {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.document-item {
+  mat-card {
+    padding: 1rem;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+  }
+
+  .document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    .document-label {
+      font-weight: 500;
+      color: #424242;
+    }
+  }
+
+  button {
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  .file-name {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #757575;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+
+  button {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row,
+  .prerequis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .documents-upload {
+    grid-template-columns: 1fr;
+  }
+}
