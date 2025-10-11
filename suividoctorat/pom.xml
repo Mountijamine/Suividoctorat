@@ -31,9 +31,11 @@
         <maven.compiler.release>17</maven.compiler.release>
     </properties>
     <modules>
-        <module>auth-service</module>
-        <module>doctorant-service</module>
-        <module>gateway</module>
+    <module>gestion-auth-service</module>
+    <module>inscription-service</module>
+    <module>soutenance-service</module>
+    <module>notification-service</module>
+    <module>gateway</module>
     </modules>
 
     <dependencyManagement>
