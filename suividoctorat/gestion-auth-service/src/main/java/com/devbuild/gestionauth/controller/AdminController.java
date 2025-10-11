@@ -40,8 +40,16 @@ public class AdminController {
     }
 
     @PostMapping("/admin/approve-user")
-    public String approveUser(@RequestParam String email) {
-        userService.approveAndAssign(email);
+    public String approveUser(@RequestParam String email, java.security.Principal principal) {
+        String approver = principal != null ? principal.getName() : "unknown";
+        userService.approveAndAssign(email, approver);
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/admin/reject-user")
+    public String rejectUser(@RequestParam String email, @RequestParam(required = false) String reason, java.security.Principal principal) {
+        String approver = principal != null ? principal.getName() : "unknown";
+        userService.rejectUser(email, reason, approver);
         return "redirect:/admin/users";
     }
 }

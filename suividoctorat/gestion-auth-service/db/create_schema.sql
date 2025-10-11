@@ -13,6 +13,11 @@ CREATE TABLE IF NOT EXISTS `users` (
   `accept_terms` TINYINT(1) DEFAULT 0,
   `requested_profile` VARCHAR(255) DEFAULT NULL,
   `approved` TINYINT(1) NOT NULL DEFAULT 0,
+  `affiliation` VARCHAR(512) DEFAULT NULL,
+  `proof_url` VARCHAR(1024) DEFAULT NULL,
+  `approved_by` VARCHAR(255) DEFAULT NULL,
+  `approved_at` DATETIME DEFAULT NULL,
+  `rejection_reason` VARCHAR(1024) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_users_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -36,6 +41,13 @@ ON DUPLICATE KEY UPDATE roles = roles;
 -- to add the new columns required by the application (requested_profile, approved):
 -- ALTER TABLE users ADD COLUMN requested_profile VARCHAR(255) DEFAULT NULL;
 -- ALTER TABLE users ADD COLUMN approved TINYINT(1) NOT NULL DEFAULT 0;
+
+-- Added optional fields and ALTER statements for existing DBs:
+-- ALTER TABLE users ADD COLUMN affiliation VARCHAR(512) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN proof_url VARCHAR(1024) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN approved_by VARCHAR(255) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN approved_at DATETIME DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN rejection_reason VARCHAR(1024) DEFAULT NULL;
 
 -- Optionally, if you want to add audit fields for approval later, you can run:
 -- ALTER TABLE users ADD COLUMN approved_by VARCHAR(255) DEFAULT NULL;

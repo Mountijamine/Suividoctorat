@@ -42,12 +42,14 @@ public class WebController {
         String firstName = params.get("firstName");
         String lastName = params.get("lastName");
     String phone = params.get("phone");
+    String affiliation = params.get("affiliation");
+    String proofUrl = params.get("proofUrl");
     String accept = params.get("acceptTerms");
     String requestedProfile = params.get("requestedProfile");
         if (email == null || password == null || confirm == null) { model.addAttribute("error","Missing fields"); return "signup"; }
         if (!password.equals(confirm)) { model.addAttribute("error","Passwords do not match"); return "signup"; }
         if (!"on".equalsIgnoreCase(accept) && !"true".equalsIgnoreCase(accept)) { model.addAttribute("error","You must accept terms"); return "signup"; }
-    userService.createUserWithProfile(email, password, firstName, lastName, phone, true, requestedProfile);
+    userService.createUserWithProfile(email, password, firstName, lastName, phone, true, requestedProfile, affiliation, proofUrl);
         return "redirect:/login";
     }
 

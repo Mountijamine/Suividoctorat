@@ -45,6 +45,21 @@ public class User {
     @Column(nullable = false)
     private Boolean approved = false;
 
+    @Column(nullable = true)
+    private String affiliation;
+
+    @Column(nullable = true)
+    private String proofUrl;
+
+    @Column(nullable = true)
+    private String approvedBy;
+
+    @Column(nullable = true)
+    private java.time.LocalDateTime approvedAt;
+
+    @Column(nullable = true)
+    private String rejectionReason;
+
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
@@ -61,4 +76,14 @@ public class User {
     public void setRequestedProfile(String requestedProfile) { this.requestedProfile = requestedProfile; }
     public Boolean getApproved() { return approved; }
     public void setApproved(Boolean approved) { this.approved = approved; }
+    public String getAffiliation() { return affiliation; }
+    public void setAffiliation(String affiliation) { this.affiliation = affiliation; }
+    public String getProofUrl() { return proofUrl; }
+    public void setProofUrl(String proofUrl) { this.proofUrl = proofUrl; }
+    public String getApprovedBy() { return approvedBy; }
+    public void setApprovedBy(String approvedBy) { this.approvedBy = approvedBy; }
+    public java.time.LocalDateTime getApprovedAt() { return approvedAt; }
+    public void setApprovedAt(java.time.LocalDateTime approvedAt) { this.approvedAt = approvedAt; }
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 }
