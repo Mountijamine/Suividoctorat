@@ -17,7 +17,7 @@
         <td th:text="${u.firstName}"></td>
         <td th:text="${u.lastName}"></td>
         <td>
-            <span th:text="${roleLabels[u.requestedProfile]} ?: ${u.requestedProfile}"></span>
+            <span th:text="${u.requestedProfile != null ? (roleLabels.containsKey(u.requestedProfile) ? roleLabels[u.requestedProfile] : u.requestedProfile) : ''}"></span>
         </td>
         <td th:text="${u.approved}"></td>
         <td th:text="${u.roles}"></td>
@@ -25,11 +25,11 @@
             <form method="post" th:action="@{/admin/assign-role}" style="display:inline-block">
                 <input type="hidden" name="email" th:value="${u.email}" />
                 <select name="role">
-                    <option th:each="r : ${roles}" th:value="${r}" th:text="${roleLabels[r.name()]} ?: ${r}"></option>
+                    <option th:each="r : ${roles}" th:value="${r}" th:text="${roleLabels.containsKey(r.name()) ? roleLabels[r.name()] : r}" th:selected="${r.name() == u.requestedProfile}"></option>
                 </select>
                 <button type="submit">Assign</button>
             </form>
-            <form method="post" th:action="@{/admin/approve-user}" style="display:inline-block" th:if="${u.approved} == false and ${u.requestedProfile} != null">
+            <form method="post" th:action="@{/admin/approve-user}" style="display:inline-block" th:if="${u.approved == false and u.requestedProfile != null}">
                 <input type="hidden" name="email" th:value="${u.email}" />
                 <button type="submit">Approve Request</button>
             </form>

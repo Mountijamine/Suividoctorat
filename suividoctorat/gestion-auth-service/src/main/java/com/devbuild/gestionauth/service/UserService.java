@@ -40,6 +40,11 @@ public class UserService {
         return userRepository.save(u);
     }
 
+    // Backward-compatible overload for existing callers that didn't pass requestedProfile
+    public User createUserWithProfile(String email, String rawPassword, String firstName, String lastName, String phone, boolean acceptTerms) {
+        return createUserWithProfile(email, rawPassword, firstName, lastName, phone, acceptTerms, null);
+    }
+
     public User approveAndAssign(String email) {
         User u = userRepository.findByEmail(email).orElseThrow();
         if (u.getRequestedProfile() == null) return u;
