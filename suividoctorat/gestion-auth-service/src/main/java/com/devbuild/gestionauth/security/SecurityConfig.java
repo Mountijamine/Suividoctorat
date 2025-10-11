@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -36,18 +39,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         TokenFilter tokenFilter = new TokenFilter(jwtUtil);
-        http.csrf().disable()
-            .sessionManagement().sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeHttpRequests()
-            // permit access to static resources and form endpoints
-            .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-            .requestMatchers(HttpMethod.GET, "/login", "/signup").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login", "/signup", "/login").permitAll()
-            .anyRequest().authenticated()
+        http
+            .csrf(csrf -> csrf
+                // keep CSRF protection for stateful form endpoints and expose token via cookie
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                // ignore API endpoints (they use JWT)
+                .ignoringRequestMatchers("/api/**")
+            )
+            // Use stateful sessions for form-based UI so redirects and CSRF-protected forms work.
+            // API endpoints still use JWT (TokenFilter) but session auth is required for MVC flows.
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .authorizeHttpRequests(auth -> auth
+                // permit access to static resources and form endpoints
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers(HttpMethod.GET, "/login", "/signup").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login", "/signup", "/login").permitAll()
+                .anyRequest().authenticated()
+            )
             // do NOT enable HTTP Basic; we use JWT bearer tokens only
-            .and()
-            .addFilterBefore(tokenFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

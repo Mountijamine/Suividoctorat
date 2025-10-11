@@ -18,9 +18,21 @@ public class JwtUtil {
     private final SecretKey key;
     private final long expirationMs;
 
-    public JwtUtil(@Value("${app.jwt.secret}") String secret,
-                   @Value("${app.jwt.expiration-ms}") long expirationMs) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    public JwtUtil(@Value("${app.jwt.secret:}") String secret,
+                   @Value("${app.jwt.expiration-ms:86400000}") long expirationMs) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret is not configured. Set 'app.jwt.secret' environment variable or property.");
+        }
+        byte[] keyBytes;
+        if (secret.startsWith("base64:")) {
+            keyBytes = java.util.Base64.getDecoder().decode(secret.substring(7));
+        } else {
+            keyBytes = secret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        }
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("JWT secret is too short; require at least 32 bytes of entropy (use a base64 string or a longer secret).");
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
         this.expirationMs = expirationMs;
     }
 

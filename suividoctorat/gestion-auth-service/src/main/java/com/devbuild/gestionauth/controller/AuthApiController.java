@@ -83,4 +83,14 @@ public class AuthApiController {
         User u = userService.assignRole(email, Role.valueOf(role));
         return ResponseEntity.ok(Map.of("email", u.getEmail(), "roles", u.getRoles()));
     }
+
+    @PostMapping("/approve-user")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> approveUser(@RequestBody Map<String, String> body, Authentication auth) {
+        String email = body.get("email");
+        if (email == null) return ResponseEntity.badRequest().build();
+        String approver = auth != null ? auth.getName() : "unknown";
+        User u = userService.approveAndAssign(email, approver);
+        return ResponseEntity.ok(Map.of("email", u.getEmail(), "approved", u.getApproved()));
+    }
 }

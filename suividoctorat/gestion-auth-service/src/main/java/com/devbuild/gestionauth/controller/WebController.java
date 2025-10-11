@@ -60,7 +60,7 @@ public class WebController {
     }
 
     @PostMapping(value = "/login", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String loginForm(@org.springframework.web.bind.annotation.RequestParam java.util.Map<String, String> params, org.springframework.ui.Model model, HttpServletResponse response, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String loginForm(@org.springframework.web.bind.annotation.RequestParam java.util.Map<String, String> params, org.springframework.ui.Model model, HttpServletResponse response, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes, jakarta.servlet.http.HttpServletRequest request) {
         String email = params.get("email");
         String password = params.get("password");
         if (email == null || password == null) { model.addAttribute("error","Missing credentials"); return "login"; }
@@ -79,7 +79,12 @@ public class WebController {
             String token = jwtUtil.generateToken(u.getEmail(), roles);
             Cookie cookie = new Cookie("JWT", token);
             cookie.setHttpOnly(true);
-            cookie.setSecure(false); // set to true if you use HTTPS in production
+            // mark Secure only when request uses HTTPS
+            try {
+                cookie.setSecure(request.isSecure());
+            } catch (Exception ignored) {
+                cookie.setSecure(false);
+            }
             cookie.setPath("/");
             cookie.setMaxAge(60 * 60 * 24); // 1 day
             response.addCookie(cookie);
