@@ -18,13 +18,115 @@ import org.springframework.http.ResponseEntity;
 public class AdminController {
 
     private final UserService userService;
+    private final com.devbuild.gestionauth.repository.ExportAccessLogRepository exportAccessLogRepository;
     @Value("${app.inscription.url:}")
     private String inscriptionUrl; // optional URL for the inscription/campaigns microservice
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, com.devbuild.gestionauth.repository.ExportAccessLogRepository exportAccessLogRepository) {
         this.userService = userService;
+        this.exportAccessLogRepository = exportAccessLogRepository;
+    }
+
+    @GetMapping(path = "/admin/users.csv", produces = "text/csv")
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.InputStreamResource> exportUsersCsv(
+        @RequestParam(name = "role", required = false) String role,
+        @RequestParam(name = "columns", required = false) String[] columns,
+        @RequestParam(name = "email", required = false) String emailFilter,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "1000") int size,
+            java.security.Principal principal) {
+
+        // Determine result set (email filter and role filter applied)
+        java.util.List<com.devbuild.gestionauth.model.User> usersPage;
+        if (emailFilter != null && !emailFilter.isBlank()) {
+            // simple contains search across email
+            usersPage = userService.findAllUsers().stream().filter(u -> u.getEmail() != null && u.getEmail().toLowerCase().contains(emailFilter.toLowerCase())).toList();
+        } else if (role != null && !role.isBlank()) {
+            try {
+                usersPage = userService.findUsersByRole(com.devbuild.gestionauth.model.Role.valueOf(role));
+            } catch (IllegalArgumentException ex) {
+                usersPage = java.util.Collections.emptyList();
+            }
+        } else {
+            usersPage = userService.findAllUsers();
+        }
+
+        // paging
+        int from = Math.max(0, page * size);
+        int to = Math.min(usersPage.size(), from + Math.max(0, size));
+        java.util.List<com.devbuild.gestionauth.model.User> users = usersPage.subList(Math.min(from, usersPage.size()), Math.min(to, usersPage.size()));
+
+        java.util.List<String> cols = new java.util.ArrayList<>();
+        if (columns != null && columns.length > 0) {
+            for (String c : columns) if (c != null && !c.isBlank()) cols.add(c);
+        }
+        // default columns if none selected
+        if (cols.isEmpty()) {
+            cols = java.util.Arrays.asList("email","firstName","lastName","requestedProfile","roles");
+        }
+
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        try (java.io.PrintWriter pw = new java.io.PrintWriter(baos)) {
+            // header
+            pw.println(String.join(",", cols));
+            for (com.devbuild.gestionauth.model.User u : users) {
+                java.util.List<String> row = new java.util.ArrayList<>();
+                for (String c : cols) {
+                    switch (c) {
+                        case "id": row.add(String.valueOf(u.getId() != null ? u.getId() : 0)); break;
+                        case "email": row.add(csvEscape(u.getEmail())); break;
+                        case "firstName": row.add(csvEscape(u.getFirstName())); break;
+                        case "lastName": row.add(csvEscape(u.getLastName())); break;
+                        case "phone": row.add(csvEscape(u.getPhone())); break;
+                        case "affiliation": row.add(csvEscape(u.getAffiliation())); break;
+                        case "requestedProfile": row.add(csvEscape(u.getRequestedProfile())); break;
+                        case "approved": row.add(u.getApproved() != null ? u.getApproved().toString() : ""); break;
+                        case "approvedBy": row.add(csvEscape(u.getApprovedBy())); break;
+                        case "approvedAt": row.add(u.getApprovedAt() != null ? csvEscape(u.getApprovedAt().toString()) : ""); break;
+                        case "rejectionReason": row.add(csvEscape(u.getRejectionReason())); break;
+                        case "roles": row.add(csvEscape(u.getRoles() != null ? u.getRoles().toString() : "")); break;
+                        case "disabled": row.add(u.getDisabled() != null ? u.getDisabled().toString() : ""); break;
+                        default: row.add(""); break;
+                    }
+                }
+                pw.println(String.join(",", row));
+            }
+            pw.flush();
+        }
+
+        java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(baos.toByteArray());
+
+        // Log the export access
+        try {
+            com.devbuild.gestionauth.model.ExportAccessLog log = new com.devbuild.gestionauth.model.ExportAccessLog();
+            log.setAdminEmail(principal != null ? principal.getName() : "system");
+            log.setEndpoint("/admin/users.csv");
+            java.util.Map<String,Object> p = new java.util.HashMap<>();
+            p.put("role", role);
+            p.put("email", emailFilter);
+            p.put("page", page);
+            p.put("size", size);
+            p.put("columns", columns);
+            log.setParams(p.toString());
+            log.setTimestamp(java.time.LocalDateTime.now());
+            log.setResultCount(users.size());
+            exportAccessLogRepository.save(log);
+        } catch (Exception ignored) {}
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.csv");
+        return org.springframework.http.ResponseEntity.ok().headers(headers).contentLength(baos.size()).contentType(org.springframework.http.MediaType.parseMediaType("text/csv")).body(new org.springframework.core.io.InputStreamResource(bais));
+    }
+
+    private static String csvEscape(String v) {
+        if (v == null) return "";
+        String out = v.replace("\"", "\"\"");
+        if (out.contains(",") || out.contains("\n") || out.contains("\r") || out.contains("\"")) {
+            return "\"" + out + "\"";
+        }
+        return out;
     }
 
     @GetMapping("/admin/users")

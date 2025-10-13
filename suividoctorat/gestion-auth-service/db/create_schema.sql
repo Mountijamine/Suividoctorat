@@ -51,3 +51,14 @@ ON DUPLICATE KEY UPDATE roles = roles;
 -- Optionally, if you want to add audit fields for approval later, you can run:
 -- ALTER TABLE users ADD COLUMN approved_by VARCHAR(255) DEFAULT NULL;
 -- ALTER TABLE users ADD COLUMN approved_at DATETIME DEFAULT NULL;
+
+-- export_access_log table to record CSV/export usage by admins
+CREATE TABLE IF NOT EXISTS export_access_log (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  admin_email VARCHAR(255) NOT NULL,
+  endpoint VARCHAR(255) NOT NULL,
+  params VARCHAR(2048),
+  timestamp DATETIME NOT NULL,
+  result_count INT DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

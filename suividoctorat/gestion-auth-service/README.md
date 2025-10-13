@@ -115,6 +115,26 @@ Set `app.notification.url` in `src/main/resources/application.properties` to you
 - Add tests for signup/approve/reject flows.
 - Integrate notification-service for production with authentication and retries.
 
+Admin CSV export
+
+- GET /admin/users.csv — download a CSV of users. Optional query param `role` can filter by role (e.g. `?role=ROLE_ENCADRANT`).
+
+Export access logging
+
+- This service records CSV export accesses into the `export_access_log` table. If you manage the DB schema manually, run the following SQL to create it:
+
+```sql
+CREATE TABLE IF NOT EXISTS export_access_log (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  admin_email VARCHAR(255) NOT NULL,
+  endpoint VARCHAR(255) NOT NULL,
+  params VARCHAR(2048),
+  timestamp DATETIME NOT NULL,
+  result_count INT DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
 ## Troubleshooting: IllegalArgumentException when approving users
 
 If you see an error like:

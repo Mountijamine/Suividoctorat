@@ -14,6 +14,36 @@
     <button onclick="showTab('users')">User Management</button>
     <button onclick="showTab('encadrants')">Encadrant Management</button>
     <a th:href="@{/admin/role-audit}" style="margin-left:12px;">Role Audit</a>
+    <form method="get" th:action="@{/admin/users.csv}" style="display:inline-block;margin-left:12px;">
+        <label>Export users by role: </label>
+        <select name="role">
+            <option value="">All roles</option>
+            <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${roleLabels.containsKey(r.name()) ? roleLabels[r.name()] : r}"></option>
+        </select>
+        <label style="margin-left:8px">Email contains: <input type="text" name="email" placeholder="email substring"/></label>
+        <label style="margin-left:8px">Page: <input type="number" name="page" min="0" value="0" style="width:60px;"/></label>
+        <label style="margin-left:8px">Size: <input type="number" name="size" min="1" value="1000" style="width:80px;"/></label>
+        <fieldset style="display:inline-block;margin-left:8px;border:1px solid #ddd;padding:6px;">
+            <legend style="font-size:smaller;margin:0 4px 4px 0">Columns</legend>
+            <label style="font-weight:normal;display:inline-block;margin-right:8px;"><input type="checkbox" id="columns-select-all"/> Select all</label>
+            <div style="display:inline-block;vertical-align:middle;max-height:90px;overflow:auto;padding-left:6px;">
+                <label><input type="checkbox" name="columns" value="id"/> id</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="email" checked/> email</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="firstName" checked/> firstName</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="lastName" checked/> lastName</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="phone"/> phone</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="affiliation"/> affiliation</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="requestedProfile"/> requestedProfile</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="approved"/> approved</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="approvedBy"/> approvedBy</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="approvedAt"/> approvedAt</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="rejectionReason"/> rejectionReason</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="roles"/> roles</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="disabled"/> disabled</label>
+            </div>
+        </fieldset>
+        <button type="submit">Export Users CSV</button>
+    </form>
 </div>
 
 <div id="tab-users" style="display:block;margin-top:10px;">
@@ -44,7 +74,7 @@
                 </select>
                 <button type="submit">Assign</button>
             </form>
-            <form method="post" th:action="@{/admin/remove-role}" style="display:inline-block;margin-left:6px;" onsubmit="return confirmRemove(this);">
+            <form method="post" th:action="@{/admin/remove-role}" style="display:inline-block;margin-left:6px;" onsubmit="return confirmModal(this, 'Remove role from user?');">
                 <input type="hidden" name="email" th:value="${u.email}" />
                 <select name="role">
                     <option th:each="r : ${u.roles}" th:value="${r.name()}" th:text="${roleLabels.containsKey(r.name()) ? roleLabels[r.name()] : r}"></option>
@@ -56,7 +86,7 @@
                 <input type="hidden" name="disable" th:value="${!u.disabled}" />
                 <button type="submit" th:text="${u.disabled} ? 'Enable' : 'Disable'"></button>
             </form>
-            <form method="post" th:action="@{/admin/delete-user}" style="display:inline-block;margin-left:6px;" onsubmit="return confirm('Delete user? This cannot be undone.');">
+            <form method="post" th:action="@{/admin/delete-user}" style="display:inline-block;margin-left:6px;" onsubmit="return confirmModal(this, 'Delete user? This cannot be undone.');">
                 <input type="hidden" name="email" th:value="${u.email}" />
                 <button type="submit">Delete</button>
             </form>
@@ -114,11 +144,49 @@
         } catch(e) { showTab('users'); }
     })();
 
-    function confirmRemove(form) {
-        var sel = form.querySelector('select[name="role"]');
-        var roleText = sel.options[sel.selectedIndex].text;
-        return confirm('Remove role ' + roleText + ' from user?');
+    // Modal confirmation
+    function confirmModal(form, message) {
+        var modal = document.getElementById('confirm-modal');
+        document.getElementById('confirm-modal-message').textContent = message;
+        modal.__targetForm = form;
+        modal.style.display = 'block';
+        return false; // prevent immediate submit
     }
+
+    function confirmModalYes() {
+        var modal = document.getElementById('confirm-modal');
+        var f = modal.__targetForm;
+        modal.style.display = 'none';
+        if (f) f.submit();
+    }
+
+    function confirmModalNo() {
+        var modal = document.getElementById('confirm-modal');
+        modal.style.display = 'none';
+        modal.__targetForm = null;
+    }
+</script>
+
+<!-- Modal markup -->
+<div id="confirm-modal" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;">
+    <div style="background:#fff;padding:16px;border-radius:6px;width:420px;margin:80px auto;">
+        <p id="confirm-modal-message">Are you sure?</p>
+        <div style="text-align:right;margin-top:12px;">
+            <button type="button" onclick="confirmModalNo()">No</button>
+            <button type="button" onclick="confirmModalYes()" style="margin-left:8px;">Yes</button>
+        </div>
+    </div>
+</div>
+<script>
+    // Select-all for export columns
+    (function(){
+        var sel = document.getElementById('columns-select-all');
+        if (!sel) return;
+        sel.addEventListener('change', function(){
+            var checks = document.querySelectorAll('input[name="columns"]');
+            checks.forEach(function(c){ c.checked = sel.checked; });
+        });
+    })();
 </script>
 
 </body>
