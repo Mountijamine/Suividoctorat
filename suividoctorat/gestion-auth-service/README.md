@@ -1,3 +1,32 @@
+- GET /documents/for-encadrant
+  - Encadrant-only: lists documents from users with the same `affiliation` as the encadrant (simple heuristic).
+
+Configuration
+
+- `app.upload.dir` (property) controls where uploaded files are stored. Default `./uploads`.
+
+Security notes
+
+- Document endpoints check ownership and roles. Files are served from disk; in production consider using a secure object store and signed URLs.
+
+Candidate documents UI
+
+- GET /candidat/documents (HTML page)
+
+  - Shows the candidate's uploaded documents with a search/filter box.
+
+- POST /candidat/documents/upload (form multipart)
+
+  - Upload a document (form field `file`). Redirects back to the documents page with success/error message.
+
+- POST /candidat/documents/delete
+  - Delete a document by id (owner only). Uses CSRF-protected form.
+
+Admin filters
+
+- GET /documents/all (admin) — list all documents
+- GET /documents?filter=... (future) — planned: add server-side filters and pagination for admin dashboards
+
 Gestion Auth Service
 
 Endpoints:
@@ -67,3 +96,86 @@ Set `app.notification.url` in `src/main/resources/application.properties` to you
 
 - Add tests for signup/approve/reject flows.
 - Integrate notification-service for production with authentication and retries.
+
+## Troubleshooting: IllegalArgumentException when approving users
+
+If you see an error like:
+
+```
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+```
+
+Root cause:
+
+- This happens when Spring MVC cannot determine the name of a handler method parameter for binding (e.g. a String argument annotated with `@RequestParam`). The JVM only exposes parameter names at runtime if the code was compiled with the `-parameters` flag. If the project is not compiled that way, Spring needs explicit names in `@RequestParam("name")`.
+
+What we changed to fix it:
+
+- Controller methods that accept form parameters now use explicit parameter names, for example:
+
+```java
+public String approveUser(@RequestParam("email") String email, Principal principal) { ... }
+```
+
+This avoids requiring the `-parameters` compiler flag and fixes the exception when approving/rejecting or assigning roles via the admin UI.
+
+Admin logout
+
+- The admin page includes a logout link at `/logout`. The logout handler clears the JWT cookie and invalidates the server session, then redirects to `/login`.
+
+If you still hit problems when approving a user:
+
+1. Check the server logs for the exact stack trace and the failing controller method name/line.
+2. Verify your browser is including the CSRF token in the form POSTs (the admin UI forms include CSRF token as a cookie-based repository).
+3. If you compiled the app with a custom build step that removes parameter names, ensure controller parameters carry explicit `@RequestParam("name")` annotations.
+
+## Module 1 API endpoints (auth + user POVs)
+
+Authentication / signup
+
+- POST /api/auth/signup
+
+  - Body (form or JSON): { email, password, confirmPassword, firstName, lastName, phone, acceptTerms, requestedProfile, affiliation, proofUrl }
+  - Creates a user with requested profile. Admin approval may be required before role is granted.
+
+- POST /api/auth/login
+  - Body: { email, password }
+  - Returns a JWT token (API) and sets a JWT cookie for web UI flows.
+
+Profile (authenticated user)
+
+- GET /profile
+
+  - Returns the authenticated user's profile page (HTML). Shows approval status and roles.
+
+- POST /profile
+  - Fields: firstName, lastName, phone, affiliation, proofUrl, requestedProfile
+  - Updates profile. If `requestedProfile` changes, approval is reset and admin must re-approve.
+
+Documents (candidate upload / encadrant & admin views)
+
+- Authenticated (candidate) multipart/form-data with `file` parameter. Stores file metadata and the file on disk under the `app.upload.dir` directory (default `./uploads`).
+- Authenticated (candidate) multipart/form-data with `file` parameter. Stores file metadata and the file on disk under the `app.upload.dir` directory (default `./uploads`).
+- Optional form fields: `title` (string) and `category` (string). These are saved with the document and can be used to filter documents in the UI.
+- GET /documents/me
+
+  - Upload a document (form field `file`). Form also accepts `title` and `category`. Redirects back to the documents page with success/error message.
+
+- GET /documents/download/{id}
+
+  - Download a document by id. Allowed for document owner or admin.
+
+- GET /documents/all
+
+  - Admin-only: list all documents (metadata).
+
+- GET /documents/for-encadrant
+  - Encadrant-only: lists documents from users with the same `affiliation` as the encadrant (simple heuristic).
+
+Configuration
+
+- `app.upload.dir` (property) controls where uploaded files are stored. Default `./uploads`.
+
+Security notes
+
+- Document endpoints check ownership and roles. Files are served from disk; in production consider using a secure object store and signed URLs.

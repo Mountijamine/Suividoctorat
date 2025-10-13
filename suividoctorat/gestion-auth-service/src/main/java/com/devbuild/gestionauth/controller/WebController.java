@@ -56,6 +56,10 @@ public class WebController {
 
     @GetMapping("/")
     public String index(Model model) {
+        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            return "redirect:/dashboard";
+        }
         return "login";
     }
 
@@ -94,6 +98,24 @@ public class WebController {
                 return "redirect:/admin/users";
             }
         }
-        return "redirect:/";
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletResponse response, jakarta.servlet.http.HttpServletRequest request, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        // remove JWT cookie
+        Cookie cookie = new Cookie("JWT", "");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        try { cookie.setSecure(request.isSecure()); } catch (Exception ignored) {}
+        response.addCookie(cookie);
+        // invalidate server session if present
+        try {
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session != null) session.invalidate();
+        } catch (Exception ignored) {}
+        redirectAttributes.addFlashAttribute("message", "Logged out");
+        return "redirect:/login";
     }
 }

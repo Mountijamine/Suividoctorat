@@ -117,4 +117,25 @@ public class UserService {
         u.getRoles().add(role);
         return userRepository.save(u);
     }
+
+    // Update profile fields. If requestedProfile changes, mark approved=false and clear approval audit.
+    public User updateProfile(String email, String firstName, String lastName, String phone, String affiliation, String proofUrl, String requestedProfile) {
+        User u = userRepository.findByEmail(email).orElseThrow();
+        boolean profileChanged = false;
+        if (firstName != null && !firstName.equals(u.getFirstName())) { u.setFirstName(firstName); profileChanged = true; }
+        if (lastName != null && !lastName.equals(u.getLastName())) { u.setLastName(lastName); profileChanged = true; }
+        if (phone != null && !phone.equals(u.getPhone())) { u.setPhone(phone); profileChanged = true; }
+        if (affiliation != null && !affiliation.equals(u.getAffiliation())) { u.setAffiliation(affiliation); profileChanged = true; }
+        if (proofUrl != null && !proofUrl.equals(u.getProofUrl())) { u.setProofUrl(proofUrl); profileChanged = true; }
+        if (requestedProfile != null && !requestedProfile.equals(u.getRequestedProfile())) {
+            u.setRequestedProfile(requestedProfile);
+            u.setApproved(false);
+            u.setApprovedBy(null);
+            u.setApprovedAt(null);
+            u.setRejectionReason(null);
+            profileChanged = true;
+        }
+        if (profileChanged) return userRepository.save(u);
+        return u;
+    }
 }
