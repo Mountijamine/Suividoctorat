@@ -25,7 +25,7 @@ public class UserServiceTest {
         when(notif.sendProfileRequest(any())).thenReturn(reactor.core.publisher.Mono.empty());
 
         UserService svc = new UserService(repo, encoder, notif);
-        User u = svc.createUserWithProfile("a@b", "pwd", "F", "L", "p", true, "ROLE_CANDIDAT", "Uni", "http://proof");
+    User u = svc.createUserWithProfile("a@b", "pwd", "F", "L", "p", true, "ROLE_CANDIDAT", "Uni");
 
         assertEquals("a@b", u.getEmail());
         verify(notif, times(1)).sendProfileRequest(any());

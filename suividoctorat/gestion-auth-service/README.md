@@ -9,6 +9,24 @@ Security notes
 
 - Document endpoints check ownership and roles. Files are served from disk; in production consider using a secure object store and signed URLs.
 
+## Campaigns (Inscription microservice) — integration notes
+
+This service contains a small read-only placeholder for campaigns and an admin helper to assign encadrants to campaigns. Campaign management (creation, subscription, approval) belongs to Microservice 2 (Inscription). To integrate:
+
+- Set `app.inscription.url` in `application.properties` or via environment variable to the base URL of the Inscription service (for example `http://localhost:8082`).
+- The admin UI will then attempt to fetch campaigns from: `GET {app.inscription.url}/api/campaigns`.
+- To assign an encadrant to a campaign, the admin UI will POST to: `POST {app.inscription.url}/api/campaigns/{campaignId}/assign-encadrant` with JSON body { "email": "encadrant@example.com", "assignedBy": "admin@example.com" }.
+
+The assignment call is best-effort: if `app.inscription.url` is not configured the Admin UI shows a placeholder message and instructions. The Inscription microservice API is not implemented here — this module only demonstrates how to call it and reports the response.
+
+Please coordinate API shape with the Inscription microservice. The expected integration points are:
+
+- GET /api/campaigns — returns a JSON array of campaigns with fields { id, title, description }
+- POST /api/campaigns/{campaignId}/assign-encadrant — body { email, assignedBy } — returns 2xx on success
+
+Add these endpoints to the Inscription service or provide a proxy if you need to test end-to-end.
+
+
 Candidate documents UI
 
 - GET /candidat/documents (HTML page)
@@ -82,7 +100,7 @@ If you already have an existing `users` table, run these ALTER statements to add
 ALTER TABLE users ADD COLUMN requested_profile VARCHAR(255) DEFAULT NULL;
 ALTER TABLE users ADD COLUMN approved TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE users ADD COLUMN affiliation VARCHAR(512) DEFAULT NULL;
-ALTER TABLE users ADD COLUMN proof_url VARCHAR(1024) DEFAULT NULL;
+-- proof_url column removed per request
 ALTER TABLE users ADD COLUMN approved_by VARCHAR(255) DEFAULT NULL;
 ALTER TABLE users ADD COLUMN approved_at DATETIME DEFAULT NULL;
 ALTER TABLE users ADD COLUMN rejection_reason VARCHAR(1024) DEFAULT NULL;
@@ -135,7 +153,7 @@ Authentication / signup
 
 - POST /api/auth/signup
 
-  - Body (form or JSON): { email, password, confirmPassword, firstName, lastName, phone, acceptTerms, requestedProfile, affiliation, proofUrl }
+  - Body (form or JSON): { email, password, confirmPassword, firstName, lastName, phone, acceptTerms, requestedProfile, affiliation }
   - Creates a user with requested profile. Admin approval may be required before role is granted.
 
 - POST /api/auth/login
@@ -149,7 +167,7 @@ Profile (authenticated user)
   - Returns the authenticated user's profile page (HTML). Shows approval status and roles.
 
 - POST /profile
-  - Fields: firstName, lastName, phone, affiliation, proofUrl, requestedProfile
+  - Fields: firstName, lastName, phone, affiliation, requestedProfile
   - Updates profile. If `requestedProfile` changes, approval is reset and admin must re-approve.
 
 Documents (candidate upload / encadrant & admin views)

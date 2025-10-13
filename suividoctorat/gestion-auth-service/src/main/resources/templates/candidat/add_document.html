@@ -5,6 +5,7 @@
     <title>Ajouter un document</title>
 </head>
 <body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
 <h1>Ajouter un document</h1>
 <div th:if="${message}" style="color:green"><p th:text="${message}"></p></div>
 <div th:if="${error}" style="color:red"><p th:text="${error}"></p></div>

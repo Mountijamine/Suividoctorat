@@ -48,8 +48,6 @@ public class User {
     @Column(nullable = true)
     private String affiliation;
 
-    @Column(nullable = true)
-    private String proofUrl;
 
     @Column(nullable = true)
     private String approvedBy;
@@ -59,6 +57,9 @@ public class User {
 
     @Column(nullable = true)
     private String rejectionReason;
+
+    @Column(nullable = false)
+    private Boolean disabled = false;
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
@@ -78,12 +79,12 @@ public class User {
     public void setApproved(Boolean approved) { this.approved = approved; }
     public String getAffiliation() { return affiliation; }
     public void setAffiliation(String affiliation) { this.affiliation = affiliation; }
-    public String getProofUrl() { return proofUrl; }
-    public void setProofUrl(String proofUrl) { this.proofUrl = proofUrl; }
     public String getApprovedBy() { return approvedBy; }
     public void setApprovedBy(String approvedBy) { this.approvedBy = approvedBy; }
     public java.time.LocalDateTime getApprovedAt() { return approvedAt; }
     public void setApprovedAt(java.time.LocalDateTime approvedAt) { this.approvedAt = approvedAt; }
     public String getRejectionReason() { return rejectionReason; }
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+    public Boolean getDisabled() { return disabled; }
+    public void setDisabled(Boolean disabled) { this.disabled = disabled; }
 }

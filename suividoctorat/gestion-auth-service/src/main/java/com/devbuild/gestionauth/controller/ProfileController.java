@@ -36,12 +36,11 @@ public class ProfileController {
                                 @RequestParam(name = "lastName", required = false) String lastName,
                                 @RequestParam(name = "phone", required = false) String phone,
                                 @RequestParam(name = "affiliation", required = false) String affiliation,
-                                @RequestParam(name = "proofUrl", required = false) String proofUrl,
                                 @RequestParam(name = "requestedProfile", required = false) String requestedProfile,
                                 java.security.Principal principal) {
         if (principal == null) return "redirect:/login";
         String email = principal.getName();
-        userService.updateProfile(email, firstName, lastName, phone, affiliation, proofUrl, requestedProfile);
+        userService.updateProfile(email, firstName, lastName, phone, affiliation, requestedProfile);
         return "redirect:/profile";
     }
 }

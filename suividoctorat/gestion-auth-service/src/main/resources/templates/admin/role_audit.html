@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Role Audit</title>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+<h1>Role Audit</h1>
+<p><a th:href="@{/admin/users}">Back to Admin</a></p>
+<form method="get" th:action="@{/admin/role-audit}">
+    <label>Filter: 
+        <select name="action">
+            <option value="" th:selected="${action} == null">All</option>
+            <option value="ASSIGNED" th:selected="${action} == 'ASSIGNED'">Assigned</option>
+            <option value="REMOVED" th:selected="${action} == 'REMOVED'">Removed</option>
+        </select>
+    </label>
+    <label>From: <input type="date" name="from" th:value="${from}"/></label>
+    <label>To: <input type="date" name="to" th:value="${to}"/></label>
+    <button type="submit">Apply</button>
+    <a th:href="@{/admin/role-audit.csv(action=${action}, from=${from}, to=${to})}" style="margin-left:8px;">Export CSV</a>
+</form>
+<table border="1">
+    <tr><th>ID</th><th>When</th><th>Action</th><th>Role</th><th>User</th><th>By</th><th>Details</th></tr>
+    <tr th:each="a : ${audits}">
+        <td th:text="${a.id}"></td>
+        <td th:text="${a.timestamp}"></td>
+        <td th:text="${a.action}"></td>
+        <td th:text="${a.roleName}"></td>
+        <td th:text="${a.targetEmail}"></td>
+        <td th:text="${a.performedBy}"></td>
+        <td th:text="${a.details}"></td>
+    </tr>
+</table>
+<div style="margin-top:8px;">
+    <a th:if="${page} > 0" th:href="@{/admin/role-audit(page=${page - 1}, action=${action}, from=${from}, to=${to})}">Prev</a>
+    <span th:text="'Page ' + (${page} + 1) + ' / ' + ${totalPages}"></span>
+    <a th:if="${page} + 1 < ${totalPages}" th:href="@{/admin/role-audit(page=${page + 1}, action=${action}, from=${from}, to=${to})}">Next</a>
+</div>
+</body>
+</html>

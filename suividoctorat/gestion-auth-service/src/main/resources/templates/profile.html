@@ -5,6 +5,7 @@
     <title>Mon profil</title>
     </head>
 <body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
 <h1>Mon profil</h1>
 <div th:if="${message}" style="color:green"><p th:text="${message}"></p></div>
 <div th:if="${user}">
@@ -17,8 +18,7 @@
         <label>Prénom: <input type="text" name="firstName" th:value="${user.firstName}" /></label><br/>
         <label>Nom: <input type="text" name="lastName" th:value="${user.lastName}" /></label><br/>
         <label>Téléphone: <input type="text" name="phone" th:value="${user.phone}" /></label><br/>
-        <label>Affiliation: <input type="text" name="affiliation" th:value="${user.affiliation}" /></label><br/>
-        <label>Preuve (URL): <input type="url" name="proofUrl" th:value="${user.proofUrl}" /></label><br/>
+    <label>Affiliation: <input type="text" name="affiliation" th:value="${user.affiliation}" /></label><br/>
         <label>Profil demandé:
             <select name="requestedProfile">
                 <option value="">Aucun</option>

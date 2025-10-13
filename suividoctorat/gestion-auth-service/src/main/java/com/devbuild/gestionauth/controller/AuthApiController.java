@@ -80,8 +80,9 @@ public class AuthApiController {
         String email = body.get("email");
         String role = body.get("role");
         if (email == null || role == null) return ResponseEntity.badRequest().build();
-        User u = userService.assignRole(email, Role.valueOf(role));
-        return ResponseEntity.ok(Map.of("email", u.getEmail(), "roles", u.getRoles()));
+        String actor = auth != null ? auth.getName() : "system";
+        User u = userService.assignRole(email, Role.valueOf(role), actor);
+        return ResponseEntity.ok(Map.of("email", u.getEmail(), "roles", u.getRoles(), "performedBy", actor));
     }
 
     @PostMapping("/approve-user")

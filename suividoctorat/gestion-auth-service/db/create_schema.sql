@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `requested_profile` VARCHAR(255) DEFAULT NULL,
   `approved` TINYINT(1) NOT NULL DEFAULT 0,
   `affiliation` VARCHAR(512) DEFAULT NULL,
-  `proof_url` VARCHAR(1024) DEFAULT NULL,
   `approved_by` VARCHAR(255) DEFAULT NULL,
   `approved_at` DATETIME DEFAULT NULL,
   `rejection_reason` VARCHAR(1024) DEFAULT NULL,
@@ -44,7 +43,7 @@ ON DUPLICATE KEY UPDATE roles = roles;
 
 -- Added optional fields and ALTER statements for existing DBs:
 -- ALTER TABLE users ADD COLUMN affiliation VARCHAR(512) DEFAULT NULL;
--- ALTER TABLE users ADD COLUMN proof_url VARCHAR(1024) DEFAULT NULL;
+-- proof_url column removed per request
 -- ALTER TABLE users ADD COLUMN approved_by VARCHAR(255) DEFAULT NULL;
 -- ALTER TABLE users ADD COLUMN approved_at DATETIME DEFAULT NULL;
 -- ALTER TABLE users ADD COLUMN rejection_reason VARCHAR(1024) DEFAULT NULL;
