@@ -26,7 +26,6 @@ Please coordinate API shape with the Inscription microservice. The expected inte
 
 Add these endpoints to the Inscription service or provide a proxy if you need to test end-to-end.
 
-
 Candidate documents UI
 
 - GET /candidat/documents (HTML page)
