@@ -1,0 +1,38 @@
+<mat-card class="signup-card">
+  <mat-card-title>Create account</mat-card-title>
+  <mat-card-content>
+    <form (ngSubmit)="submit()">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>First name</mat-label>
+        <input matInput [(ngModel)]="model.firstName" name="firstName" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Last name</mat-label>
+        <input matInput [(ngModel)]="model.lastName" name="lastName" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" [(ngModel)]="model.email" name="email" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" [(ngModel)]="model.password" name="password" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Confirm password</mat-label>
+        <input matInput type="password" [(ngModel)]="model.confirmPassword" name="confirmPassword" required />
+      </mat-form-field>
+
+      <mat-checkbox [(ngModel)]="model.acceptTerms" name="acceptTerms">I accept terms</mat-checkbox>
+
+      <div class="actions">
+        <button mat-flat-button color="primary" [disabled]="loading">Sign up</button>
+      </div>
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </form>
+  </mat-card-content>
+</mat-card>
