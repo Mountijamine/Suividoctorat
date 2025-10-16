@@ -1,8 +1,12 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { ToastService } from '../../services/toast.service';
+import { ToastComponent } from '../../components/toast/toast';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'documents-page',
@@ -29,7 +33,11 @@ export class DocumentsPage {
   filterType = signal('all');
   selected = signal<Record<string, boolean>>({});
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router){
+  constructor(private http: HttpClient,
+              private route: ActivatedRoute,
+              private router: Router,
+              private ts: ToastService,
+              private auth: AuthService){
     // listen to query params so page is bookmarkable/shareable
     this.route.queryParams.subscribe(q => {
       const p = parseInt(q['page'] || '0', 10) || 0;
@@ -38,7 +46,14 @@ export class DocumentsPage {
       this.size.set(s);
       this.query.set(q['q'] || '');
       this.filterType.set(q['type'] || 'all');
-      this.load();
+      // only call load when authenticated to avoid 403
+      if (this.auth.isLoggedIn()) this.load();
+    });
+
+    // also load when the user logs in while on the page (react to signal)
+    effect(() => {
+      const logged = this.auth.isLoggedIn();
+      if (logged) this.load(); else { this.docs.set([]); this.total.set(0); }
     });
   }
 
@@ -46,24 +61,60 @@ export class DocumentsPage {
     const params: any = { page: String(this.page()), size: String(this.size()) };
     if (this.query()) params.q = this.query();
     if (this.filterType() && this.filterType() !== 'all') params.type = this.filterType();
-    this.http.get('/api/documents', { params }).subscribe({
+    // call candidate REST API (server exposes /api/candidat/documents)
+    this.http.get('/api/candidat/documents', { params }).subscribe({
       next: (res:any) => {
-        // expected shape: { data: [...], total: 123 }
-        if (Array.isArray(res)) { this.docs.set(res); this.total.set(res.length); }
-        else { this.docs.set(res?.data || []); this.total.set(res?.total || (res?.data||[]).length || 0); }
+        // backend returns a Page-like shape: { content: [...], totalElements: N, totalPages: M, number: page }
+        if (Array.isArray(res)) {
+          this.docs.set(res);
+          this.total.set(res.length);
+        } else if (res && res.content) {
+          this.docs.set(res.content || []);
+          this.total.set(res.totalElements || (res.content || []).length || 0);
+          // synchronize page from server if provided
+          if (typeof res.number === 'number') this.page.set(res.number);
+        } else {
+          this.docs.set(res?.data || []);
+          this.total.set(res?.total || (res?.data||[]).length || 0);
+        }
+  try { this.ts.success('Documents loaded'); } catch(e){}
       },
       error: (err:any) => {
         console.error('Failed to fetch documents', err);
-        // fallback mock
-        const mock = [
-          { id: 'd1', title: 'Rapport de thèse', type: 'rapport', date: '2025-10-10' },
-          { id: 'd2', title: 'Attestation d’inscription', type: 'attestation', date: '2024-09-01' },
-          { id: 'd3', title: 'Article accepté', type: 'publication', date: '2025-06-20' }
-        ];
-        this.docs.set(mock.slice(this.page()*this.size(), (this.page()+1)*this.size()));
-        this.total.set(mock.length);
+        this.docs.set([]);
+        this.total.set(0);
+  try { this.ts.error('Failed to load documents'); } catch(e){}
       }
     });
+  }
+
+  // fetch all matching documents from the backend by paging through results
+  private async fetchAllMatching(): Promise<any[]>{
+    const collected: any[] = [];
+    const baseParams: any = {};
+    if (this.query()) baseParams.q = this.query();
+    if (this.filterType() && this.filterType() !== 'all') baseParams.category = this.filterType();
+    let page = 0;
+    const pageSize = Math.max(100, this.size()); // fetch reasonably large pages
+    while (true) {
+      const params: any = { ...baseParams, page: String(page), size: String(pageSize) };
+      try {
+        const res: any = await firstValueFrom(this.http.get('/api/candidat/documents', { params }));
+        if (res && Array.isArray(res)) { collected.push(...res); break; }
+        if (res && res.content) {
+          collected.push(...(res.content || []));
+          if (typeof res.totalPages === 'number' && page >= res.totalPages - 1) break;
+          page++;
+          continue;
+        }
+        // unknown shape, break
+        break;
+      } catch (e) {
+        console.error('Failed to fetch page for export', e);
+        break;
+      }
+    }
+    return collected;
   }
 
   filtered = computed(() => this.docs().filter(d => {
@@ -76,12 +127,55 @@ export class DocumentsPage {
   toggle(id:string){ this.selected.update(s => { s[id] = !s[id]; return s; }); }
 
   exportCSV(){
-    const rows = this.docs().map(d => ({ id: d.id, title: d.title, type: d.type, date: d.date }));
-    if (rows.length === 0) return alert('No data to export');
-    const csv = [Object.keys(rows[0]).join(','), ...rows.map(r => Object.values(r).map(v=>`"${String(v||'')?.replace(/"/g,'""')}"`).join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'documents.csv'; a.click(); URL.revokeObjectURL(url);
+    (async () => {
+      const sel = Object.entries(this.selected()).filter(([k,v]) => v).map(([k]) => k);
+      // if user selected rows, do local export
+      if (sel.length > 0) {
+        const set = new Set(sel.map(s => String(s)));
+        const rowsData = this.docs().filter(d => set.has(String(d.id)));
+        if (!rowsData || rowsData.length === 0) { alert('No data to export'); return; }
+        const rows = rowsData.map(d => ({ id: d.id, title: d.title || d.originalFilename || '', category: d.category || d.type || '', uploadedAt: d.uploadedAt || d.date || '' }));
+        const csv = [Object.keys(rows[0]).join(','), ...rows.map(r => Object.values(r).map(v=>`"${String(v||'')?.replace(/"/g,'""')}"`).join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'documents.csv'; a.click(); URL.revokeObjectURL(url);
+        return;
+      }
+
+      // No selection: prefer server-side export for large sets
+      // First get totalElements for current filters by requesting page=0,size=1
+      const params: any = { page: '0', size: '1' };
+      if (this.query()) params.q = this.query();
+      if (this.filterType() && this.filterType() !== 'all') params.category = this.filterType();
+      try {
+        const sres: any = await firstValueFrom(this.http.get('/api/candidat/documents', { params }));
+        const total = (sres && sres.totalElements) ? sres.totalElements : 0;
+        const MAX_CONFIRM = 500;
+        if (total > MAX_CONFIRM) {
+          if (!confirm(`Export will include ${total} rows. This may take a while. Continue?`)) return;
+        }
+        // trigger server-side export
+        const qparams: any = {};
+        if (this.query()) qparams.q = this.query();
+        if (this.filterType() && this.filterType() !== 'all') qparams.category = this.filterType();
+        const url = '/api/candidat/documents/export' + (Object.keys(qparams).length ? '?' + new URLSearchParams(qparams).toString() : '');
+        const resp = await firstValueFrom(this.http.get(url, { responseType: 'blob' }));
+        const blob = new Blob([resp], { type: 'text/csv' });
+        const dlUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = dlUrl; a.download = 'documents_export.csv'; a.click(); URL.revokeObjectURL(dlUrl);
+      } catch (e:any) {
+        console.error('Server export failed, falling back to client export', e);
+  try { this.ts.error('Server export failed, using client-side export'); } catch(e){}
+        // fallback to fetching everything client-side
+        const rowsData = await this.fetchAllMatching();
+        if (!rowsData || rowsData.length === 0) { alert('No data to export'); return; }
+        const rows = rowsData.map(d => ({ id: d.id, title: d.title || d.originalFilename || '', category: d.category || d.type || '', uploadedAt: d.uploadedAt || d.date || '' }));
+        const csv = [Object.keys(rows[0]).join(','), ...rows.map(r => Object.values(r).map(v=>`"${String(v||'')?.replace(/"/g,'""')}"`).join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url2 = URL.createObjectURL(blob);
+        const a2 = document.createElement('a'); a2.href = url2; a2.download = 'documents.csv'; a2.click(); URL.revokeObjectURL(url2);
+      }
+    })();
   }
 
   goto(p: number){ if (p < 0) p = 0; if (p > Math.ceil(this.total()/this.size())-1) p = Math.ceil(this.total()/this.size())-1; this.page.set(p); this.load(); }

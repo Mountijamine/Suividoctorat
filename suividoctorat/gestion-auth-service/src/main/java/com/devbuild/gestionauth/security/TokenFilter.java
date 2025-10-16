@@ -51,7 +51,8 @@ public class TokenFilter extends OncePerRequestFilter {
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception ex) {
-                // ignore token errors for demo
+                // DEBUG: log token parse errors for troubleshooting
+                try { System.err.println("[TokenFilter] token parse error: " + ex.getMessage()); } catch (Throwable t) {}
             }
         }
         filterChain.doFilter(request, response);

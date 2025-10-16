@@ -89,6 +89,24 @@ public class DocumentService {
         return documentRepository.findByOwner_Affiliation(affiliation);
     }
 
+    /**
+     * Return all documents for a user (by owner email) optionally filtered by search term and category.
+     * This is used by export endpoints that need the full result set.
+     */
+    public java.util.List<Document> findForUserAll(String email, String q, String category) {
+        List<Document> all = documentRepository.findAll();
+        java.util.stream.Stream<Document> s = all.stream().filter(d -> d.getOwner() != null && email.equals(d.getOwner().getEmail()));
+        if (q != null && !q.isBlank()) {
+            String tq = q.toLowerCase();
+            s = s.filter(d -> (d.getOriginalFilename() != null && d.getOriginalFilename().toLowerCase().contains(tq)) || (d.getTitle() != null && d.getTitle().toLowerCase().contains(tq)));
+        }
+        if (category != null && !category.isBlank()) {
+            String tc = category.toLowerCase().trim();
+            s = s.filter(d -> d.getCategory() != null && d.getCategory().toLowerCase().contains(tc));
+        }
+        return s.collect(java.util.stream.Collectors.toList());
+    }
+
     // Load file as Resource and ensure permissions (owner or admin) are respected by caller
     public org.springframework.core.io.Resource loadAsResource(Long id, String requestingUsername) throws java.io.IOException {
         Document d = documentRepository.findById(id).orElseThrow();
