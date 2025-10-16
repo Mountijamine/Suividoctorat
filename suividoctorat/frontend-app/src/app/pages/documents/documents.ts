@@ -31,6 +31,7 @@ export class DocumentsPage {
   size = signal(6);
   query = signal('');
   filterType = signal('all');
+  categories = signal<string[]>([]);
   selected = signal<Record<string, boolean>>({});
 
   constructor(private http: HttpClient,
@@ -45,7 +46,8 @@ export class DocumentsPage {
       this.page.set(p);
       this.size.set(s);
       this.query.set(q['q'] || '');
-      this.filterType.set(q['type'] || 'all');
+  // server expects 'category' param; keep local key as filterType but read 'category' from URL
+      this.filterType.set(q['category'] || q['type'] || 'all');
       // only call load when authenticated to avoid 403
       if (this.auth.isLoggedIn()) this.load();
     });
@@ -53,14 +55,30 @@ export class DocumentsPage {
     // also load when the user logs in while on the page (react to signal)
     effect(() => {
       const logged = this.auth.isLoggedIn();
-      if (logged) this.load(); else { this.docs.set([]); this.total.set(0); }
+      if (logged) {
+        // load categories once when logged in
+        this.loadCategories();
+        this.load();
+      } else { this.docs.set([]); this.total.set(0); this.categories.set([]); }
+    });
+  }
+
+  private loadCategories(){
+    this.http.get<any>('/api/candidat/documents/categories').subscribe({
+      next: (res) => {
+        const cats = Array.isArray(res?.categories) ? res.categories : (res?.categories || []);
+        // ensure unique and sorted presentation
+  const uniq = Array.from(new Set((cats as string[]).map((c:string) => (c||'').trim()).filter(Boolean)));
+  this.categories.set(uniq as string[]);
+      },
+      error: (err) => { console.debug('Could not load categories', err); this.categories.set([]); }
     });
   }
 
   load(){
     const params: any = { page: String(this.page()), size: String(this.size()) };
     if (this.query()) params.q = this.query();
-    if (this.filterType() && this.filterType() !== 'all') params.type = this.filterType();
+    if (this.filterType() && this.filterType() !== 'all') params.category = this.filterType();
     // call candidate REST API (server exposes /api/candidat/documents)
     this.http.get('/api/candidat/documents', { params }).subscribe({
       next: (res:any) => {
@@ -119,10 +137,36 @@ export class DocumentsPage {
 
   filtered = computed(() => this.docs().filter(d => {
     const q = this.query().toLowerCase();
-    if (this.filterType() !== 'all' && d.type !== this.filterType()) return false;
+    const docType = d.category || d.type || '';
+    if (this.filterType() !== 'all' && docType !== this.filterType()) return false;
     if (!q) return true;
-    return (d.title || '').toLowerCase().includes(q) || (d.type || '').toLowerCase().includes(q);
+    return (d.title || '').toLowerCase().includes(q) || (docType || '').toLowerCase().includes(q);
   }));
+
+  // download document by id using candidate REST download endpoint
+  downloadDocument(id: number|string){
+    const url = `/api/candidat/documents/download/${id}`;
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const dlUrl = URL.createObjectURL(blob as Blob);
+        const a = document.createElement('a'); a.href = dlUrl; a.download = `document-${id}`; a.click(); URL.revokeObjectURL(dlUrl);
+      },
+      error: (err) => { console.error('Download failed', err); try{ this.ts.error('Download failed'); }catch(e){} }
+    });
+  }
+
+  // share: copy a link to clipboard (relative url to download endpoint)
+  async shareDocument(id: number|string){
+    const href = window.location.origin + `/api/candidat/documents/download/${id}`;
+    try{
+      await navigator.clipboard.writeText(href);
+      try{ this.ts.success('Link copied to clipboard'); }catch(e){}
+    } catch(e){
+      // fallback: select a temporary input
+      const input = document.createElement('input'); input.value = href; document.body.appendChild(input); input.select(); document.execCommand('copy'); document.body.removeChild(input);
+      try{ this.ts.success('Link copied to clipboard'); }catch(e){}
+    }
+  }
 
   toggle(id:string){ this.selected.update(s => { s[id] = !s[id]; return s; }); }
 
@@ -181,7 +225,7 @@ export class DocumentsPage {
   goto(p: number){ if (p < 0) p = 0; if (p > Math.ceil(this.total()/this.size())-1) p = Math.ceil(this.total()/this.size())-1; this.page.set(p); this.load(); }
 
   // helper to change page and update URL
-  setPage(p: number){ this.page.set(p); this.router.navigate([], { queryParams: { page: p, size: this.size(), q: this.query(), type: this.filterType() } }); }
+  setPage(p: number){ this.page.set(p); this.router.navigate([], { queryParams: { page: p, size: this.size(), q: this.query(), category: this.filterType() } }); }
 
   totalPages(){ return Math.max(1, Math.ceil(this.total()/this.size())); }
 }

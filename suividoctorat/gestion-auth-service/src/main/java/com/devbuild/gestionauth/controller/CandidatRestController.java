@@ -121,4 +121,15 @@ public class CandidatRestController {
             return ResponseEntity.status(500).body(Map.of("message", "Export failed: " + ex.getMessage()));
         }
     }
+
+    @GetMapping("/documents/categories")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> categories(java.security.Principal principal) {
+        try {
+            java.util.List<String> cats = documentService.findDistinctCategoriesForUser(principal.getName());
+            return ResponseEntity.ok(java.util.Map.of("categories", cats));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(java.util.Map.of("message", "Failed to fetch categories"));
+        }
+    }
 }

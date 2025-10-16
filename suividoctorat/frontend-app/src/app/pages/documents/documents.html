@@ -4,9 +4,7 @@
   <input placeholder="Rechercher..." [(ngModel)]="query" (change)="setPage(0)" style="padding:0.5rem; border-radius:8px; border:1px solid #eef2f7" />
   <select [(ngModel)]="filterType" (change)="setPage(0)" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7">
         <option value="all">Tous</option>
-        <option value="rapport">Rapport</option>
-        <option value="attestation">Attestation</option>
-        <option value="publication">Publication</option>
+        <option *ngFor="let c of categories()" [value]="c">{{ c | titlecase }}</option>
       </select>
       <a routerLink="/documents/add" style="margin-left:0.5rem; padding:0.45rem 0.7rem; border-radius:8px; background:#eef2ff; color:#1e40af; text-decoration:none">Ajouter</a>
     </div>
@@ -24,14 +22,17 @@
           <div style="color:#6b7280">{{ d.date }}</div>
         </div>
         <div style="display:flex; flex-direction:column; align-items:flex-end">
-          <div class="badge">{{ d.type }}</div>
+          <div class="badge">{{ d.category || d.type || '—' }}</div>
           <input type="checkbox" [checked]="selected()[d.id]" (change)="toggle(d.id)" aria-label="Select document" />
         </div>
       </div>
-      <div style="color:#374151">Extrait ou description courte du document si disponible.</div>
+      <div style="color:#374151">{{ d.description || d.excerpt || '' }}</div>
+      <div style="display:flex; gap:0.5rem; align-items:center; color:#6b7280; font-size:0.9rem">
+        <div>{{ d.uploadedAt ? (d.uploadedAt | date:'medium') : (d.date || '') }}</div>
+      </div>
       <div class="actions">
-        <button class="btn outline">Télécharger</button>
-        <button class="btn">Partager</button>
+        <button class="btn outline" (click)="downloadDocument(d.id)">Télécharger</button>
+        <button class="btn" (click)="shareDocument(d.id)">Partager</button>
       </div>
     </div>
   </div>

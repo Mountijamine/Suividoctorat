@@ -20,12 +20,22 @@ import { ToastService } from '../../services/toast.service';
 export class AddDocumentPage {
   title = '';
   type = 'rapport';
+  categories: string[] = [];
+  useCustom = false; // when true, user types free-form category
   file: File | null = null;
   uploading = false;
   progress = 0;
   error: string | null = null;
 
   constructor(private http: HttpClient, private router: Router, private ts: ToastService) {}
+
+  ngOnInit(): void {
+    // fetch existing categories for this user
+    this.http.get<any>('/api/candidat/documents/categories').subscribe({
+      next: (res) => { try { this.categories = res?.categories || []; if (this.categories.length === 0) this.categories = ['rapport','attestation','publication']; } catch(e){} },
+      error: (err) => { console.debug('Could not load categories', err); this.categories = ['rapport','attestation','publication']; }
+    });
+  }
 
   onFile(e: any){ this.file = e?.target?.files?.[0] || null; }
 
@@ -35,7 +45,7 @@ export class AddDocumentPage {
     const fd = new FormData();
     fd.append('title', this.title);
     // backend expects 'category' param name
-    fd.append('category', this.type);
+  fd.append('category', this.useCustom ? this.type : this.type);
     fd.append('file', this.file as Blob, this.file!.name);
     this.uploading = true; this.progress = 0;
     // POST to candidate REST upload endpoint

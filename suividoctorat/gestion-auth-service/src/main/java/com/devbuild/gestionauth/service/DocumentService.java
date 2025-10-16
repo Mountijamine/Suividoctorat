@@ -107,6 +107,20 @@ public class DocumentService {
         return s.collect(java.util.stream.Collectors.toList());
     }
 
+    /**
+     * Return distinct non-null categories used by a user's documents (order by frequency not required).
+     */
+    public java.util.List<String> findDistinctCategoriesForUser(String email) {
+        List<Document> all = documentRepository.findAll();
+        return all.stream()
+                .filter(d -> d.getOwner() != null && email.equals(d.getOwner().getEmail()))
+                .map(Document::getCategory)
+                .filter(c -> c != null && !c.isBlank())
+                .map(String::trim)
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     // Load file as Resource and ensure permissions (owner or admin) are respected by caller
     public org.springframework.core.io.Resource loadAsResource(Long id, String requestingUsername) throws java.io.IOException {
         Document d = documentRepository.findById(id).orElseThrow();

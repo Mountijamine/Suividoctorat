@@ -6,11 +6,17 @@
   </div>
   <div class="field">
     <label>Type</label>
-    <select [(ngModel)]="type" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7">
-      <option value="rapport">Rapport</option>
-      <option value="attestation">Attestation</option>
-      <option value="publication">Publication</option>
-    </select>
+    <div style="display:flex; gap:0.5rem; align-items:center">
+      <label style="font-size:0.9rem"><input type="checkbox" [(ngModel)]="useCustom" /> Saisir manuellement</label>
+      <ng-container *ngIf="!useCustom">
+        <select [(ngModel)]="type" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7">
+          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+        </select>
+      </ng-container>
+      <ng-container *ngIf="useCustom">
+        <input [(ngModel)]="type" placeholder="Entrez une catégorie (ex: diplome)" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7" />
+      </ng-container>
+    </div>
   </div>
   <div class="field">
     <label>Fichier</label>
