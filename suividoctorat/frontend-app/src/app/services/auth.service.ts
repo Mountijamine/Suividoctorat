@@ -21,6 +21,11 @@ export class AuthService {
     );
   }
 
+  /** Fetch current user profile (use after login or to refresh role) */
+  getProfile(){
+    return this.http.get('/api/auth/me');
+  }
+
   logout() {
     localStorage.removeItem('auth_token');
   }

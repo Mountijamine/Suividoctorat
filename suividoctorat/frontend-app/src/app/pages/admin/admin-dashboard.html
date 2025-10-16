@@ -1,0 +1,31 @@
+<div class="wrap">
+  <div class="header">
+    <div>
+      <h1 style="margin:0">Admin — Utilisateurs</h1>
+      <div style="color:#6b7280">Chaque utilisateur est affiché comme une carte moderne</div>
+    </div>
+    <div>
+      <button class="btn" (click)="fetchUsers()">Rafraîchir</button>
+    </div>
+  </div>
+
+  <div style="margin-top:1rem">
+    <div *ngIf="loading()" style="color:#6b7280">Chargement des utilisateurs...</div>
+    <div class="grid">
+      <div *ngFor="let u of users()" class="user-card">
+        <div class="meta">
+          <div class="avatar">{{ initials(u).toUpperCase() }}</div>
+          <div>
+            <div style="font-weight:700">{{ u.firstName }} {{ u.lastName }}</div>
+            <div class="role">{{ u.email }} · {{ u.role }}</div>
+          </div>
+        </div>
+        <div style="margin-top:0.5rem; color:#374151">ID: {{ u.id }}</div>
+        <div class="actions">
+          <button class="btn outline">Voir</button>
+          <button class="btn">Modifier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -12,8 +12,11 @@
         <button [class.active]="mode() === 'signup'" (click)="switch('signup')">Sign up</button>
       </div>
 
-      <h1 *ngIf="mode() === 'signin'">Welcome back</h1>
-      <h1 *ngIf="mode() === 'signup'">Create an account</h1>
+      <div class="page-header">
+  <img src="/assets/logo.png" alt="logo" class="page-logo" />
+        <h1 *ngIf="mode() === 'signin'">Welcome back</h1>
+        <h1 *ngIf="mode() === 'signup'">Create an account</h1>
+      </div>
 
       <form *ngIf="mode() === 'signin'" [formGroup]="signinForm" (ngSubmit)="submitSignin()" class="form">
         <label>Email
