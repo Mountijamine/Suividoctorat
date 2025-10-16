@@ -2,7 +2,7 @@ import { Component, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../components/toast/toast';
@@ -11,17 +11,42 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'documents-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, RouterLink],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './documents.html',
   styles: [
     `
     .wrap{ max-width:1200px; margin:1.25rem auto; padding:1rem }
-    .tools{ display:flex; gap:0.5rem; align-items:center; justify-content:space-between }
-    .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; margin-top:1rem }
-    .doc-card{ background:#fff; border-radius:12px; padding:1rem; box-shadow:0 8px 20px rgba(2,6,23,0.06); display:flex; flex-direction:column; gap:0.5rem }
-    .meta{ display:flex; justify-content:space-between; gap:0.5rem; align-items:center }
-    .badge{ background:#eef2ff; color:#1e40af; padding:0.25rem 0.5rem; border-radius:999px; font-weight:600 }
-    .actions{ margin-top:auto; display:flex; gap:0.5rem }
+    .header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem }
+    .title { margin:0; font-size:1.5rem }
+    .subtitle { margin:0; color:#6b7280 }
+    .search-bar{ display:flex; gap:0.75rem; align-items:center; margin:0.75rem 0 }
+    .search-input input{ padding:0.6rem 0.8rem; border-radius:8px; border:1px solid #eef2f7; width:360px }
+    .btn-primary{ background:linear-gradient(90deg,#111,#111); color:#fff; padding:0.6rem 0.9rem; border-radius:8px; border:0 }
+    .layout{ display:grid; grid-template-columns:280px 1fr; gap:1rem }
+    .filters-card{ background:#fff; padding:1rem; border-radius:12px; box-shadow:0 8px 20px rgba(2,6,23,0.06) }
+    .filters-header{ display:flex; justify-content:space-between; align-items:center }
+    .filter-section{ margin-top:0.75rem }
+    .types{ display:flex; flex-direction:column; gap:0.35rem; max-height:300px; overflow:auto }
+    .type-item{ display:flex; gap:0.5rem; align-items:center }
+    .type-item.active{ font-weight:700 }
+    .content{ }
+    .meta-top{ color:#6b7280; margin-bottom:0.5rem }
+    .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem }
+    .card{ background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(2,6,23,0.06); display:flex; flex-direction:column }
+    .card-media{ position:relative; height:160px; background:#f8fafc; display:flex; align-items:center; justify-content:center }
+    .card-media img{ width:100%; height:100%; object-fit:cover }
+    .placeholder{ font-size:36px }
+    .media-overlay{ position:absolute; bottom:8px; left:8px; right:8px; display:flex; gap:8px; opacity:0; transition:opacity 180ms }
+    .card:hover .media-overlay{ opacity:1 }
+    .card-body{ padding:0.9rem; display:flex; flex-direction:column; gap:0.5rem }
+    .card-head{ display:flex; justify-content:space-between; align-items:flex-start }
+    .card-title{ font-weight:700 }
+    .card-type{ display:inline-block; background:#f1f5f9; color:#374151; padding:0.25rem 0.5rem; border-radius:999px; font-size:12px }
+    .card-meta{ display:flex; justify-content:space-between; color:#6b7280; font-size:13px }
+    .card-actions{ display:flex; gap:0.5rem; margin-top:0.5rem }
+    .btn-ghost{ background:transparent; border:1px solid #e6eef8; padding:0.45rem 0.6rem; border-radius:8px }
+    .btn-danger{ background:#ef4444; color:#fff; border:0; padding:0.45rem 0.6rem; border-radius:8px }
+    .pager{ display:flex; justify-content:center; gap:0.75rem; margin-top:1rem; align-items:center }
     `]
 })
 export class DocumentsPage {
@@ -38,7 +63,7 @@ export class DocumentsPage {
               private route: ActivatedRoute,
               private router: Router,
               private ts: ToastService,
-              private auth: AuthService){
+              public auth: AuthService){
     // listen to query params so page is bookmarkable/shareable
     this.route.queryParams.subscribe(q => {
       const p = parseInt(q['page'] || '0', 10) || 0;
@@ -169,6 +194,21 @@ export class DocumentsPage {
   }
 
   toggle(id:string){ this.selected.update(s => { s[id] = !s[id]; return s; }); }
+
+  // helper to open document in a new tab/window
+  openDocument(id: number|string){ const url = '/api/candidat/documents/download/' + id; try{ window.open(url, '_blank'); }catch(e){ console.warn('Could not open document', e); } }
+
+  // select a filter type from template
+  selectType(c: string){ this.filterType.set(c); this.setPage(0); }
+
+  // navigate to add document page or to login with redirect when not authenticated
+  gotoAdd(){
+    if (this.auth.isLoggedIn && this.auth.isLoggedIn()){
+      this.router.navigate(['/documents','add']);
+    } else {
+      try { this.router.navigate(['/auth/login'], { queryParams: { redirect: '/documents/add' } }); } catch(e){ this.router.navigate(['/auth/login']); }
+    }
+  }
 
   exportCSV(){
     (async () => {

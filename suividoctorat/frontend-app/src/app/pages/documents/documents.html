@@ -1,45 +1,100 @@
 <div class="wrap">
-  <div class="tools">
-    <div style="display:flex; gap:0.5rem; align-items:center">
-  <input placeholder="Rechercher..." [(ngModel)]="query" (change)="setPage(0)" style="padding:0.5rem; border-radius:8px; border:1px solid #eef2f7" />
-  <select [(ngModel)]="filterType" (change)="setPage(0)" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7">
-        <option value="all">Tous</option>
-        <option *ngFor="let c of categories()" [value]="c">{{ c | titlecase }}</option>
-      </select>
-      <a routerLink="/documents/add" style="margin-left:0.5rem; padding:0.45rem 0.7rem; border-radius:8px; background:#eef2ff; color:#1e40af; text-decoration:none">Ajouter</a>
-    </div>
-    <div style="display:flex; gap:0.5rem; align-items:center">
-      <button (click)="exportCSV()" style="background:linear-gradient(90deg,#7c3aed,#06b6d4); color:#fff; border:0; padding:0.5rem 0.8rem; border-radius:8px">Exporter CSV</button>
-      <button (click)="load()" style="background:transparent; border:1px solid #e6eef8; padding:0.45rem 0.7rem; border-radius:8px">Rafraîchir</button>
+  <div class="header">
+    <div>
+      <h1 class="title">Documents</h1>
+      <p class="subtitle">Manage and organize your documents</p>
     </div>
   </div>
 
-  <div class="grid">
-    <div *ngFor="let d of docs()" class="doc-card">
-      <div class="meta">
-        <div>
-          <div style="font-weight:700">{{ d.title }}</div>
-          <div style="color:#6b7280">{{ d.date }}</div>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:flex-end">
-          <div class="badge">{{ d.category || d.type || '—' }}</div>
-          <input type="checkbox" [checked]="selected()[d.id]" (change)="toggle(d.id)" aria-label="Select document" />
-        </div>
-      </div>
-      <div style="color:#374151">{{ d.description || d.excerpt || '' }}</div>
-      <div style="display:flex; gap:0.5rem; align-items:center; color:#6b7280; font-size:0.9rem">
-        <div>{{ d.uploadedAt ? (d.uploadedAt | date:'medium') : (d.date || '') }}</div>
-      </div>
-      <div class="actions">
-        <button class="btn outline" (click)="downloadDocument(d.id)">Télécharger</button>
-        <button class="btn" (click)="shareDocument(d.id)">Partager</button>
-      </div>
+  <!-- Search & Export bar -->
+  <div class="search-bar">
+    <div class="search-input">
+      <input placeholder="Search documents..." [(ngModel)]="query" (input)="setPage(0)" />
+    </div>
+    <div class="search-actions">
+      <button (click)="exportCSV()" class="btn-primary">Export</button>
     </div>
   </div>
 
-    <div style="display:flex; justify-content:center; gap:0.5rem; margin-top:1rem; align-items:center">
-      <button (click)="setPage(page()-1)" [disabled]="page()===0">Préc.</button>
-      <div>Page {{ page()+1 }} / {{ totalPages() }}</div>
-      <button (click)="setPage(page()+1)" [disabled]="page() >= totalPages()-1">Suiv.</button>
-    </div>
+  <div class="layout">
+    <!-- Left: Filters -->
+    <aside class="filters">
+  <div class="filters-card">
+        <div class="filters-header">
+          <h3>Filters</h3>
+          <div *ngIf="(query() || (filterType() !== 'all'))" style="font-size:13px"><a href="#" (click)="$event.preventDefault(); query.set(''); filterType.set('all'); setPage(0);">Clear</a></div>
+        </div>
+
+  <div class="filter-section">
+          <h4>Document Type</h4>
+          <div class="types">
+            <label class="type-item" [class.active]="filterType() === 'all'">
+              <input type="radio" name="doc-type" [checked]="filterType() === 'all'" (change)="selectType('all')" />
+              <span>All</span>
+            </label>
+            <label *ngFor="let c of categories()" class="type-item" [class.active]="filterType() === c">
+              <input type="radio" name="doc-type" [checked]="filterType() === c" (change)="selectType(c)" />
+              <span>{{ c | titlecase }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h4>Sort By</h4>
+          <select [(ngModel)]="size" (change)="setPage(0)">
+            <option [value]="6">Newest First</option>
+            <option [value]="12">Oldest First</option>
+          </select>
+        </div>
+        <div style="margin-top:0.85rem; display:flex; justify-content:center">
+          <button (click)="gotoAdd()" class="btn-primary" style="width:100%">
+            {{ auth?.isLoggedIn() ? 'Add Document' : 'Sign in to Add' }}
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right: Documents Grid -->
+    <main class="content">
+      <div class="meta-top">Showing {{ filtered().length }} documents</div>
+      <div class="cards">
+        <div *ngFor="let d of filtered()" class="card">
+          <div class="card-media">
+            <img *ngIf="d.thumbnail || d.previewUrl || d.url" [src]="d.thumbnail || d.previewUrl || d.url" alt="{{ d.title }}" />
+            <div *ngIf="!d.thumbnail && !d.previewUrl && !d.url" class="placeholder">📄</div>
+            <div class="media-overlay">
+                <button (click)="openDocument(d.id)">View</button>
+              <button (click)="downloadDocument(d.id)">Download</button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="card-head">
+              <div class="card-title">{{ d.title || d.originalFilename || 'Untitled' }}</div>
+              <div class="card-menu"> 
+                <input type="checkbox" [checked]="selected()[d.id]" (change)="toggle(d.id)" aria-label="Select document" />
+              </div>
+            </div>
+
+            <div class="card-type">{{ d.category || d.type || '—' }}</div>
+            <div class="card-meta">
+              <span class="date">{{ d.uploadedAt ? (d.uploadedAt | date:'mediumDate') : (d.date || '') }}</span>
+              <span class="size">{{ d.size || '' }}</span>
+            </div>
+
+            <div class="card-actions">
+              <button class="btn-ghost" (click)="shareDocument(d.id)">Share</button>
+              <button class="btn-danger" (click)="downloadDocument(d.id)">Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pager">
+        <button (click)="setPage(page()-1)" [disabled]="page()===0">Prev</button>
+        <div>Page {{ page()+1 }} / {{ totalPages() }}</div>
+        <button (click)="setPage(page()+1)" [disabled]="page() >= totalPages()-1">Next</button>
+      </div>
+    </main>
+  </div>
 </div>

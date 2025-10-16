@@ -47,7 +47,7 @@
 
     <!-- right: preview / image -->
     <div style="width:320px; flex:0 0 320px; display:flex; align-items:center; justify-content:center">
-      <ng-container *ngIf="previews?.length > 0; else placeholder">
+      <ng-container *ngIf="previews && previews.length > 0; else placeholder">
         <div style="display:grid; gap:0.5rem; width:100%">
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:0.5rem">
             <div *ngFor="let p of previews; let i = index" style="position:relative; border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 6px 14px rgba(2,6,23,0.04)">
