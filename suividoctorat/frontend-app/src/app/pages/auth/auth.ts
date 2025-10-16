@@ -2,7 +2,8 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'auth-page',
@@ -26,12 +27,16 @@ export class AuthPage {
 
   serverError = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  invalidFields = signal<string[] | null>(null);
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private http: HttpClient){
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private auth: AuthService){
     this.route.queryParams.subscribe(q => {
       const m = q['mode'];
       if (m === 'signup') this.mode.set('signup');
       else this.mode.set('signin');
+      if (q['email']) {
+        try { this.signinForm.patchValue({ email: q['email'] }); } catch(e) { /* ignore */ }
+      }
     });
     this.signupForm = this.fb.group({
       firstName: [''],
@@ -52,13 +57,23 @@ export class AuthPage {
   switch(mode: 'signin'|'signup'){
     this.serverError.set(null);
     this.successMessage.set(null);
+    this.invalidFields.set(null);
     this.router.navigate([], { queryParams: { mode } });
   }
 
   submitSignup(){
     this.serverError.set(null);
     this.successMessage.set(null);
-    if (this.signupForm.invalid) { this.serverError.set('Please fill all required fields correctly.'); return; }
+    if (this.signupForm.invalid) {
+      // mark controls so validation messages appear in the UI
+      try { this.signupForm.markAllAsTouched(); } catch(e) { }
+      // collect invalid control names for a clearer error
+      const invalid = Object.keys(this.signupForm.controls || {}).filter(k => this.signupForm.controls[k].invalid);
+      this.invalidFields.set(invalid.length ? invalid : null);
+      const list = invalid.length ? invalid.join(', ') : 'required fields';
+      this.serverError.set('Please fill all required fields correctly');
+      return;
+    }
     const v = this.signupForm.value;
     if (v.password !== v.confirmPassword) { this.serverError.set('Passwords do not match'); return; }
     const payload: any = {
@@ -71,11 +86,12 @@ export class AuthPage {
       acceptTerms: String(v.acceptTerms),
       requestedProfile: v.requestedProfile
     };
-    this.http.post('/api/auth/signup', payload).subscribe({
+    this.auth.signup(payload).subscribe({
       next: (res:any) => {
         this.successMessage.set('Signup successful — you can now sign in.');
         // Switch to signin mode and prefill email
         this.signupForm.reset({acceptTerms:false});
+        this.invalidFields.set(null);
         this.router.navigate([], { queryParams: { mode: 'signin', email: payload.email } });
       },
       error: (err) => {
@@ -90,11 +106,10 @@ export class AuthPage {
     this.successMessage.set(null);
     if (this.signinForm.invalid) { this.serverError.set('Please provide email and password.'); return; }
     const v = this.signinForm.value;
-    this.http.post('/api/auth/login', v).subscribe({
+    this.auth.login(v).subscribe({
       next: (res:any) => {
         const token = res?.token;
         if (token) {
-          localStorage.setItem('auth_token', token);
           this.successMessage.set('Login successful');
           // navigate to home or dashboard
           this.router.navigate(['/']);
