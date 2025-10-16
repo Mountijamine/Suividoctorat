@@ -1,0 +1,101 @@
+<div class="min-h-screen bg-zinc-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="bg-white rounded-lg shadow-sm p-8 mb-6">
+      <div class="flex items-start gap-6">
+        <div class="relative">
+          <img [src]="avatarUrl || '/assets/default-avatar.png'" alt="profile" class="w-32 h-32 rounded-full object-cover border-4 border-zinc-100" />
+          <label class="avatar-edit" title="Change avatar">
+            <input type="file" (change)="onAvatar($event)" accept="image/*" />
+            ✎
+          </label>
+        </div>
+
+        <div class="flex-1">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h1 class="text-3xl font-semibold text-zinc-900 mb-1">{{ profile?.firstName }} {{ profile?.lastName }}</h1>
+              <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{{ profile?.role || 'Doctorant' }}</span>
+            </div>
+            <button class="flex items-center gap-2 px-4 py-2 border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors" (click)="editMode = !editMode">
+              ✎ Edit Profile
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="flex items-center gap-2 text-zinc-600"><strong>Email:</strong> {{ profile?.email }}</div>
+            <div class="flex items-center gap-2 text-zinc-600"><strong>Téléphone:</strong> {{ profile?.phone }}</div>
+            <div class="flex items-center gap-2 text-zinc-600"><strong>Adresse:</strong> {{ profile?.address }}</div>
+            <div class="flex items-center gap-2 text-zinc-600"><strong>Inscrit depuis:</strong> {{ profile?.enrollmentDate }}</div>
+          </div>
+
+          <div class="p-4 bg-zinc-50 rounded-lg">
+            <h3 class="text-sm font-medium text-zinc-700 mb-2">Sujet de Thèse</h3>
+            <p class="text-sm text-zinc-900 mb-2">{{ profile?.thesisTitle }}</p>
+            <div class="flex items-center gap-4 text-sm text-zinc-600">
+              <span>Directeur: {{ profile?.thesisDirector }}</span>
+              <span>{{ profile?.laboratory }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-lg font-semibold text-zinc-900 mb-4">Progression Doctorale</h2>
+          <div *ngFor="let stat of stats" style="margin-bottom:1rem">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-zinc-700">{{ stat.label }}</span>
+              <span class="text-sm font-semibold" [ngClass]="getProgressColor(stat.current, stat.required)">{{ stat.current }}/{{ stat.required }}</span>
+            </div>
+            <div class="w-full bg-zinc-200 rounded-full h-2">
+              <div class="bg-blue-600 h-2 rounded-full" [style.width.%]="(stat.current / stat.required) * 100"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-lg font-semibold text-zinc-900 mb-4">Actions Rapides</h2>
+          <div *ngFor="let link of quickLinks" style="margin-bottom:0.5rem">
+            <button class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-50 transition-colors" (click)="onAction(link)">
+              <div [ngStyle]="{'background': link.color, 'width':'36px','height':'36px','display':'flex','align-items':'center','justify-content':'center','border-radius':'8px','color':'white'}">{{ link.icon }}</div>
+              <span class="flex-1 text-left text-sm font-medium text-zinc-700">{{ link.label }}</span>
+              <span *ngIf="link.count !== null" class="px-2 py-1 bg-zinc-100 text-zinc-700 rounded text-xs font-medium">{{ link.count }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-lg font-semibold text-zinc-900 mb-4">Activité Récente</h2>
+          <div *ngFor="let a of recentActivity" style="margin-bottom:0.75rem">
+            <div class="flex items-start gap-4 pb-3 border-b border-zinc-100">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">✔</div>
+              <div>
+                <div style="display:flex; justify-content:space-between"><strong>{{ a.action }}</strong><span class="text-xs text-zinc-500">{{ a.date }}</span></div>
+                <div class="text-sm text-zinc-600">{{ a.description }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-zinc-900">Documents Récents</h2>
+            <button class="text-sm text-blue-600 hover:text-blue-700 font-medium">Voir tout</button>
+          </div>
+          <div *ngFor="let doc of documents" style="margin-bottom:0.5rem" class="flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-50 transition-colors">
+            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">📄</div>
+            <div class="flex-1">
+              <div class="text-sm font-medium text-zinc-900">{{ doc.name }}</div>
+              <div class="text-xs text-zinc-500">{{ doc.date }} • {{ doc.size }}</div>
+            </div>
+            <button (click)="download(doc)">⬇</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

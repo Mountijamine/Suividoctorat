@@ -5,6 +5,7 @@ import { AuthPage } from './pages/auth/auth';
 import { DashboardPage } from './pages/dashboard/dashboard';
 import { AdminDashboard } from './pages/admin/admin-dashboard';
 import { DocumentsPage, AddDocumentPage } from './pages/documents';
+import { ProfilePage } from './pages/profile/profile';
 
 export const routes: Routes = [
   { path: '', component: StartPage },
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'admin', component: AdminDashboard },
   { path: 'documents', component: DocumentsPage },
   { path: 'documents/add', component: AddDocumentPage },
+  { path: 'profile', component: ProfilePage },
   { path: '**', redirectTo: '' }
 ];
 

@@ -31,7 +31,10 @@ import { AuthService } from './services/auth.service';
 
           <div class="right">
             <ng-container *ngIf="isLoggedIn()">
-              <a routerLink="/dashboard" class="cta" (click)="closeNav()">Mon espace</a>
+              <a routerLink="/profile" class="profile-link" (click)="closeNav()" style="display:flex; align-items:center; gap:0.5rem; text-decoration:none">
+                <img *ngIf="profile?.avatar" [src]="profile.avatar" alt="avatar" style="width:32px; height:32px; border-radius:999px; object-fit:cover; border:2px solid #fff" />
+                <span class="cta">Mon espace</span>
+              </a>
               <button (click)="logout()" class="logout">Se déconnecter</button>
             </ng-container>
             <ng-container *ngIf="!isLoggedIn()">
@@ -74,11 +77,16 @@ export class App {
   // placeholders; actual references are set in constructor
   isLoggedIn: any;
   role: any;
+  profile: any = null;
   navOpen = signal(false);
 
-  constructor(private router: Router, private auth: AuthService) {
+  constructor(private router: Router, public auth: AuthService) {
     this.isLoggedIn = this.auth.isLoggedIn;
     this.role = this.auth.role;
+    // attempt to load profile for header avatar/name
+    try {
+      this.auth.getProfile().subscribe({ next: (res:any) => { this.profile = res || null; }, error: () => { this.profile = null; } });
+    } catch(e) { this.profile = null; }
   }
 
   logout(){
