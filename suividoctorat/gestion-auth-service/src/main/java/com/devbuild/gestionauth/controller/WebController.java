@@ -26,12 +26,13 @@ public class WebController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login";
+        // Redirect to SPA entry; Angular will render the login page client-side.
+        return "redirect:/";
     }
 
     @GetMapping("/signup")
     public String signupPage() {
-        return "signup";
+        return "redirect:/";
     }
 
     @PostMapping(value = "/signup", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -56,10 +57,9 @@ public class WebController {
     @GetMapping("/")
     public String index(Model model) {
         org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
-            return "redirect:/dashboard";
-        }
-        return "login";
+        // Let the SPA decide routing for authenticated/anonymous users.
+        // Forward to Angular index (resources/static/index.html) so the SPA can handle client-side routing.
+        return "forward:/index.html";
     }
 
     @PostMapping(value = "/login", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)

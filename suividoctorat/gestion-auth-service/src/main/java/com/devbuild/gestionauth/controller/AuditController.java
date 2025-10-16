@@ -52,13 +52,8 @@ public class AuditController {
                 p = repo.findByActionAndTimestampBetween(action, start, end, pageable);
             }
         }
-        model.addAttribute("audits", p.getContent());
-        model.addAttribute("action", action);
-        model.addAttribute("from", fromDate);
-        model.addAttribute("to", toDate);
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", p.getTotalPages());
-        return "admin/role_audit";
+        // UI is handled by SPA; keep CSV export for API consumers
+        return "redirect:/";
     }
 
     @GetMapping(path = "/admin/role-audit.csv", produces = "text/csv")

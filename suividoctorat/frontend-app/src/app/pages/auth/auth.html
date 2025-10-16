@@ -1,0 +1,49 @@
+<div class="auth">
+  <div class="panel">
+    <div class="tabs">
+      <button [class.active]="mode() === 'signin'" (click)="switch('signin')">Sign in</button>
+      <button [class.active]="mode() === 'signup'" (click)="switch('signup')">Sign up</button>
+    </div>
+
+    <div *ngIf="mode() === 'signin'">
+      <h2>Sign in</h2>
+      <form [formGroup]="signinForm" (ngSubmit)="submitSignin()">
+        <div>
+          <label>Email</label>
+          <input type="email" formControlName="email" />
+          <div class="error" *ngIf="signinForm.controls.email?.invalid && signinForm.controls.email?.touched">Valid email required</div>
+        </div>
+        <div>
+          <label>Password</label>
+          <input type="password" formControlName="password" />
+          <div class="error" *ngIf="signinForm.controls.password?.invalid && signinForm.controls.password?.touched">Password required</div>
+        </div>
+        <div style="margin-top:1rem">
+          <button type="submit">Sign in</button>
+        </div>
+      </form>
+    </div>
+
+    <div *ngIf="mode() === 'signup'">
+      <h2>Sign up</h2>
+      <form [formGroup]="signupForm" (ngSubmit)="submitSignup()">
+        <div><label>First name</label><input type="text" formControlName="firstName" /></div>
+        <div><label>Last name</label><input type="text" formControlName="lastName" /></div>
+        <div><label>Email</label><input type="email" formControlName="email" />
+          <div class="error" *ngIf="signupForm.controls.email?.invalid && signupForm.controls.email?.touched">Valid email required</div>
+        </div>
+        <div><label>Phone</label><input type="text" formControlName="phone" /></div>
+        <div><label>Requested profile</label><input type="text" formControlName="requestedProfile" /></div>
+        <div><label>Password</label><input type="password" formControlName="password" /></div>
+        <div><label>Confirm password</label><input type="password" formControlName="confirmPassword" /></div>
+        <div><label><input type="checkbox" formControlName="acceptTerms" /> I accept the terms</label>
+          <div class="error" *ngIf="signupForm.controls.acceptTerms?.invalid && signupForm.controls.acceptTerms?.touched">You must accept terms</div>
+        </div>
+        <div style="margin-top:1rem"><button type="submit">Create account</button></div>
+      </form>
+    </div>
+
+    <div *ngIf="serverError()" class="error" style="margin-top:1rem">{{ serverError() }}</div>
+    <div *ngIf="successMessage()" class="success" style="margin-top:1rem">{{ successMessage() }}</div>
+  </div>
+</div>

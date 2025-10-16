@@ -25,10 +25,13 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final boolean devApiOpen;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    public SecurityConfig(UserDetailsService userDetailsService, JwtUtil jwtUtil, org.springframework.core.env.Environment env) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        // read a dev toggle from application properties: app.dev.api-open=true to allow unauthenticated GET /api/admin/users
+        this.devApiOpen = Boolean.parseBoolean(env.getProperty("app.dev.api-open", "false"));
     }
 
     @Bean
@@ -38,25 +41,30 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // API-first configuration: stateless JWT for /api/**
         TokenFilter tokenFilter = new TokenFilter(jwtUtil);
         http
-            .csrf(csrf -> csrf
-                // keep CSRF protection for stateful form endpoints and expose token via cookie
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                // ignore API endpoints (they use JWT)
-                .ignoringRequestMatchers("/api/**")
-            )
-            // Use stateful sessions for form-based UI so redirects and CSRF-protected forms work.
-            // API endpoints still use JWT (TokenFilter) but session auth is required for MVC flows.
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-            .authorizeHttpRequests(auth -> auth
-                // permit access to static resources and form endpoints
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-                .requestMatchers(HttpMethod.GET, "/login", "/signup").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login", "/signup", "/login").permitAll()
-                .anyRequest().authenticated()
-            )
-            // do NOT enable HTTP Basic; we use JWT bearer tokens only
+            // Disable CSRF for API endpoints (we rely on JWT)
+            .csrf(csrf -> csrf.disable())
+            // Stateless session management for APIs
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> {
+                // Allow API auth endpoints
+                auth.requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login").permitAll();
+                // Allow CORS preflight for API endpoints
+                auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll();
+                // Allow actuator/health for checks
+                auth.requestMatchers("/actuator/health", "/actuator/info").permitAll();
+                // Allow static resources if serving SPA from backend
+                auth.requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/favicon.ico").permitAll();
+                // Development-friendly override: optionally allow GET /api/admin/users without authentication
+                if (devApiOpen) {
+                    auth.requestMatchers(HttpMethod.GET, "/api/admin/users").permitAll();
+                }
+                // All other API endpoints require authentication
+                auth.requestMatchers("/api/**").authenticated();
+                auth.anyRequest().denyAll();
+            })
             .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

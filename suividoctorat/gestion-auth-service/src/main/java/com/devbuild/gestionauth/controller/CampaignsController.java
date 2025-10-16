@@ -16,18 +16,8 @@ public class CampaignsController {
 
     @GetMapping("/campaigns")
     public String campaigns(Model model) {
-        if (inscriptionUrl == null || inscriptionUrl.isBlank()) {
-            model.addAttribute("message", "Campaigns microservice not configured. To enable fetching campaigns, set app.inscription.url to the Inscription service base URL.");
-            return "campaigns/list";
-        }
-        try {
-            String url = inscriptionUrl + "/api/campaigns";
-            Object resp = rest.getForObject(url, Object.class);
-            model.addAttribute("campaigns", resp);
-        } catch (Exception ex) {
-            model.addAttribute("error", "Failed to fetch campaigns: " + ex.getMessage());
-        }
-        model.addAttribute("inscriptionUrl", inscriptionUrl);
-        return "campaigns/list";
+        // Campaigns are rendered by the SPA. Keep this endpoint for legacy server-side usage if needed,
+        // but redirect to the SPA entry point for client-side rendering.
+        return "forward:/index.html";
     }
 }

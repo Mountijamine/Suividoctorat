@@ -1,8 +1,12 @@
 import { Routes } from '@angular/router';
-import { importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { StartPage } from './pages/start-page/start-page';
+import { AuthPage } from './pages/auth/auth';
 
 export const routes: Routes = [
-	{ path: 'login', loadComponent: () => import('./auth/login.material.component').then(m => m.LoginMaterialComponent) },
-	{ path: 'signup', loadComponent: () => import('./auth/signup.material.component').then(m => m.SignupMaterialComponent) },
-	{ path: '', redirectTo: '/login', pathMatch: 'full' }
+  { path: '', component: StartPage },
+  { path: 'auth', component: AuthPage },
+  { path: '**', redirectTo: '' }
 ];
+
+export const APP_ROUTER_PROVIDERS = [provideRouter(routes)];

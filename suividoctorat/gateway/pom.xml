@@ -13,14 +13,21 @@
     <name>gateway</name>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
+        <!-- Use only reactive stack for gateway to avoid servlet-based Spring MVC on classpath -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
+        <!-- Spring Cloud Gateway for HTTP routing (uses discovery locator) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+        <!-- NOTE: For stable reactive Gateway + Eureka usage, run a dedicated Eureka server module.
+             Remove the server dependency here to avoid servlet-based bootstrap conflicts when
+             running Spring Cloud Gateway in reactive mode. If you want a combined server/gateway
+             in one process, additional servlet-reactor bridging is required (not recommended).
+        -->
     </dependencies>
 
     <build>

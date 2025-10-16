@@ -63,12 +63,42 @@ public class DocumentService {
         return documentRepository.findById(id);
     }
 
+    // New helper: list documents for a username (email) with optional search q and pageable
+    public org.springframework.data.domain.Page<Document> listForUser(String email, String q, int page, int size) {
+        // resolve user by owner email (join query via repository may be better; keep simple for now)
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"));
+        // Simple approach: fetch all and filter if q provided
+        List<Document> all = documentRepository.findAll();
+        java.util.stream.Stream<Document> s = all.stream().filter(d -> d.getOwner() != null && email.equals(d.getOwner().getEmail()));
+        if (q != null && !q.isBlank()) {
+            String tq = q.toLowerCase();
+            s = s.filter(d -> (d.getOriginalFilename() != null && d.getOriginalFilename().toLowerCase().contains(tq)) || (d.getTitle() != null && d.getTitle().toLowerCase().contains(tq)));
+        }
+        List<Document> filtered = s.collect(java.util.stream.Collectors.toList());
+        int start = Math.min(page * size, filtered.size());
+        int end = Math.min(start + size, filtered.size());
+        List<Document> pageContent = filtered.subList(start, end);
+        return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, filtered.size());
+    }
+
     public java.util.List<Document> findAll() {
         return documentRepository.findAll();
     }
 
     public java.util.List<Document> findByOwnerAffiliation(String affiliation) {
         return documentRepository.findByOwner_Affiliation(affiliation);
+    }
+
+    // Load file as Resource and ensure permissions (owner or admin) are respected by caller
+    public org.springframework.core.io.Resource loadAsResource(Long id, String requestingUsername) throws java.io.IOException {
+        Document d = documentRepository.findById(id).orElseThrow();
+        boolean allowed = false;
+        if (d.getOwner() != null && d.getOwner().getEmail().equals(requestingUsername)) allowed = true;
+        // If calling code needs admin checks it can be done at controller level via roles; here allow owner only
+        if (!allowed) throw new SecurityException("Forbidden");
+        java.io.File f = new java.io.File(d.getPath());
+        if (!f.exists()) throw new java.io.FileNotFoundException("file not found");
+        return new org.springframework.core.io.UrlResource(f.toURI());
     }
 
     public void delete(Long id, User requesting) throws java.io.IOException {

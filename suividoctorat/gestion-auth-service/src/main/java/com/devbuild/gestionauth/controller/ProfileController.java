@@ -20,15 +20,9 @@ public class ProfileController {
 
     @GetMapping("/profile")
     public String profile(Model model, java.security.Principal principal) {
-        if (principal == null) return "redirect:/login";
-        String email = principal.getName();
-        User u = userService.findByEmail(email).orElseThrow();
-        model.addAttribute("user", u);
-        java.util.Map<String,String> roleLabels = new java.util.HashMap<>();
-        roleLabels.put("ROLE_CANDIDAT","Candidat"); roleLabels.put("ROLE_ENCADRANT","Encadrant"); roleLabels.put("ROLE_PERSONNEL","Personnel administratif");
-        model.addAttribute("roleLabels", roleLabels);
-        model.addAttribute("roles", Role.values());
-        return "profile";
+        // Serve the SPA which will render the profile client-side. If clients POST to /profile
+        // the POST mapping will continue to process updates and redirect back to the SPA.
+        return "forward:/index.html";
     }
 
     @PostMapping("/profile")

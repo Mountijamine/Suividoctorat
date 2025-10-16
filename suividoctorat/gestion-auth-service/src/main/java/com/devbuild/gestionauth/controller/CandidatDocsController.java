@@ -28,32 +28,13 @@ public class CandidatDocsController {
                            @RequestParam(name = "category", required = false) String category,
                            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
                            @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
-        if (principal == null) return "redirect:/login";
-        User u = userService.findByEmail(principal.getName()).orElseThrow();
-        org.springframework.data.domain.Page<Document> docsPage = documentService.listFor(u, org.springframework.data.domain.PageRequest.of(page, size));
-        java.util.List<Document> docs = docsPage.getContent();
-        if (q != null && !q.isBlank()) {
-            docs = docs.stream().filter(d -> (d.getOriginalFilename()!=null && d.getOriginalFilename().toLowerCase().contains(q.toLowerCase())) || (d.getTitle()!=null && d.getTitle().toLowerCase().contains(q.toLowerCase()))).collect(java.util.stream.Collectors.toList());
-        }
-        if (category != null && !category.isBlank()) {
-            docs = docs.stream().filter(d -> category.equalsIgnoreCase(d.getCategory())).collect(java.util.stream.Collectors.toList());
-        }
-        model.addAttribute("docs", docs);
-        model.addAttribute("q", q);
-        model.addAttribute("category", category);
-        model.addAttribute("page", page);
-        model.addAttribute("size", size);
-        model.addAttribute("totalPages", docsPage.getTotalPages());
-        model.addAttribute("totalElements", docsPage.getTotalElements());
-        return "candidat/documents";
+        // The SPA handles rendering; API endpoints (GET /api/...) should be used to fetch documents.
+        return "forward:/index.html";
     }
 
     @GetMapping("/candidat/documents/add")
     public String addDocumentPage(Model model, java.security.Principal principal) {
-        if (principal == null) return "redirect:/login";
-        // Provide an empty model for the add form
-        model.addAttribute("categoriesHint", "You can enter a new category name or reuse an existing one.");
-        return "candidat/add_document";
+        return "forward:/index.html";
     }
 
     @PostMapping("/candidat/documents/upload")
