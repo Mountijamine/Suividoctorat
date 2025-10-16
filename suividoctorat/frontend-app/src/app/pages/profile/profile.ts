@@ -63,6 +63,10 @@ export class ProfilePage {
 
   // normalize backend shapes to common keys used by the template
   normalizeProfile(raw: any){
+    // unwrap possible containers
+    if (!raw) return {};
+    if (raw.user) raw = raw.user;
+    if (raw.data) raw = raw.data;
     const p: any = {};
     p.firstName = raw.firstName || raw.firstname || raw.givenName || raw.given_name || raw.first_name || raw.name || '';
     p.lastName = raw.lastName || raw.lastname || raw.familyName || raw.family_name || raw.last_name || '';
