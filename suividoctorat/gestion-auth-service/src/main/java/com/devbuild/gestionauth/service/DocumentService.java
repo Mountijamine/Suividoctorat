@@ -27,7 +27,7 @@ public class DocumentService {
         this.documentRepository = documentRepository;
     }
 
-    public Document store(User owner, MultipartFile file, String title, String category) throws IOException {
+    public Document store(User owner, MultipartFile file, String title, String category, String note) throws IOException {
         File dir = new File(uploadDir);
         if (!dir.exists()) dir.mkdirs();
         String savedName = System.currentTimeMillis() + "-" + java.util.UUID.randomUUID() + "-" + file.getOriginalFilename();
@@ -48,6 +48,7 @@ public class DocumentService {
         d.setPath(dest.getAbsolutePath());
     d.setTitle(normTitle);
     d.setCategory(normCategory);
+    d.setNote(note == null ? null : note.trim());
         return documentRepository.save(d);
     }
 

@@ -62,12 +62,13 @@ public class CandidatRestController {
     public ResponseEntity<?> upload(@RequestPart("file") MultipartFile file,
                                     @RequestPart(name = "title", required = false) String title,
                                     @RequestPart(name = "category", required = false) String category,
+                                    @RequestPart(name = "note", required = false) String note,
                                     java.security.Principal principal) throws Exception {
         // find User entity for owner
         java.util.Optional<User> opt = userService.findByEmail(principal.getName());
         if (opt.isEmpty()) return ResponseEntity.status(404).body(Map.of("message","user not found"));
         User owner = opt.get();
-    com.devbuild.gestionauth.model.Document d = documentService.store(owner, file, title, category);
+    com.devbuild.gestionauth.model.Document d = documentService.store(owner, file, title, category, note);
         return ResponseEntity.ok(d);
     }
 

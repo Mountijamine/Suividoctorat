@@ -1,30 +1,73 @@
-<div class="wrap">
-  <h2>Ajouter un document</h2>
-  <div class="field">
-    <label>Titre</label>
-    <input [(ngModel)]="title" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #eef2f7" />
-  </div>
-  <div class="field">
-    <label>Type</label>
-    <div style="display:flex; gap:0.5rem; align-items:center">
-      <label style="font-size:0.9rem"><input type="checkbox" [(ngModel)]="useCustom" /> Saisir manuellement</label>
-      <ng-container *ngIf="!useCustom">
-        <select [(ngModel)]="type" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7">
-          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-        </select>
-      </ng-container>
-      <ng-container *ngIf="useCustom">
-        <input [(ngModel)]="type" placeholder="Entrez une catégorie (ex: diplome)" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7" />
-      </ng-container>
+<div class="wrap" style="max-width:980px; margin:1.25rem auto;">
+  <div style="display:flex; gap:1.25rem; align-items:flex-start">
+    <!-- left: form -->
+    <div style="flex:1; background:#fff; padding:1.25rem; border-radius:12px; box-shadow:0 8px 24px rgba(2,6,23,0.06)">
+      <h2 style="margin-top:0">Add Document</h2>
+      <p class="muted">Upload and categorize your document</p>
+
+      <div class="field">
+        <label style="font-weight:600">Document Type</label>
+        <div class="segmented" style="margin-top:0.5rem" tabindex="0" (keydown)="segmentedKeydown($event)">
+          <button [class.active]="!useCustom" (click)="useCustom=false">Select Type</button>
+          <button [class.active]="useCustom" (click)="useCustom=true">Manual Input</button>
+        </div>
+        <div style="margin-top:0.75rem">
+          <ng-container *ngIf="!useCustom">
+            <select [(ngModel)]="type" style="width:100%; padding:0.75rem; border-radius:8px; border:1px solid #eef2f7">
+              <option value="">Choose a document type</option>
+              <option *ngFor="let c of categories" [value]="c">{{ c | titlecase }}</option>
+            </select>
+          </ng-container>
+          <ng-container *ngIf="useCustom">
+            <input [(ngModel)]="type" placeholder="Enter document type" style="width:100%; padding:0.75rem; border-radius:8px; border:1px solid #eef2f7" />
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="field">
+        <label style="font-weight:600">Document Name</label>
+        <input [(ngModel)]="title" placeholder="Enter document name" style="width:100%; padding:0.75rem; border-radius:8px; border:1px solid #eef2f7" />
+      </div>
+
+      <div class="field">
+        <label style="font-weight:600">Notes (Optional)</label>
+        <textarea [(ngModel)]="note" placeholder="Add any additional information" rows="6" style="width:100%; padding:0.75rem; border-radius:8px; border:1px solid #eef2f7"></textarea>
+      </div>
+
+      <div class="field">
+        <label style="font-weight:600">Upload File</label>
+        <input type="file" (change)="onFile($event)" />
+      </div>
+
+      <div style="display:flex; gap:0.75rem; margin-top:1rem">
+        <button (click)="submit()" style="flex:1; background:#111; color:#fff; border:0; padding:0.9rem; border-radius:8px">Save Document</button>
+        <a routerLink="/documents" style="padding:0.9rem 1rem; border-radius:8px; border:1px solid #e6eef8">Cancel</a>
+      </div>
     </div>
-  </div>
-  <div class="field">
-    <label>Fichier</label>
-    <input type="file" (change)="onFile($event)" />
-  </div>
-  <div style="display:flex; gap:0.5rem">
-    <button (click)="submit()" style="background:linear-gradient(90deg,#7c3aed,#06b6d4); color:#fff; border:0; padding:0.6rem 1rem; border-radius:8px">Ajouter</button>
-    <a routerLink="/documents" style="padding:0.6rem 1rem; border-radius:8px; border:1px solid #e6eef8">Annuler</a>
+
+    <!-- right: preview / image -->
+    <div style="width:320px; flex:0 0 320px; display:flex; align-items:center; justify-content:center">
+      <ng-container *ngIf="previews?.length > 0; else placeholder">
+        <div style="display:grid; gap:0.5rem; width:100%">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:0.5rem">
+            <div *ngFor="let p of previews; let i = index" style="position:relative; border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 6px 14px rgba(2,6,23,0.04)">
+              <div style="height:120px; display:flex; align-items:center; justify-content:center; background:#f8fafc">
+                <img *ngIf="p.type==='image' && p.url" [src]="p.url" alt="thumb" style="width:100%; height:100%; object-fit:cover" />
+                <object *ngIf="p.type==='pdf' && p.url" [data]="p.url" type="application/pdf" style="width:100%; height:100%"></object>
+                <div *ngIf="p.type==='other' || !p.url" style="text-align:center; padding:0.5rem">📄<div style="font-size:12px; color:#6b7280; margin-top:6px">{{ p.name }}</div></div>
+              </div>
+              <button title="Remove" (click)="clearThumbnail(i)" style="position:absolute; top:8px; right:8px; width:28px; height:28px; border-radius:999px; border:0; background:rgba(0,0,0,0.55); color:#fff">×</button>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:center">
+            <button class="preview-remove" title="Remove all previews" (click)="clearPreview()">🗑</button>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #placeholder>
+        <img src="/assets/document-side.png" alt="Document illustration" style="width:100%; border-radius:12px; box-shadow:0 8px 24px rgba(2,6,23,0.06)" />
+      </ng-template>
+    </div>
   </div>
   <div *ngIf="uploading" style="margin-top:1rem">
     <div style="font-size:0.9rem">Uploading: {{ progress }}%</div>

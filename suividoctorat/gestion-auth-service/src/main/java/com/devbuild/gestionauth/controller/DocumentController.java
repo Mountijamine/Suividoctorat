@@ -33,11 +33,12 @@ public class DocumentController {
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
                                      @RequestParam(name = "title", required = false) String title,
                                      @RequestParam(name = "category", required = false) String category,
+                                     @RequestParam(name = "note", required = false) String note,
                                      java.security.Principal principal) throws Exception {
         if (principal == null) return ResponseEntity.status(401).body("Not authenticated");
         String email = principal.getName();
         User u = userService.findByEmail(email).orElseThrow();
-        Document d = documentService.store(u, file, title, category);
+    Document d = documentService.store(u, file, title, category, note);
         return ResponseEntity.ok(d);
     }
 

@@ -28,6 +28,9 @@ public class Document {
     @Column(nullable = true)
     private String category;
 
+    @Column(nullable = true, length = 2048)
+    private String note;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
@@ -48,6 +51,8 @@ public class Document {
     public void setTitle(String title) { this.title = title; }
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }
     public LocalDateTime getUploadedAt() { return uploadedAt; }

@@ -25,7 +25,8 @@ public class CandidatDocsController {
     @GetMapping("/candidat/documents")
     public String docsPage(Model model, java.security.Principal principal,
                            @RequestParam(name = "q", required = false) String q,
-                           @RequestParam(name = "category", required = false) String category,
+                        @RequestParam(name = "category", required = false) String category,
+                        @RequestParam(name = "note", required = false) String note,
                            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
                            @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
         // The SPA handles rendering; API endpoints (GET /api/...) should be used to fetch documents.
@@ -41,11 +42,12 @@ public class CandidatDocsController {
     public String upload(@RequestParam(name = "file") MultipartFile file,
                          @RequestParam(name = "title", required = false) String title,
                          @RequestParam(name = "category", required = false) String category,
+                         @RequestParam(name = "note", required = false) String note,
                          java.security.Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (principal == null) return "redirect:/login";
         try {
             User u = userService.findByEmail(principal.getName()).orElseThrow();
-            documentService.store(u, file, title, category);
+            documentService.store(u, file, title, category, note);
             ra.addFlashAttribute("message", "Fichier uploadé");
         } catch (Exception ex) {
             ra.addFlashAttribute("error", "Upload failed: " + ex.getMessage());
