@@ -42,6 +42,10 @@ public class AuthApiController {
         String accept = body.get("acceptTerms");
         String requestedProfile = body.get("requestedProfile");
         if (email == null || password == null || confirm == null) return ResponseEntity.badRequest().build();
+        // If a user with the email already exists, return a clear conflict message instead of a generic forbidden
+        if (userService.findByEmail(email).isPresent()) {
+            return ResponseEntity.status(409).body(Map.of("message", "Email is already registered"));
+        }
         if (!password.equals(confirm)) return ResponseEntity.badRequest().body(Map.of("message","passwords do not match"));
         if (!"true".equalsIgnoreCase(accept)) return ResponseEntity.badRequest().body(Map.of("message","terms must be accepted"));
         User u = userService.createUserWithProfile(email, password, firstName, lastName, phone, true, requestedProfile);

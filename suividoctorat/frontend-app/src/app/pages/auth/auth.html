@@ -1,74 +1,105 @@
-<div class="auth">
-  <div class="panel">
-    <div class="tabs">
-      <button [class.active]="mode() === 'signin'" (click)="switch('signin')">Sign in</button>
-      <button [class.active]="mode() === 'signup'" (click)="switch('signup')">Sign up</button>
+<div class="auth-portal">
+  <div class="card">
+    <div class="left">
+      <div class="logo">SuiviDoctorat</div>
+      <p class="tagline">Manage your PhD journey — seamless, secure, and simple.</p>
+      <img src="/assets/auth-illustration.png" alt="illustration" class="illustration" />
     </div>
 
-    <div *ngIf="mode() === 'signin'">
-      <h2>Sign in</h2>
-      <form [formGroup]="signinForm" (ngSubmit)="submitSignin()">
-        <div>
-          <label>Email</label>
+    <div class="right">
+      <div class="switch">
+        <button [class.active]="mode() === 'signin'" (click)="switch('signin')">Sign in</button>
+        <button [class.active]="mode() === 'signup'" (click)="switch('signup')">Sign up</button>
+      </div>
+
+      <h1 *ngIf="mode() === 'signin'">Welcome back</h1>
+      <h1 *ngIf="mode() === 'signup'">Create an account</h1>
+
+      <form *ngIf="mode() === 'signin'" [formGroup]="signinForm" (ngSubmit)="submitSignin()" class="form">
+        <label>Email
+          <input type="email" formControlName="email" placeholder="you@domain.com" />
+        </label>
+        <div class="error" *ngIf="signinForm.controls.email?.invalid && signinForm.controls.email?.touched">
+          <span *ngIf="signinForm.controls.email?.errors?.required">Email is required.</span>
+          <span *ngIf="signinForm.controls.email?.errors?.email">Enter a valid email address.</span>
+        </div>
+
+        <label>Password
+          <input type="password" formControlName="password" placeholder="••••••••" />
+        </label>
+        <div class="error" *ngIf="signinForm.controls.password?.invalid && signinForm.controls.password?.touched">
+          <span *ngIf="signinForm.controls.password?.errors?.required">Password is required.</span>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Sign in</button>
+        </div>
+      </form>
+
+      <form *ngIf="mode() === 'signup'" [formGroup]="signupForm" (ngSubmit)="submitSignup()" class="form">
+        <div class="row-2">
+          <label>First name
+            <input type="text" formControlName="firstName" />
+          </label>
+          <label>Last name
+            <input type="text" formControlName="lastName" />
+          </label>
+        </div>
+
+        <label>Email
           <input type="email" formControlName="email" />
-          <div class="error" *ngIf="signinForm.controls.email?.invalid && signinForm.controls.email?.touched">
-            <span *ngIf="signinForm.controls.email?.errors?.required">Email is required.</span>
-            <span *ngIf="signinForm.controls.email?.errors?.email">Enter a valid email address.</span>
-          </div>
+        </label>
+        <div class="error" *ngIf="signupForm.controls.email?.invalid && signupForm.controls.email?.touched">
+          <span *ngIf="signupForm.controls.email?.errors?.required">Email is required.</span>
+          <span *ngIf="signupForm.controls.email?.errors?.email">Enter a valid email address.</span>
         </div>
-        <div>
-          <label>Password</label>
-          <input type="password" formControlName="password" />
-          <div class="error" *ngIf="signinForm.controls.password?.invalid && signinForm.controls.password?.touched">
-            <span *ngIf="signinForm.controls.password?.errors?.required">Password is required.</span>
-          </div>
-        </div>
-        <div style="margin-top:1rem">
-          <button type="submit">Sign in</button>
-        </div>
-      </form>
-    </div>
 
-    <div *ngIf="mode() === 'signup'">
-      <h2>Sign up</h2>
-      <form [formGroup]="signupForm" (ngSubmit)="submitSignup()">
-        <div><label>First name</label><input type="text" formControlName="firstName" /></div>
-        <div><label>Last name</label><input type="text" formControlName="lastName" /></div>
-        <div><label>Email</label><input type="email" formControlName="email" />
-          <div class="error" *ngIf="signupForm.controls.email?.invalid && signupForm.controls.email?.touched">
-            <span *ngIf="signupForm.controls.email?.errors?.required">Email is required.</span>
-            <span *ngIf="signupForm.controls.email?.errors?.email">Enter a valid email address.</span>
-          </div>
+        <label>Phone
+          <input type="text" formControlName="phone" />
+        </label>
+
+        <div class="row-2">
+          <label>Password
+            <input type="password" formControlName="password" />
+          </label>
+          <label>Confirm Password
+            <input type="password" formControlName="confirmPassword" />
+          </label>
         </div>
-        <div><label>Phone</label><input type="text" formControlName="phone" /></div>
-        <div><label>Requested profile</label><input type="text" formControlName="requestedProfile" /></div>
-        <div>
-          <label>Password</label>
-          <input type="password" formControlName="password" />
-          <div class="error" *ngIf="signupForm.controls.password?.invalid && signupForm.controls.password?.touched">
-            <span *ngIf="signupForm.controls.password?.errors?.required">Password is required.</span>
-            <span *ngIf="signupForm.controls.password?.errors?.minlength">Password must be at least 6 characters.</span>
-          </div>
+        <div class="error" *ngIf="signupForm.controls.password?.invalid && signupForm.controls.password?.touched">
+          <span *ngIf="signupForm.controls.password?.errors?.required">Password is required.</span>
+          <span *ngIf="signupForm.controls.password?.errors?.minlength">Password must be at least 6 characters.</span>
         </div>
-        <div>
-          <label>Confirm password</label>
-          <input type="password" formControlName="confirmPassword" />
-          <div class="error" *ngIf="signupForm.controls.confirmPassword?.invalid && signupForm.controls.confirmPassword?.touched">
-            <span *ngIf="signupForm.controls.confirmPassword?.errors?.required">Please confirm your password.</span>
-          </div>
+
+        <div class="checkbox-row">
+          <label class="checkbox"><input type="checkbox" formControlName="acceptTerms" /> <span class="checkbox-text">I accept the</span> <a href="#" (click)="openTerms($event)">terms and services</a></label>
         </div>
-        <div>
-          <label><input type="checkbox" formControlName="acceptTerms" /> I accept the terms</label>
-          <div class="error" *ngIf="signupForm.controls.acceptTerms?.invalid && signupForm.controls.acceptTerms?.touched">You must accept terms</div>
+        <div class="error" *ngIf="signupForm.controls.acceptTerms?.invalid && signupForm.controls.acceptTerms?.touched">You must accept the terms and services</div>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Create account</button>
         </div>
-        <div style="margin-top:1rem"><button type="submit">Create account</button></div>
       </form>
-      <div *ngIf="invalidFields()" style="margin-top:0.5rem" class="error">
-        Invalid fields: <strong>{{ invalidFields()!.join(', ') }}</strong>
+
+      <div *ngIf="invalidFields()" class="error summary">Please correct: <strong>{{ invalidFields()!.join(', ') }}</strong></div>
+      <div *ngIf="serverError()" class="error server">{{ serverError() }}</div>
+      <div *ngIf="successMessage()" class="success server">{{ successMessage() }}</div>
+
+      <!-- Terms modal -->
+      <div class="modal-backdrop" *ngIf="showTerms()">
+        <div class="modal" role="dialog" aria-modal="true">
+          <div class="modal-header">
+            <h3>Terms and Services</h3>
+            <button class="close" (click)="closeTerms()" aria-label="Close">✕</button>
+          </div>
+          <div class="modal-body">
+            <iframe [src]="termsUrl" frameborder="0" style="width:100%;height:400px"></iframe>
+          </div>
+          <div class="modal-footer">
+            <button (click)="closeTerms()" class="primary">Close</button>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div *ngIf="serverError()" class="error" style="margin-top:1rem">{{ serverError() }}</div>
-    <div *ngIf="successMessage()" class="success" style="margin-top:1rem">{{ successMessage() }}</div>
   </div>
 </div>
