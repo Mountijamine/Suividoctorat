@@ -1,0 +1,28 @@
+<div class="wrap">
+  <h2>Ajouter un document</h2>
+  <div class="field">
+    <label>Titre</label>
+    <input [(ngModel)]="title" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #eef2f7" />
+  </div>
+  <div class="field">
+    <label>Type</label>
+    <select [(ngModel)]="type" style="padding:0.45rem; border-radius:8px; border:1px solid #eef2f7">
+      <option value="rapport">Rapport</option>
+      <option value="attestation">Attestation</option>
+      <option value="publication">Publication</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Fichier</label>
+    <input type="file" (change)="onFile($event)" />
+  </div>
+  <div style="display:flex; gap:0.5rem">
+    <button (click)="submit()" style="background:linear-gradient(90deg,#7c3aed,#06b6d4); color:#fff; border:0; padding:0.6rem 1rem; border-radius:8px">Ajouter</button>
+    <a routerLink="/documents" style="padding:0.6rem 1rem; border-radius:8px; border:1px solid #e6eef8">Annuler</a>
+  </div>
+  <div *ngIf="uploading" style="margin-top:1rem">
+    <div style="font-size:0.9rem">Uploading: {{ progress }}%</div>
+    <div style="height:8px; background:#f1f5f9; border-radius:999px; overflow:hidden; margin-top:6px"><div [style.width.%]="progress" style="height:100%; background:linear-gradient(90deg,#7c3aed,#06b6d4)"></div></div>
+  </div>
+  <div *ngIf="error" style="color:#b00020; margin-top:0.75rem">{{ error }}</div>
+</div>
