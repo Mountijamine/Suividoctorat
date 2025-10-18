@@ -18,7 +18,7 @@
   <div class="filters-card" [style.display]="sidebarOpen() || isDesktop() ? 'block' : 'none'">
         <div class="filters-header">
           <h3>Filters</h3>
-          <div *ngIf="(query() || (filterType() !== 'all'))" style="font-size:13px"><a href="#" (click)="$event.preventDefault(); query.set(''); filterType.set('all'); setPage(0);">Clear</a></div>
+          <div *ngIf="(query() || (filterType() !== 'all'))" style="font-size:13px"><a class="clear-link" href="#" (click)="$event.preventDefault(); query.set(''); filterType.set('all'); setPage(0);">Clear</a></div>
         </div>
 
         <!-- Search in sidebar -->
@@ -45,7 +45,7 @@
         <!-- Export & Refresh now sit under Sort By to group actions -->
         <div style="display:flex; gap:0.5rem; margin-top:2rem; margin-bottom:0.75rem">
           <button (click)="exportCSV()" class="btn-primary" style="flex:1">Export</button>
-          <button (click)="load()" class="btn-outline" style="flex:1">Refresh</button>
+          <button (click)="load()" class="btn-outline" style="flex:1" [disabled]="loading()">{{ loading() ? 'Refreshing...' : 'Refresh' }}</button>
         </div>
         <!-- Add button moved to header to keep sidebar compact -->
       </div>
@@ -62,16 +62,9 @@
             </ng-container>
             <ng-template #nonImage>
               <div class="placeholder">
-                <!-- Neutral monochrome file icon (inline SVG) -->
                 <div class="placeholder-icon" aria-hidden="true">
-                  <!-- Simple document icon (monochrome stroke) -->
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <path d="M14 2v6h6" />
-                    <path d="M8 13h8M8 17h8" stroke="#c7cddb" stroke-width="1.2" />
-                  </svg>
-                </div>
-              
+                    <img [src]="getIconForDoc(d)" alt="file icon" style="max-width:120px; max-height:96px" />
+                  </div>
               </div>
             </ng-template>
             <div class="media-overlay">
@@ -108,7 +101,7 @@
       </div>
 
       <div class="pager">
-        <button class="pager-btn" (click)="setPage(page()-1)" [disabled]="page()===0">Prev</button>
+        <button class="pager-btn" (click)="setPage(page()-1)" [disabled]="page()===0">Previous</button>
         <div class="pager-info">Page {{ page()+1 }} / {{ totalPages() }}</div>
         <button class="pager-btn" (click)="setPage(page()+1)" [disabled]="page() >= totalPages()-1">Next</button>
       </div>

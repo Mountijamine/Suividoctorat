@@ -38,15 +38,18 @@
         <label style="font-weight:600">Upload File</label>
         <div style="margin-top:0.5rem">
             <label class="file-drop" [class.drag-active]="dragActive" for="fileInput" (dragover)="onDragOver($event)" (drop)="onDrop($event)" (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)">
-              <div style="display:flex; align-items:center; gap:8px">
-                <div style="font-size:18px">📤</div>
-                <div>
+              <div class="file-drop-left">
+                <div aria-hidden="true" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#f8fafc">
+                  <!-- simple doc icon -->
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#9ca3af" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="#9ca3af" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div style="display:flex; flex-direction:column">
                   <div class="drop-title">Drag & drop files here</div>
-                  <div class="drop-sub">or choose from your device</div>
+                  <div class="drop-sub">or choose a file</div>
+                  <div class="file-name trunc" title="{{ files && files.length ? files[0].name : '' }}" style="margin-top:6px">{{ files && files.length ? files[0].name : 'No file chosen' }}<span *ngIf="files && files.length>1" class="file-count"> +{{ files.length-1 }}</span></div>
                 </div>
               </div>
               <div class="drop-actions">
-                <div class="file-name">{{ files && files.length ? (files[0].name + (files.length>1 ? ' +' + (files.length-1) : '')) : 'No file chosen' }}</div>
                 <label class="btn-file" for="fileInput">Choose</label>
               </div>
               <input id="fileInput" type="file" (change)="onFile($event)" style="display:none" />
@@ -55,8 +58,8 @@
       </div>
 
       <div style="display:flex; gap:0.75rem; margin-top:1rem">
-        <button (click)="submit()" style="flex:1; background:#111; color:#fff; border:0; padding:0.9rem; border-radius:8px">Save Document</button>
-        <a routerLink="/documents" style="padding:0.9rem 1rem; border-radius:8px; border:1px solid #e6eef8">Cancel</a>
+        <button (click)="submit()" class="btn-save">Save Document</button>
+        <a [routerLink]="['/documents']" role="button" class="btn-cancel">Cancel</a>
       </div>
     </div>
 
@@ -66,18 +69,34 @@
         <ng-container *ngIf="previews.length === 1; else gridThumbs">
           <div class="single-preview">
             <button class="preview-close" title="Close" (click)="clearThumbnail(0)">×</button>
-            <ng-container *ngIf="previews[0].type === 'image' && previews[0].url">
-              <img [src]="previews[0].url" alt="preview" />
-            </ng-container>
-            <ng-container *ngIf="previews[0].type === 'pdf' && previews[0].url">
-              <object [data]="previews[0].urlSafe || previews[0].url" type="application/pdf"></object>
-            </ng-container>
-            <ng-container *ngIf="previews[0].type === 'text' && previews[0].content">
-              <div class="preview-text" style="height:100%">{{ previews[0].content }}</div>
-            </ng-container>
-            <ng-container *ngIf="previews[0].type === 'other'">
-              <div style="text-align:center">📄<div style="font-size:12px; color:#6b7280; margin-top:6px">{{ previews[0].name }}</div></div>
-            </ng-container>
+                <ng-container *ngIf="previews[0].type === 'image' && previews[0].url">
+                  <img [src]="previews[0].url" alt="preview" />
+                </ng-container>
+                <ng-container *ngIf="previews[0].type === 'pdf' && previews[0].url">
+                  <object [data]="previews[0].urlSafe || previews[0].url" type="application/pdf"></object>
+                </ng-container>
+                <ng-container *ngIf="previews[0].type === 'text' && previews[0].content">
+                  <div class="single-preview text-file">
+                    <pre><code>{{ previews[0].content }}</code></pre>
+                    <div *ngIf="previews[0].truncated" class="truncated-note">
+                      (Preview truncated) <button type="button" class="btn-link" (click)="loadFullTextPreview(previews[0])">Load full preview</button>
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="previews[0].type === 'text' && previews[0].deferred">
+                  <div class="single-preview">
+                    <div style="text-align:center">
+                        <div style="font-size:28px; margin-bottom:8px">📄</div>
+                        <div class="trunc" style="font-size:13px; color:#6b7280">{{ previews[0].name }}</div>
+                      </div>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="previews[0].type === 'other'">
+                  <div class="single-preview other-file">
+                    <img [src]="getIconForExt(previews[0].ext)" alt="file icon" class="file-icon" />
+                    <div class="other-meta trunc">{{ previews[0].name }}</div>
+                  </div>
+                </ng-container>
             
           </div>
         </ng-container>
@@ -91,7 +110,11 @@
                   <div *ngIf="p.type==='text' && p.content" style="width:100%">
                     <div class="preview-text">{{ p.content }}</div>
                   </div>
-                  <div *ngIf="p.type==='other' || (!p.url && !p.content)" style="text-align:center; padding:0.5rem">📄<div style="font-size:12px; color:#6b7280; margin-top:6px">{{ p.name }}</div></div>
+                  <div *ngIf="p.type==='text' && p.deferred" style="text-align:center; padding:0.5rem">
+                    <div class="trunc" style="font-size:14px; color:#6b7280">{{ p.name }}</div>
+                    <div style="margin-top:6px"><button class="btn-file" (click)="loadDeferredPreview(p)">Load preview</button></div>
+                  </div>
+                  <div *ngIf="p.type==='other' || (!p.url && !p.content && !p.deferred)" style="text-align:center; padding:0.5rem">📄<div class="trunc" style="font-size:12px; color:#6b7280; margin-top:6px">{{ p.name }}</div></div>
                 </div>
                 <button title="Remove" (click)="clearThumbnail(i)" style="position:absolute; top:8px; right:8px; width:28px; height:28px; border-radius:999px; border:0; background:rgba(0,0,0,0.55); color:#fff">×</button>
               </div>

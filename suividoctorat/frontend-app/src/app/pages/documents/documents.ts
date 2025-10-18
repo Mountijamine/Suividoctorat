@@ -42,6 +42,8 @@ import { AuthService } from '../../services/auth.service';
   /* make the main content scroll independently so filters stay visible while browsing docs */
   .content { max-height: calc(100vh - 140px); overflow:auto; padding-right:8px }
     .filters-header{ display:flex; justify-content:space-between; align-items:center }
+  .filters-header .clear-link{ font-size:13px; color:#2563eb; font-weight:600; text-decoration:none; padding:6px 8px; border-radius:8px; border:1px solid transparent }
+  .filters-header .clear-link:hover{ background:#eef2ff; border-color:rgba(37,99,235,0.08); text-decoration:none }
     .filter-section{ margin-top:0.75rem }
     .types{ display:flex; flex-direction:column; gap:0.35rem; max-height:300px; overflow:auto }
     .type-item{ display:flex; gap:0.5rem; align-items:center }
@@ -103,6 +105,7 @@ import { AuthService } from '../../services/auth.service';
 export class DocumentsPage {
   docs = signal<any[]>([]);
   total = signal(0);
+  loading = signal(false);
   page = signal(0);
   size = signal(6);
   query = signal('');
@@ -164,6 +167,7 @@ export class DocumentsPage {
 
   load(){
     const params: any = { page: String(this.page()), size: String(this.size()) };
+    this.loading.set(true);
     if (this.query()) params.q = this.query();
     if (this.filterType() && this.filterType() !== 'all') params.category = this.filterType();
     // call candidate REST API (server exposes /api/candidat/documents)
@@ -187,12 +191,14 @@ export class DocumentsPage {
           this.total.set(res?.total || (res?.data||[]).length || 0);
         }
   try { this.ts.success('Documents loaded'); } catch(e){}
+    this.loading.set(false);
       },
       error: (err:any) => {
         console.error('Failed to fetch documents', err);
         this.docs.set([]);
         this.total.set(0);
   try { this.ts.error('Failed to load documents'); } catch(e){}
+        this.loading.set(false);
       }
     });
   }
@@ -423,4 +429,27 @@ export class DocumentsPage {
   setPage(p: number){ this.page.set(p); this.router.navigate([], { queryParams: { page: p, size: this.size(), q: this.query(), category: this.filterType() } }); }
 
   totalPages(){ return Math.max(1, Math.ceil(this.total()/this.size())); }
+
+  // small inline SVG icons for known extensions
+  getIconForExt(ext?: string | null){
+    const e = (ext || '').toLowerCase();
+    const icons: Record<string,string> = {
+      pdf: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%23E53E3E" width="24" height="24" rx="3"/><text x="12" y="16" font-size="10" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">PDF</text></svg>',
+      docx: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%23007ACC" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">DOCX</text></svg>',
+      zip: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%23000000" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">ZIP</text></svg>',
+      default: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%238B8B8B" width="24" height="24" rx="3"/><path d="M6 4h9l5 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="%23fff" opacity="0.15"/></svg>'
+    };
+    return icons[e] || icons['default'];
+  }
+
+  // Infer an icon for a backend document object: prefer detected extension, then type/category, then default
+  getIconForDoc(d: any){
+    if (!d) return this.getIconForExt('default');
+    const filename = d.filename || d.fileName || d.originalFilename || d.original_filename || d.url || '';
+    const ext = (filename && filename.indexOf('.') !== -1) ? filename.split('.').pop()!.toLowerCase() : '';
+    if (ext) return this.getIconForExt(ext);
+    const t = (d.type || d.category || d.mimeType || '').toString().toLowerCase();
+    if (t.includes('pdf')) return this.getIconForExt('pdf');
+    return this.getIconForExt('default');
+  }
 }

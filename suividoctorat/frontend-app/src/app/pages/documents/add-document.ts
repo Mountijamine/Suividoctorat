@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
@@ -10,7 +11,7 @@ import { ToastService } from '../../services/toast.service';
 @Component({
   selector: 'add-document',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule],
   templateUrl: './add-document.html',
   styles: [
     `
@@ -51,6 +52,22 @@ import { ToastService } from '../../services/toast.service';
   .btn-file{ background:transparent; color:#111827; padding:0.5rem 0.7rem; border-radius:8px; border:1px solid #e6eef8; cursor:pointer; font-weight:600 }
   .btn-file:hover{ background:#f8fafc }
     .file-drop.drag-active{ border-color:#7c3aed; background:linear-gradient(180deg,#fbfbff,#f7f0ff); box-shadow:0 8px 30px rgba(124,58,237,0.08) }
+    .file-drop{ width:100%; box-sizing:border-box; overflow:hidden; max-width:100% }
+    /* allow left column to shrink properly inside a flex container (width:0 enables min-width behavior) */
+    .file-drop-left{ display:flex; gap:12px; align-items:center; min-width:0; flex:1 1 0%; width:0 }
+    /* filename must not grow container; ensure it truncates and respects parent's width */
+    .file-drop-left .file-name{ display:block; width:100%; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+      /* make sure any filename or metadata inside previews truncate and don't expand flex items */
+      .single-preview .trunc, .other-meta.trunc, .grid-item .trunc { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+      /* enforce min-width:0 on preview grid items so long children don't force expansion */
+      .columns-stretch .right-panel, .columns-stretch .left-panel, .columns-stretch .right-panel > * { min-width:0 }
+    /* Make sure action area doesn't shrink and stays at right */
+    .drop-actions{ margin-left:auto; display:flex; gap:8px; align-items:center; flex:0 0 auto }
+    .trunc{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block }
+    .file-count{ margin-left:6px; color:#6b7280; font-size:0.95rem }
+    .drop-actions{ margin-left:auto; display:flex; gap:8px; align-items:center }
+    .drop-title{ font-weight:700 }
+    .drop-sub{ color:#6b7280; font-size:0.95rem }
   .columns-stretch{ display:flex; align-items:stretch; gap:1.25rem; background:#fff; border-radius:12px; padding:12px; box-shadow:0 8px 24px rgba(2,6,23,0.06) }
   .preview-full{ width:100%; height:100%; display:flex; align-items:center; justify-content:center }
   /* make inner panels transparent so the outer card shows as single block */
@@ -61,6 +78,10 @@ import { ToastService } from '../../services/toast.service';
   /* single large preview styling */
   .single-preview{ flex:1; display:flex; align-items:center; justify-content:center; width:100%; height:100% }
   .single-preview img, .single-preview object, .single-preview iframe{ width:100%; height:100%; border-radius:12px }
+  .file-icon{ width:64px; height:64px; display:block; margin:auto }
+  .other-file .other-meta{ margin-top:8px; color:#374151; font-size:0.95rem }
+  .other-file .other-meta{ max-width:92%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .truncated-note{ margin-top:8px; color:#6b7280; font-size:0.9rem }
   /* responsive: stack columns on small screens */
   @media (max-width: 900px){
     .columns-stretch{ flex-direction:column; padding:8px }
@@ -69,7 +90,12 @@ import { ToastService } from '../../services/toast.service';
     .file-name{ max-width:320px }
   }
   .preview-close{ position:absolute; top:10px; right:10px; width:36px; height:36px; border-radius:999px; border:0; background:rgba(0,0,0,0.55); color:#fff; z-index:30; display:inline-flex; align-items:center; justify-content:center; cursor:pointer }
+  .preview-close:hover{ transform:scale(1.06); box-shadow:0 8px 20px rgba(0,0,0,0.18) }
   .preview-full img{ width:100%; height:100%; object-fit:cover; border-radius:12px }
+  .btn-save{ flex:1; background:#111; color:#fff; border:0; padding:0.9rem; border-radius:8px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; justify-content:center }
+  .btn-save:hover{ transform:translateY(-3px); box-shadow:0 12px 30px rgba(2,6,23,0.12) }
+  .btn-cancel{ padding:0.9rem 1rem; border-radius:8px; border:1px solid #e6eef8; background:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; color:#111827; min-width:110px; font-weight:600; transition:background 140ms, transform 120ms, box-shadow 160ms }
+  .btn-cancel:hover{ background:#f8fafc; transform:translateY(-2px); box-shadow:0 8px 18px rgba(2,6,23,0.06) }
     `
   ]
 })
@@ -82,7 +108,7 @@ export class AddDocumentPage {
   // files selected by the user (UI supports previewing multiple files). The server upload still posts the first file.
   files: File[] = [];
   file: File | null = null;
-  previews: Array<{ url: string | null, urlSafe?: any, type: 'image'|'pdf'|'other'|'none'|'text', name?: string, content?: string }> = [];
+  previews: Array<{ url: string | null, urlSafe?: any, type: 'image'|'pdf'|'other'|'none'|'text', name?: string, content?: string, ext?: string, truncated?: boolean, deferred?: boolean }> = [];
   // keep legacy single-preview properties for simple checks
   previewUrl: string | null = null;
   previewType: 'image'|'pdf'|'other'|'none'|'text' = 'none';
@@ -123,6 +149,19 @@ export class AddDocumentPage {
     this.previews = [];
     const MAX_PREVIEWS = 8;
     const LARGE_BYTES = 5 * 1024 * 1024; // 5 MB confirmation threshold
+    // helper to get extension
+    const getExt = (name: string) => {
+      const m = (name || '').split('.');
+      return m.length > 1 ? m[m.length-1].toLowerCase() : '';
+    };
+
+  const imageExts = new Set(['jpg','jpeg','png','gif','webp','svg']);
+  const textExts = new Set(['txt','md','json','xml','js','ts','jsx','tsx','css']);
+  const officeExts = new Set(['doc','docx','xls','xlsx','ppt','pptx']);
+  // extensions we intentionally defer previewing until the user requests it
+  const DEFER_TEXT_EXTS = new Set(['html','htm','csv','log','sql']);
+  const PREVIEW_TEXT_MAX = 200 * 1024; // preview only first 200KB of text files to avoid blocking
+
     for (let i = 0; i < this.files.length && i < MAX_PREVIEWS; i++){
       const f = this.files[i];
       // if file is large, ask before previewing
@@ -134,23 +173,40 @@ export class AddDocumentPage {
         }
       }
       const t = f.type || '';
-      if (t.startsWith('image/')) {
+      const ext = getExt(f.name);
+      // If the extension is in the defer-list, do not read or create object URLs yet — show a lightweight placeholder
+      if (DEFER_TEXT_EXTS.has(ext)) {
+        this.previews.push({ url: null, type: 'text', name: f.name, ext, deferred: true });
+        continue;
+      }
+      // images by extension or mime
+      if (imageExts.has(ext) || t.startsWith('image/')) {
         const u = URL.createObjectURL(f);
-        this.previews.push({ url: u, type: 'image', name: f.name });
-      } else if (t === 'application/pdf'){
+        this.previews.push({ url: u, type: 'image', name: f.name, ext });
+      } else if (ext === 'pdf' || t === 'application/pdf'){
         const u = URL.createObjectURL(f);
         const safe = this.sanitizer.bypassSecurityTrustResourceUrl(u);
-        this.previews.push({ url: u, urlSafe: safe, type: 'pdf', name: f.name });
-      } else if (t.startsWith('text/') || t.includes('json') || t.includes('xml') || t.includes('html')){
-        // read text content for inline preview
+        this.previews.push({ url: u, urlSafe: safe, type: 'pdf', name: f.name, ext });
+      } else if (textExts.has(ext) || t.startsWith('text/') || t.includes('json') || t.includes('xml')){
+        // read text/code content for inline preview (escape in template)
         try{
-          const txt = await f.text();
-          this.previews.push({ url: null, type: 'text', name: f.name, content: txt });
+          // if file is big, only read a slice to avoid blocking/huge memory usage
+          let truncated = false;
+          let txt = '';
+          if (f.size > PREVIEW_TEXT_MAX) {
+            const slice = f.slice(0, PREVIEW_TEXT_MAX);
+            txt = await slice.text();
+            truncated = true;
+          } else {
+            txt = await f.text();
+          }
+          this.previews.push({ url: null, type: 'text', name: f.name, content: txt, ext, truncated });
         }catch(e){
-          this.previews.push({ url: null, type: 'other', name: f.name });
+          this.previews.push({ url: null, type: 'other', name: f.name, ext });
         }
       } else {
-        this.previews.push({ url: null, type: 'other', name: f.name });
+        // unknown/binary: do not attempt to preview, show filename only
+        this.previews.push({ url: null, type: 'other', name: f.name, ext });
       }
     }
     // legacy single preview mapping (first preview)
@@ -158,6 +214,71 @@ export class AddDocumentPage {
       this.previewUrl = this.previews[0].url;
       this.previewType = this.previews[0].type;
     } else { this.previewUrl = null; this.previewType = 'none'; }
+  }
+
+  // Return a small inline SVG data-uri for common extensions to avoid extra asset files
+  getIconForExt(ext?: string | undefined): string {
+    const e = (ext || '').toLowerCase();
+    const icons: Record<string, string> = {
+      pdf: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><rect fill="%23E53E3E" width="24" height="24" rx="3"/><text x="12" y="16" font-size="10" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">PDF</text></svg>',
+      docx: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><rect fill="%23007ACC" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">DOCX</text></svg>',
+      doc: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><rect fill="%23007ACC" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">DOC</text></svg>',
+      zip: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><rect fill="%23000000" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">ZIP</text></svg>',
+      xls: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><rect fill="%2300A859" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">XLS</text></svg>',
+      ppt: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><rect fill="%23D97B00" width="24" height="24" rx="3"/><text x="12" y="16" font-size="8.5" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">PPT</text></svg>',
+      default: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><rect fill="%238B8B8B" width="24" height="24" rx="3"/><path d="M6 4h9l5 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="%23fff" opacity="0.15"/></svg>'
+    };
+    return icons[e] || icons['default'];
+  }
+
+  // Load full text preview for a truncated text preview (reads the whole file)
+  async loadFullTextPreview(p: { name?: string, ext?: string, type?: string, content?: string, truncated?: boolean }){
+    // find file by name
+    const f = this.files.find(x => x.name === p.name);
+    if (!f) return;
+    try{
+      const full = await f.text();
+      p.content = full;
+      p.truncated = false;
+    }catch(e){
+      // keep truncated state and optionally show an error
+      console.error('Could not load full preview', e);
+    }
+  }
+
+  // Load deferred preview (for HTML/CSV/etc) on user demand. This reads a slice for large files.
+  async loadDeferredPreview(p: { name?: string | undefined, ext?: string | undefined, deferred?: boolean, type?: string, content?: string, truncated?: boolean, url?: string | null, urlSafe?: any }){
+    if (!p || !p.name) return;
+    const f = this.files.find(x => x.name === p.name);
+    if (!f) return;
+    // mark not deferred while loading
+    p.deferred = false;
+    const PREVIEW_TEXT_MAX = 1024 * 200;
+    try{
+      if ((f.type && f.type.startsWith('image/')) || /jpe?g|png|gif|webp|svg/i.test((p.ext||'') as string)){
+        const u = URL.createObjectURL(f);
+        p.url = u; p.type = 'image'; p.ext = p.ext || (f.name.split('.').pop() || '');
+      } else if ((p.ext || '').toLowerCase() === 'pdf' || f.type === 'application/pdf'){
+        const u = URL.createObjectURL(f);
+        p.url = u; p.urlSafe = this.sanitizer.bypassSecurityTrustResourceUrl(u); p.type = 'pdf';
+      } else if ((f.type && f.type.startsWith('text/')) || /txt|md|json|xml|html|htm|csv|log|sql/i.test(p.ext||'')){
+        let truncated = false;
+        let txt = '';
+        if (f.size > PREVIEW_TEXT_MAX) {
+          txt = await f.slice(0, PREVIEW_TEXT_MAX).text();
+          truncated = true;
+        } else {
+          txt = await f.text();
+        }
+        p.content = txt; p.truncated = truncated; p.type = 'text';
+      } else {
+        // unknown, leave as other
+        p.type = 'other';
+      }
+    }catch(e){
+      console.error('Failed to load deferred preview', e);
+      p.deferred = true; // revert
+    }
   }
 
   // drag/drop handlers
