@@ -83,6 +83,8 @@ export class App {
   constructor(private router: Router, public auth: AuthService) {
     this.isLoggedIn = this.auth.isLoggedIn;
     this.role = this.auth.role;
+    // clear expired token at startup
+    try { if (this.auth.logoutIfExpired()) { try{ this.router.navigate(['/auth'], { queryParams: { sessionExpired: '1' } }); }catch(e){} } } catch(e){}
     // attempt to load profile for header avatar/name
     try {
       this.auth.getProfile().subscribe({ next: (res:any) => { this.profile = res || null; }, error: () => { this.profile = null; } });

@@ -4,53 +4,50 @@
       <h1 class="title">Documents</h1>
       <p class="subtitle">Manage and organize your documents</p>
     </div>
+    <div>
+      <button class="btn-mobile-toggle" (click)="sidebarOpen.set(!sidebarOpen())">Filters</button>
+      <button class="btn-primary header-add" (click)="gotoAdd()">{{ auth.isLoggedIn() ? 'Add Document' : 'Sign in to Add' }}</button>
+    </div>
   </div>
 
-  <!-- Search & Export bar -->
-  <div class="search-bar">
-    <div class="search-input">
-      <input placeholder="Search documents..." [(ngModel)]="query" (input)="setPage(0)" />
-    </div>
-    <div class="search-actions">
-      <button (click)="exportCSV()" class="btn-primary">Export</button>
-    </div>
-  </div>
+  <!-- (Search moved to sidebar) -->
 
   <div class="layout">
     <!-- Left: Filters -->
-    <aside class="filters">
-  <div class="filters-card">
+    <aside class="filters" [class.open]="sidebarOpen()">
+  <div class="filters-card" [style.display]="sidebarOpen() || isDesktop() ? 'block' : 'none'">
         <div class="filters-header">
           <h3>Filters</h3>
           <div *ngIf="(query() || (filterType() !== 'all'))" style="font-size:13px"><a href="#" (click)="$event.preventDefault(); query.set(''); filterType.set('all'); setPage(0);">Clear</a></div>
         </div>
 
-  <div class="filter-section">
+        <!-- Search in sidebar -->
+        <div style="margin-top:0.5rem; margin-bottom:0.75rem">
+          <input placeholder="Search documents..." [(ngModel)]="query" (input)="setPage(0)" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #eef2f7" />
+        </div>
+
+        <div class="filter-section">
           <h4>Document Type</h4>
-          <div class="types">
-            <label class="type-item" [class.active]="filterType() === 'all'">
-              <input type="radio" name="doc-type" [checked]="filterType() === 'all'" (change)="selectType('all')" />
-              <span>All</span>
-            </label>
-            <label *ngFor="let c of categories()" class="type-item" [class.active]="filterType() === c">
-              <input type="radio" name="doc-type" [checked]="filterType() === c" (change)="selectType(c)" />
-              <span>{{ c | titlecase }}</span>
-            </label>
-          </div>
+          <select [(ngModel)]="filterType" (change)="setPage(0)" style="width:100%; padding:0.5rem; border-radius:8px; border:1px solid #eef2f7">
+            <option value="all">All</option>
+            <option *ngFor="let c of categories()" [value]="c">{{ c | titlecase }}</option>
+          </select>
         </div>
 
         <div class="filter-section">
           <h4>Sort By</h4>
-          <select [(ngModel)]="size" (change)="setPage(0)">
+            <select class="select-modern" [(ngModel)]="size" (change)="setPage(0)" style="padding:0.55rem; border-radius:8px; border:1px solid #eef2f7; background:#fff; width:100%;">
             <option [value]="6">Newest First</option>
             <option [value]="12">Oldest First</option>
           </select>
         </div>
-        <div style="margin-top:0.85rem; display:flex; justify-content:center">
-          <button (click)="gotoAdd()" class="btn-primary" style="width:100%">
-            {{ auth.isLoggedIn() ? 'Add Document' : 'Sign in to Add' }}
-          </button>
+
+        <!-- Export & Refresh now sit under Sort By to group actions -->
+        <div style="display:flex; gap:0.5rem; margin-top:2rem; margin-bottom:0.75rem">
+          <button (click)="exportCSV()" class="btn-primary" style="flex:1">Export</button>
+          <button (click)="load()" class="btn-outline" style="flex:1">Refresh</button>
         </div>
+        <!-- Add button moved to header to keep sidebar compact -->
       </div>
     </aside>
 
@@ -59,41 +56,61 @@
       <div class="meta-top">Showing {{ filtered().length }} documents</div>
       <div class="cards">
         <div *ngFor="let d of filtered()" class="card">
-          <div class="card-media">
-            <img *ngIf="d.thumbnail || d.previewUrl || d.url" [src]="d.thumbnail || d.previewUrl || d.url" alt="{{ d.title }}" />
-            <div *ngIf="!d.thumbnail && !d.previewUrl && !d.url" class="placeholder">📄</div>
+            <div class="card-media">
+            <ng-container *ngIf="isImage(d); else nonImage">
+              <img [src]="d.thumbnail || d.previewUrl || d.url" alt="{{ d.title }}" (error)="onImageError($event)" />
+            </ng-container>
+            <ng-template #nonImage>
+              <div class="placeholder">
+                <!-- Neutral monochrome file icon (inline SVG) -->
+                <div class="placeholder-icon" aria-hidden="true">
+                  <!-- Simple document icon (monochrome stroke) -->
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6" />
+                    <path d="M8 13h8M8 17h8" stroke="#c7cddb" stroke-width="1.2" />
+                  </svg>
+                </div>
+              
+              </div>
+            </ng-template>
             <div class="media-overlay">
-                <button (click)="openDocument(d.id)">View</button>
-              <button (click)="downloadDocument(d.id)">Download</button>
+                <button class="btn-top" (click)="openDocument(d.id)">View</button>
+              <button class="btn-top" (click)="downloadDocument(d.id)">Download</button>
             </div>
           </div>
 
           <div class="card-body">
             <div class="card-head">
-              <div class="card-title">{{ d.title || d.originalFilename || 'Untitled' }}</div>
+              <div class="card-top-left">
+                <div class="card-type" title="{{ d.category || d.type }}" aria-label="{{ d.category || d.type }}">{{ d.category || d.type || '—' }}</div>
+              </div>
               <div class="card-menu"> 
+                <div class="top-actions">
+                  <button class="btn-ghost" title="Share" (click)="shareDocument(d.id)">Share</button>
+                  <button class="btn-ghost" title="Download" (click)="downloadDocument(d.id)">Download</button>
+                </div>
                 <input type="checkbox" [checked]="selected()[d.id]" (change)="toggle(d.id)" aria-label="Select document" />
               </div>
             </div>
 
-            <div class="card-type">{{ d.category || d.type || '—' }}</div>
+            <div class="card-title">{{ d.title || d.originalFilename || 'Untitled' }}</div>
+            <div class="card-note" *ngIf="d.note || d.description">{{ d.note || d.description }}</div>
+
             <div class="card-meta">
               <span class="date">{{ d.uploadedAt ? (d.uploadedAt | date:'mediumDate') : (d.date || '') }}</span>
               <span class="size">{{ d.size || '' }}</span>
             </div>
 
-            <div class="card-actions">
-              <button class="btn-ghost" (click)="shareDocument(d.id)">Share</button>
-              <button class="btn-danger" (click)="downloadDocument(d.id)">Download</button>
-            </div>
+            <!-- actions moved to top-right -->
           </div>
         </div>
       </div>
 
       <div class="pager">
-        <button (click)="setPage(page()-1)" [disabled]="page()===0">Prev</button>
-        <div>Page {{ page()+1 }} / {{ totalPages() }}</div>
-        <button (click)="setPage(page()+1)" [disabled]="page() >= totalPages()-1">Next</button>
+        <button class="pager-btn" (click)="setPage(page()-1)" [disabled]="page()===0">Prev</button>
+        <div class="pager-info">Page {{ page()+1 }} / {{ totalPages() }}</div>
+        <button class="pager-btn" (click)="setPage(page()+1)" [disabled]="page() >= totalPages()-1">Next</button>
       </div>
     </main>
   </div>

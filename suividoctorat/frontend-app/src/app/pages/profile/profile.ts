@@ -37,10 +37,10 @@ export class ProfilePage {
   loadProfile(){
     // try to fetch profile from auth service
     try {
-      this.auth.getProfile().subscribe({ next: (res:any) => { this.profile = this.normalizeProfile(res || {}); this.avatarUrl = this.profile.avatar || null; }, error: () => { this.profile = {}; } });
+      this.auth.getProfile().subscribe({ next: (res:any) => { this.profile = this.normalizeProfile(res || {}); this.avatarUrl = this.profile.avatar || '/assets/default-avatar.svg'; }, error: (err:any) => { if (err && (err.status === 401 || err.status === 403)) { this.auth.logout(); try{ this.ts.error('Session expired, please sign in again'); }catch(e){} } this.profile = {}; } });
     } catch(e) {
       // fallback
-      this.http.get('/api/me').subscribe({ next: (res:any) => { this.profile = this.normalizeProfile(res || {}); this.avatarUrl = this.profile.avatar || null; }, error: () => { this.profile = {}; } });
+      this.http.get('/api/me').subscribe({ next: (res:any) => { this.profile = this.normalizeProfile(res || {}); this.avatarUrl = this.profile.avatar || '/assets/default-avatar.svg'; }, error: (err:any) => { if (err && (err.status === 401 || err.status === 403)) { this.auth.logout(); try{ this.ts.error('Session expired, please sign in again'); }catch(e){} } this.profile = {}; } });
     }
 
     // mock some data if not present

@@ -3,7 +3,7 @@
     <div class="bg-white rounded-lg shadow-sm p-8 mb-6">
       <div class="flex items-start gap-6">
         <div class="relative">
-          <img [src]="avatarUrl || '/assets/default-avatar.png'" alt="profile" class="w-32 h-32 rounded-full object-cover border-4 border-zinc-100" />
+          <img [src]="avatarUrl || '/assets/default-avatar.svg'" alt="profile" class="w-32 h-32 rounded-full object-cover border-4 border-zinc-100" />
           <label class="avatar-edit" title="Change avatar">
             <input type="file" (change)="onAvatar($event)" accept="image/*" />
             ✎

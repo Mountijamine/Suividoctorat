@@ -11,6 +11,15 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
+  // helper: check if stored token is expired (JWT exp claim)
+  private parseJwt(token: string | null){ if (!token) return null; try { const parts = token.split('.'); if (parts.length < 2) return null; const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/'))); return payload; } catch(e){ return null; } }
+
+  isTokenExpired(): boolean {
+    const t = this.getToken(); if (!t) return true; const p = this.parseJwt(t); if (!p) return true; if (!p.exp) return true; const now = Math.floor(Date.now() / 1000); return p.exp <= now; }
+
+  // call at app startup to clear expired token
+  logoutIfExpired(){ try { if (this.isTokenExpired()) { this.setAuth(null, null); return true; } } catch(e){} return false; }
+
   signup(payload: any): Observable<any> {
     return this.http.post('/api/auth/signup', payload);
   }

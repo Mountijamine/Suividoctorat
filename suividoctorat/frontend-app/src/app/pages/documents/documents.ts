@@ -22,8 +22,25 @@ import { AuthService } from '../../services/auth.service';
     .search-bar{ display:flex; gap:0.75rem; align-items:center; margin:0.75rem 0 }
     .search-input input{ padding:0.6rem 0.8rem; border-radius:8px; border:1px solid #eef2f7; width:360px }
     .btn-primary{ background:linear-gradient(90deg,#111,#111); color:#fff; padding:0.6rem 0.9rem; border-radius:8px; border:0 }
-    .layout{ display:grid; grid-template-columns:280px 1fr; gap:1rem }
-    .filters-card{ background:#fff; padding:1rem; border-radius:12px; box-shadow:0 8px 20px rgba(2,6,23,0.06) }
+  .layout{ display:grid; grid-template-columns:380px 1fr; gap:1rem }
+    .filters-card{ background:#fff; padding:1rem; border-radius:12px; box-shadow:0 8px 20px rgba(2,6,23,0.06); box-sizing:border-box }
+  .filters { position:relative }
+  .filters-card { position:sticky; top:20px; max-height:calc(100vh - 40px); overflow:auto; overflow-x:hidden; padding-bottom:16px }
+  /* make inputs/selects/buttons inside sidebar fit and not overflow */
+  .filters-card input, .filters-card select, .filters-card button { width:100%; box-sizing:border-box }
+  .filters-card .types { max-width:100%; overflow:auto }
+    .filters-header h3{ display:flex; align-items:center; gap:8px }
+  /* neutral header, no decorative icon */
+  .btn-mobile-toggle{ display:none }
+    @media (max-width: 900px){
+      .layout{ grid-template-columns:1fr }
+      .filters { order:-1 }
+      .filters-card{ position:relative; max-height:none }
+      .content { max-height:none; overflow:visible }
+      .btn-mobile-toggle{ display:inline-flex; padding:0.45rem 0.6rem; border-radius:8px; border:1px solid #e6eef8; background:#fff }
+    }
+  /* make the main content scroll independently so filters stay visible while browsing docs */
+  .content { max-height: calc(100vh - 140px); overflow:auto; padding-right:8px }
     .filters-header{ display:flex; justify-content:space-between; align-items:center }
     .filter-section{ margin-top:0.75rem }
     .types{ display:flex; flex-direction:column; gap:0.35rem; max-height:300px; overflow:auto }
@@ -31,22 +48,56 @@ import { AuthService } from '../../services/auth.service';
     .type-item.active{ font-weight:700 }
     .content{ }
     .meta-top{ color:#6b7280; margin-bottom:0.5rem }
-    .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem }
     .card{ background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(2,6,23,0.06); display:flex; flex-direction:column }
-    .card-media{ position:relative; height:160px; background:#f8fafc; display:flex; align-items:center; justify-content:center }
-    .card-media img{ width:100%; height:100%; object-fit:cover }
-    .placeholder{ font-size:36px }
-    .media-overlay{ position:absolute; bottom:8px; left:8px; right:8px; display:flex; gap:8px; opacity:0; transition:opacity 180ms }
+  .card-media{ position:relative; height:160px; background:#f8fafc; display:flex; align-items:center; justify-content:center; overflow:hidden }
+  .card-media img{ width:100%; height:100%; object-fit:cover; display:block }
+  .placeholder{ width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc }
+  .placeholder-icon{ width:100%; height:100%; display:flex; align-items:center; justify-content:center }
+  .placeholder-icon svg{ width:100%; height:100%; object-fit:cover; max-width:120px; max-height:96px }
+    .media-overlay{ position:absolute; bottom:8px; left:8px; right:8px; display:flex; gap:8px; opacity:0; transition:opacity 160ms }
     .card:hover .media-overlay{ opacity:1 }
+  .media-overlay button{ background:#fff; border:1px solid #e6eef8; padding:0.4rem 0.6rem; border-radius:8px; color:#111827; cursor:pointer; display:inline-flex; gap:8px; align-items:center; font-weight:600 }
+  .media-overlay button:hover{ background:#f8fafc }
     .card-body{ padding:0.9rem; display:flex; flex-direction:column; gap:0.5rem }
     .card-head{ display:flex; justify-content:space-between; align-items:flex-start }
     .card-title{ font-weight:700 }
-    .card-type{ display:inline-block; background:#f1f5f9; color:#374151; padding:0.25rem 0.5rem; border-radius:999px; font-size:12px }
+    .card-type{
+      display:inline-block;
+      background:#f3f4f6;          /* soft neutral gray */
+      color:#111827;               /* charcoal text */
+      padding:0.28rem 0.6rem;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:600;
+      text-transform:none;
+      letter-spacing:0.2px;
+      max-width:120px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      border:1px solid rgba(15,23,42,0.04);
+    }
+  .card-menu{ display:flex; gap:8px; align-items:center }
+  .card-menu .top-actions{ display:flex; gap:6px; align-items:center; margin-right:6px }
+  .card-note{ color:#6b7280; font-size:13px; margin-top:4px }
     .card-meta{ display:flex; justify-content:space-between; color:#6b7280; font-size:13px }
     .card-actions{ display:flex; gap:0.5rem; margin-top:0.5rem }
-    .btn-ghost{ background:transparent; border:1px solid #e6eef8; padding:0.45rem 0.6rem; border-radius:8px }
+  .btn-ghost{ background:transparent; border:1px solid #e6eef8; padding:0.45rem 0.6rem; border-radius:8px; cursor:pointer }
+  .btn-ghost:hover{ background:#f8fafc }
     .btn-danger{ background:#ef4444; color:#fff; border:0; padding:0.45rem 0.6rem; border-radius:8px }
+  .btn-danger:hover{ filter:brightness(0.95) }
+  .btn-top{ padding:0.35rem 0.45rem; font-size:13px }
+  /* filters card buttons hover polish */
+  .filters-card .btn-primary{ transition:transform 120ms ease, box-shadow 140ms ease }
+  .filters-card .btn-primary:hover{ transform:translateY(-3px); box-shadow:0 8px 20px rgba(2,6,23,0.06) }
+  .filters-card .btn-outline{ border:1px solid #e6eef8; background:transparent; border-radius:8px; transition:background 120ms, transform 120ms }
+  .filters-card .btn-outline:hover{ background:#f8fafc; transform:translateY(-2px) }
     .pager{ display:flex; justify-content:center; gap:0.75rem; margin-top:1rem; align-items:center }
+      .pager-btn{ background:#fff; border:1px solid #e6eef8; padding:0.5rem 0.75rem; border-radius:8px; cursor:pointer; font-weight:600 }
+      .pager-btn:hover{ transform:translateY(-2px); box-shadow:0 6px 18px rgba(2,6,23,0.06) }
+      .pager-btn[disabled]{ opacity:0.55; cursor:not-allowed; transform:none; box-shadow:none }
+      .pager-info{ padding:0.45rem 0.7rem; border-radius:8px; background:#fff; border:1px solid #eef2f7; color:#374151 }
     `]
 })
 export class DocumentsPage {
@@ -58,6 +109,10 @@ export class DocumentsPage {
   filterType = signal('all');
   categories = signal<string[]>([]);
   selected = signal<Record<string, boolean>>({});
+  // mobile: controls whether sidebar (filters) is visible
+  sidebarOpen = signal(false);
+
+  isDesktop(){ try{ return window.innerWidth > 900; } catch(e){ return true; } }
 
   constructor(private http: HttpClient,
               private route: ActivatedRoute,
@@ -88,6 +143,13 @@ export class DocumentsPage {
     });
   }
 
+  // image error handler: replace broken src with local placeholder
+  onImageError(e: any){
+    try{
+      (e.target as HTMLImageElement).src = 'assets/doc-placeholder.jpg';
+    }catch(e){ }
+  }
+
   private loadCategories(){
     this.http.get<any>('/api/candidat/documents/categories').subscribe({
       next: (res) => {
@@ -106,18 +168,22 @@ export class DocumentsPage {
     if (this.filterType() && this.filterType() !== 'all') params.category = this.filterType();
     // call candidate REST API (server exposes /api/candidat/documents)
     this.http.get('/api/candidat/documents', { params }).subscribe({
-      next: (res:any) => {
+  next: (res:any) => {
         // backend returns a Page-like shape: { content: [...], totalElements: N, totalPages: M, number: page }
         if (Array.isArray(res)) {
-          this.docs.set(res);
+          // normalize docs array
+          const normalized = (res as any[]).map(d => this.normalizeDoc(d));
+          this.docs.set(normalized);
           this.total.set(res.length);
         } else if (res && res.content) {
-          this.docs.set(res.content || []);
+          const normalized = (res.content || []).map((d:any) => this.normalizeDoc(d));
+          this.docs.set(normalized || []);
           this.total.set(res.totalElements || (res.content || []).length || 0);
           // synchronize page from server if provided
           if (typeof res.number === 'number') this.page.set(res.number);
         } else {
-          this.docs.set(res?.data || []);
+          const raw = res?.data || [];
+          this.docs.set((Array.isArray(raw) ? raw : []).map((d:any) => this.normalizeDoc(d)));
           this.total.set(res?.total || (res?.data||[]).length || 0);
         }
   try { this.ts.success('Documents loaded'); } catch(e){}
@@ -129,6 +195,31 @@ export class DocumentsPage {
   try { this.ts.error('Failed to load documents'); } catch(e){}
       }
     });
+  }
+
+  // Normalize backend document shape to ensure previewUrl/thumbnail are available where possible
+  private normalizeDoc(d:any){
+    if (!d) return d;
+    const doc = { ...d };
+    // common server fields: filename, original_filename, path, url, previewUrl, thumbnail
+    // if server returned a filesystem path or filename but no public url, try to construct one
+    if (!doc.previewUrl && !doc.thumbnail && !doc.url) {
+      const filename = doc.filename || doc.fileName || doc.original_filename || doc.originalFilename || null;
+      if (filename) {
+        // only create a preview URL for image files (prevent trying to load HTML as an <img>)
+        if (/(jpe?g|png|gif|webp|svg)$/i.test(filename)) {
+          doc.previewUrl = '/uploads/' + filename;
+        }
+      }
+    }
+    return doc;
+  }
+
+  // determine if a document should be rendered as an <img>
+  isImage(d:any){
+    if (!d) return false;
+    const src = (d.thumbnail || d.previewUrl || d.url || d.filename || d.originalFilename || d.original_filename || '') as string;
+    return !!src && /\.(jpe?g|png|gif|webp|svg)$/i.test(src);
   }
 
   // fetch all matching documents from the backend by paging through results
@@ -196,7 +287,71 @@ export class DocumentsPage {
   toggle(id:string){ this.selected.update(s => { s[id] = !s[id]; return s; }); }
 
   // helper to open document in a new tab/window
-  openDocument(id: number|string){ const url = '/api/candidat/documents/download/' + id; try{ window.open(url, '_blank'); }catch(e){ console.warn('Could not open document', e); } }
+  async openDocument(id: number|string){
+    // Open a blank window immediately to preserve user gesture (avoid popup blockers)
+    const blank = window.open('', '_blank');
+    const url = '/api/candidat/documents/download/' + id;
+    if (!blank) {
+      // if popup blocked, fall back to navigating to the endpoint in current tab
+      try { window.location.href = url; } catch(e){ console.warn('Could not open document', e); }
+      return;
+    }
+    try{
+      // request full response so we can read Content-Type header
+      const resp: any = await firstValueFrom(this.http.get(url, { responseType: 'blob', observe: 'response' as 'response' }));
+      const blob = resp?.body as Blob;
+      const contentType = (resp && resp.headers && resp.headers.get) ? resp.headers.get('content-type') || blob?.type || '' : (blob?.type || '');
+      let toOpen = blob;
+      if (blob && contentType && (!blob.type || blob.type === '')) {
+        try { toOpen = new Blob([blob], { type: contentType }); } catch(e) { /* ignore */ }
+      }
+      const dlUrl = URL.createObjectURL(toOpen as Blob);
+
+      // Build a simple viewer page in the opened window that embeds the blob URL inline
+      const safeUrl = dlUrl; // blob URLs are safe here
+      const lower = (contentType || '').toLowerCase();
+      let viewerHtml = `<!doctype html><html><head><title>Preview</title><meta name=viewport content='width=device-width,initial-scale=1'></head><body style='margin:0; background:#111827; color:#fff; height:100vh;'>`;
+      // top bar with a close button (user can also use browser controls)
+      viewerHtml += `<div style='display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0f1724;color:#fff;font-family:system-ui;box-shadow:0 2px 8px rgba(0,0,0,0.4)'>`;
+      viewerHtml += `<div>Preview</div><div><button onclick='window.close()' style='padding:6px 10px;border-radius:6px;border:0;background:#111827;color:#fff;cursor:pointer'>Close</button></div></div>`;
+
+      if (lower.startsWith('image/')) {
+        viewerHtml += `<div style='display:flex;align-items:center;justify-content:center;height:calc(100vh - 52px);'><img src="${safeUrl}" style='max-width:100%;max-height:100%;object-fit:contain' alt='preview'/></div>`;
+      } else if (lower.includes('pdf')) {
+        viewerHtml += `<iframe src="${safeUrl}" style='width:100%;height:calc(100vh - 52px);border:0'></iframe>`;
+      } else if (lower.startsWith('text/') || lower.includes('json') || lower.includes('xml')) {
+        // for text, fetch as text inside the new window for nicer display
+        try {
+          const text = await toOpen.text();
+          const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          viewerHtml += `<pre style='padding:1rem;white-space:pre-wrap;word-break:break-word; height:calc(100vh - 52px); overflow:auto; background:#0b1220;color:#e6eef8'>${escaped}</pre>`;
+        } catch(e){
+          viewerHtml += `<iframe src="${safeUrl}" style='width:100%;height:calc(100vh - 52px);border:0'></iframe>`;
+        }
+      } else {
+        // generic fallback: embed in iframe which often displays or lets user save
+        viewerHtml += `<iframe src="${safeUrl}" style='width:100%;height:calc(100vh - 52px);border:0'></iframe>`;
+      }
+
+      viewerHtml += '</body></html>';
+
+      try{
+        blank.document.open();
+        blank.document.write(viewerHtml);
+        blank.document.close();
+      } catch(e){
+        // last resort: navigate the blank window to the blob URL
+        try{ blank.location.href = safeUrl; } catch(err){ window.open(safeUrl, '_blank'); }
+      }
+
+      // revoke after a delay so the new window has time to use the blob
+      setTimeout(() => { try{ URL.revokeObjectURL(dlUrl); }catch(e){} }, 45000);
+    } catch(err:any){
+      console.error('Could not open document', err);
+      try{ this.ts.error('Could not open document'); }catch(e){}
+      try{ blank.close(); }catch(e){}
+    }
+  }
 
   // select a filter type from template
   selectType(c: string){ this.filterType.set(c); this.setPage(0); }

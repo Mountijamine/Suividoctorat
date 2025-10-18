@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
@@ -33,6 +34,42 @@ import { ToastService } from '../../services/toast.service';
       .preview-remove { display:inline-flex }
     }
     .muted { color:#6b7280; margin-top:-6px; margin-bottom:12px }
+    /* file input/button styling */
+    .file-input{ display:flex; gap:0.5rem; align-items:center }
+  .btn-file{ background:linear-gradient(90deg,#111,#111); color:#fff; padding:0.8rem 1.1rem; border-radius:10px; border:0; cursor:pointer; font-weight:700; box-shadow:0 8px 24px rgba(2,6,23,0.08) }
+  .btn-file:hover{ transform:translateY(-3px) }
+    .file-name{ color:#374151; font-size:0.95rem; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    /* preview text content */
+    .preview-text{ padding:0.75rem; max-height:220px; overflow:auto; background:#0b1220; color:#e6eef8; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace }
+  /* modern dropzone look */
+  .file-drop{ display:flex; gap:12px; align-items:center; border:1px dashed #e6eef8; padding:0.85rem; border-radius:10px; background:linear-gradient(180deg,#ffffff,#fbfdff); box-shadow:inset 0 1px 0 rgba(255,255,255,0.6) }
+  .file-drop .drop-icon{ font-size:22px; color:#7c93b2 }
+  .file-drop .drop-text{ color:#6b7280 }
+  .file-drop .drop-title{ font-weight:600; color:#111827 }
+  .file-drop .drop-sub{ color:#6b7280; font-size:0.95rem }
+  .file-drop .drop-actions{ margin-left:auto; display:flex; gap:8px; align-items:center }
+  .btn-file{ background:transparent; color:#111827; padding:0.5rem 0.7rem; border-radius:8px; border:1px solid #e6eef8; cursor:pointer; font-weight:600 }
+  .btn-file:hover{ background:#f8fafc }
+    .file-drop.drag-active{ border-color:#7c3aed; background:linear-gradient(180deg,#fbfbff,#f7f0ff); box-shadow:0 8px 30px rgba(124,58,237,0.08) }
+  .columns-stretch{ display:flex; align-items:stretch; gap:1.25rem; background:#fff; border-radius:12px; padding:12px; box-shadow:0 8px 24px rgba(2,6,23,0.06) }
+  .preview-full{ width:100%; height:100%; display:flex; align-items:center; justify-content:center }
+  /* make inner panels transparent so the outer card shows as single block */
+  .columns-stretch > div { background:transparent; box-shadow:none }
+  .columns-stretch > div { display:flex; flex-direction:column }
+  .left-panel{ flex:1.2 }
+  .right-panel{ flex:0 0 440px; position:relative }
+  /* single large preview styling */
+  .single-preview{ flex:1; display:flex; align-items:center; justify-content:center; width:100%; height:100% }
+  .single-preview img, .single-preview object, .single-preview iframe{ width:100%; height:100%; border-radius:12px }
+  /* responsive: stack columns on small screens */
+  @media (max-width: 900px){
+    .columns-stretch{ flex-direction:column; padding:8px }
+    .right-panel{ flex:0 0 auto; width:100% }
+    .single-preview{ height:240px }
+    .file-name{ max-width:320px }
+  }
+  .preview-close{ position:absolute; top:10px; right:10px; width:36px; height:36px; border-radius:999px; border:0; background:rgba(0,0,0,0.55); color:#fff; z-index:30; display:inline-flex; align-items:center; justify-content:center; cursor:pointer }
+  .preview-full img{ width:100%; height:100%; object-fit:cover; border-radius:12px }
     `
   ]
 })
@@ -45,15 +82,16 @@ export class AddDocumentPage {
   // files selected by the user (UI supports previewing multiple files). The server upload still posts the first file.
   files: File[] = [];
   file: File | null = null;
-  previews: Array<{ url: string | null, type: 'image'|'pdf'|'other'|'none', name?: string }> = [];
+  previews: Array<{ url: string | null, urlSafe?: any, type: 'image'|'pdf'|'other'|'none'|'text', name?: string, content?: string }> = [];
   // keep legacy single-preview properties for simple checks
   previewUrl: string | null = null;
-  previewType: 'image'|'pdf'|'other'|'none' = 'none';
+  previewType: 'image'|'pdf'|'other'|'none'|'text' = 'none';
   uploading = false;
   progress = 0;
   error: string | null = null;
+  dragActive = false;
 
-  constructor(private http: HttpClient, private router: Router, private ts: ToastService) {}
+  constructor(private http: HttpClient, private router: Router, private ts: ToastService, private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
     // fetch existing categories for this user
@@ -71,9 +109,9 @@ export class AddDocumentPage {
     }
   }
 
-  // create previews for images/pdf and show a thumbnail grid for multiple files
-  onFile(e: any){
-    const fl: FileList | null = e?.target?.files || null;
+  // create previews for images/pdf/text and show a thumbnail grid for multiple files
+  async onFile(e: any){
+    const fl: FileList | null = e?.target?.files || e?.dataTransfer?.files || null;
     if (!fl || fl.length === 0) {
       this.files = []; this.file = null; this.previews = []; this.previewUrl = null; this.previewType = 'none';
       return;
@@ -101,7 +139,16 @@ export class AddDocumentPage {
         this.previews.push({ url: u, type: 'image', name: f.name });
       } else if (t === 'application/pdf'){
         const u = URL.createObjectURL(f);
-        this.previews.push({ url: u, type: 'pdf', name: f.name });
+        const safe = this.sanitizer.bypassSecurityTrustResourceUrl(u);
+        this.previews.push({ url: u, urlSafe: safe, type: 'pdf', name: f.name });
+      } else if (t.startsWith('text/') || t.includes('json') || t.includes('xml') || t.includes('html')){
+        // read text content for inline preview
+        try{
+          const txt = await f.text();
+          this.previews.push({ url: null, type: 'text', name: f.name, content: txt });
+        }catch(e){
+          this.previews.push({ url: null, type: 'other', name: f.name });
+        }
       } else {
         this.previews.push({ url: null, type: 'other', name: f.name });
       }
@@ -111,6 +158,32 @@ export class AddDocumentPage {
       this.previewUrl = this.previews[0].url;
       this.previewType = this.previews[0].type;
     } else { this.previewUrl = null; this.previewType = 'none'; }
+  }
+
+  // drag/drop handlers
+  onDragOver(e: DragEvent){
+    e.preventDefault();
+    try{ (e.dataTransfer as any).dropEffect = 'copy'; }catch(e){}
+  }
+
+  onDrop(e: DragEvent){
+    e.preventDefault();
+    const dt = e.dataTransfer;
+    if (!dt) return;
+    // create a synthetic event shape expected by onFile
+    this.dragActive = false;
+    this.onFile({ target: { files: dt.files } });
+  }
+
+  onDragEnter(e: DragEvent){
+    e.preventDefault();
+    this.dragActive = true;
+  }
+
+  onDragLeave(e: DragEvent){
+    e.preventDefault();
+    // only clear when leaving the drop zone entirely
+    this.dragActive = false;
   }
 
   submit(){
