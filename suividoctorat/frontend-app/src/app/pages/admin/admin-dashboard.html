@@ -11,6 +11,20 @@
 
   <div style="margin-top:1rem">
     <div *ngIf="loading()" style="color:#6b7280">Chargement des utilisateurs...</div>
+
+  <div class="requests" *ngIf="requests().length > 0">
+      <h3 style="margin:0 0 0.5rem 0">Demandes en attente</h3>
+      <div *ngFor="let r of requests()" class="req">
+        <div>
+          <div style="font-weight:700">{{ r.firstName }} {{ r.lastName }} <span style="color:#6b7280; font-size:0.9rem">({{ r.email }})</span></div>
+          <div style="color:#6b7280">Demande: <strong>{{ r.role }}</strong> — {{ r.justification || '' }}</div>
+        </div>
+        <div style="display:flex; gap:0.5rem">
+          <button class="btn outline" (click)="rejectRequest(r)">Rejeter</button>
+          <button class="btn" (click)="approveRequest(r)">Approuver</button>
+        </div>
+      </div>
+    </div>
     <div class="grid">
       <div *ngFor="let u of users()" class="user-card">
         <div class="meta">

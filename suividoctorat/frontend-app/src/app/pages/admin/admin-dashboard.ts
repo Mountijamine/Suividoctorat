@@ -19,12 +19,16 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
     .actions { margin-top:auto; display:flex; gap:0.5rem }
     .btn { padding:0.4rem 0.6rem; border-radius:8px; border:0; cursor:pointer }
     .btn.outline{ background:transparent; border:1px solid #e6eef8 }
+    .requests { margin-top:1rem; background:#fff; padding:0.75rem; border-radius:10px }
+    .req { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0; border-bottom:1px solid #f3f4f6 }
+    .req:last-child{ border-bottom:0 }
     @media (max-width:600px){ .header{ flex-direction:column; align-items:flex-start } }
   `]
 })
 export class AdminDashboard {
   users = signal<Array<any>>([]);
   loading = signal(false);
+  requests = signal<Array<any>>([]);
 
   constructor(private http: HttpClient) {
     this.fetchUsers();
@@ -44,7 +48,18 @@ export class AdminDashboard {
         this.loading.set(false);
       }
     });
+
+    // fetch pending role requests
+    this.http.get('/api/auth/role-requests').subscribe({ next: (res:any) => { this.requests.set(Array.isArray(res) ? res : (res?.data || [])); }, error: () => { this.requests.set([]); } });
   }
 
   initials(u:any){ return ((u.firstName||'')[0] || '') + ((u.lastName||'')[0] || '') }
+
+  approveRequest(r: any){
+    this.http.post(`/api/auth/role-requests/${r.id}/approve`, {}).subscribe({ next: () => { this.fetchUsers(); }, error: () => { alert('Failed to approve'); } });
+  }
+
+  rejectRequest(r: any){
+    this.http.post(`/api/auth/role-requests/${r.id}/reject`, {}).subscribe({ next: () => { this.fetchUsers(); }, error: () => { alert('Failed to reject'); } });
+  }
 }

@@ -1,0 +1,170 @@
+<div class="wrap">
+  <div class="header">
+    <div>
+      <h1 class="title">Sélection du profil</h1>
+      <p class="subtitle">Choisissez votre rôle — cette étape est obligatoire après la connexion</p>
+    </div>
+    <div>
+      <button class="btn-primary" [disabled]="!selected() || sending()" (click)="choose(selected() || '')">Confirmer</button>
+    </div>
+  </div>
+
+  <div class="layout" style="align-items:stretch; gap:1rem">
+    <div class="left-panel" style="padding:1rem; border-radius:12px">
+      <div style="display:grid; gap:0.75rem">
+        <div (click)="choose('candidat')" [class.selected]="selected() === 'candidat'" style="padding:0.8rem; border-radius:10px; background:#fff; cursor:pointer">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <div>
+              <div style="font-weight:700">Candidat / Doctorant</div>
+              <div style="color:#6b7280; font-size:0.95rem">Soumettre dossiers, suivre l'avancement, déposer thèse.</div>
+            </div>
+            <div style="color:#6b7280">&gt;</div>
+          </div>
+        </div>
+
+        <div (click)="choose('directeur')" [class.selected]="selected() === 'directeur'" style="padding:0.8rem; border-radius:10px; background:#fff; cursor:pointer">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <div>
+              <div style="font-weight:700">Directeur de Thèse / Encadrant</div>
+              <div style="color:#6b7280; font-size:0.95rem">Encadrer des doctorants. Validation admin requise pour activation.</div>
+            </div>
+            <div style="color:#6b7280">&gt;</div>
+          </div>
+        </div>
+
+        <div (click)="choose('admin')" [class.selected]="selected() === 'admin'" style="padding:0.8rem; border-radius:10px; background:#fff; cursor:pointer">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <div>
+              <div style="font-weight:700">Personnel Administratif</div>
+              <div style="color:#6b7280; font-size:0.95rem">Gérer les processus administratifs et valider les dossiers.</div>
+            </div>
+            <div style="color:#6b7280">&gt;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-panel" style="padding:1rem; border-radius:12px; background:#fff; min-width:340px">
+      <div *ngIf="!showForm()">
+        <h3 style="margin-top:0">Aperçu</h3>
+        <p style="color:#6b7280">Sélection actuelle: <strong>{{ selected() || '—' }}</strong></p>
+        <p style="margin-top:0.6rem">Après confirmation, si vous choisissez <strong>candidat</strong> vous serez redirigé·e vers votre tableau de bord. Pour les autres rôles une demande sera envoyée aux administrateurs.</p>
+      </div>
+
+      <div *ngIf="showForm()">
+        <h3 style="margin-top:0">Informations complémentaires</h3>
+        <div style="display:grid; gap:0.6rem; margin-top:0.6rem">
+          <div *ngIf="selected() === 'directeur'">
+            <label class="label">Affiliation / Institution
+              <input class="input" [(ngModel)]="extra.affiliation" />
+            </label>
+            <label class="label">Justification / Motivation
+              <textarea class="input" rows="4" [(ngModel)]="extra.justification"></textarea>
+            </label>
+            <div style="display:flex; gap:0.6rem; align-items:center">
+              <div style="flex:1">
+                <div class="label">Photo recto (carte d'identité)</div>
+                <label class="file-drop" style="display:flex; gap:0.5rem; align-items:center"
+                  (dragover)="onDragOver($event,'front')" (dragleave)="onDragLeave($event,'front')" (drop)="onDrop($event,'front')">
+                  <div [style.border]="dragActiveFront() ? '2px dashed #3b82f6' : 'none'" style="width:74px; height:48px; background:#f8fafc; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden">
+                    <img *ngIf="extraPreview.frontUrl" [src]="extraPreview.frontUrl" alt="front" style="width:100%; height:100%; object-fit:cover" />
+                    <div *ngIf="!extraPreview.frontUrl" style="color:#9ca3af">Recto</div>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:13px; color:#374151">{{ extra.frontIdFile?.name || 'Aucune photo' }}</div>
+                    <div style="margin-top:6px; display:flex; gap:0.5rem; align-items:center">
+                      <input type="file" (change)="handleFile($event,'front')" style="display:none" #frontInput />
+                      <button class="btn-outline" (click)="frontInput.click()">Choisir</button>
+                      <button class="btn-outline" *ngIf="extraPreview.frontUrl" (click)="viewFile('front')">Voir</button>
+                      <button class="btn-outline" *ngIf="extraPreview.frontUrl" (click)="clearFile('front')">Effacer</button>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div style="flex:1">
+                <div class="label">Photo verso (carte d'identité)</div>
+                <label class="file-drop" style="display:flex; gap:0.5rem; align-items:center"
+                  (dragover)="onDragOver($event,'back')" (dragleave)="onDragLeave($event,'back')" (drop)="onDrop($event,'back')">
+                  <div [style.border]="dragActiveBack() ? '2px dashed #3b82f6' : 'none'" style="width:74px; height:48px; background:#f8fafc; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden">
+                    <img *ngIf="extraPreview.backUrl" [src]="extraPreview.backUrl" alt="back" style="width:100%; height:100%; object-fit:cover" />
+                    <div *ngIf="!extraPreview.backUrl" style="color:#9ca3af">Verso</div>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:13px; color:#374151">{{ extra.backIdFile?.name || 'Aucune photo' }}</div>
+                    <div style="margin-top:6px; display:flex; gap:0.5rem; align-items:center">
+                      <input type="file" (change)="handleFile($event,'back')" style="display:none" #backInput />
+                      <button class="btn-outline" (click)="backInput.click()">Choisir</button>
+                      <button class="btn-outline" *ngIf="extraPreview.backUrl" (click)="viewFile('back')">Voir</button>
+                      <button class="btn-outline" *ngIf="extraPreview.backUrl" (click)="clearFile('back')">Effacer</button>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="selected() === 'admin'">
+            <label class="label">Nom d'utilisateur
+              <input class="input" [(ngModel)]="extraAdmin.username" />
+            </label>
+            <label class="label">Province
+              <input class="input" [(ngModel)]="extraAdmin.province" />
+            </label>
+            <div style="display:flex; gap:0.6rem; align-items:center">
+              <div style="flex:1">
+                <div class="label">Photo recto (carte d'identité)</div>
+                <label class="file-drop" style="display:flex; gap:0.5rem; align-items:center"
+                  (dragover)="onDragOver($event,'front')" (dragleave)="onDragLeave($event,'front')" (drop)="onDrop($event,'front')">
+                  <div [style.border]="dragActiveFront() ? '2px dashed #3b82f6' : 'none'" style="width:74px; height:48px; background:#f8fafc; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden">
+                    <img *ngIf="extraAdminPreview.frontUrl" [src]="extraAdminPreview.frontUrl" alt="front" style="width:100%; height:100%; object-fit:cover" />
+                    <div *ngIf="!extraAdminPreview.frontUrl" style="color:#9ca3af">Recto</div>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:13px; color:#374151">{{ extraAdmin.frontIdFile?.name || 'Aucune photo' }}</div>
+                    <div style="margin-top:6px; display:flex; gap:0.5rem; align-items:center">
+                      <input type="file" (change)="handleFile($event,'front')" style="display:none" #adminFrontInput />
+                      <button class="btn-outline" (click)="adminFrontInput.click()">Choisir</button>
+                      <button class="btn-outline" *ngIf="extraAdminPreview.frontUrl" (click)="viewFile('front')">Voir</button>
+                      <button class="btn-outline" *ngIf="extraAdminPreview.frontUrl" (click)="clearFile('front')">Effacer</button>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div style="flex:1">
+                <div class="label">Photo verso (carte d'identité)</div>
+                <label class="file-drop" style="display:flex; gap:0.5rem; align-items:center"
+                  (dragover)="onDragOver($event,'back')" (dragleave)="onDragLeave($event,'back')" (drop)="onDrop($event,'back')">
+                  <div [style.border]="dragActiveBack() ? '2px dashed #3b82f6' : 'none'" style="width:74px; height:48px; background:#f8fafc; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden">
+                    <img *ngIf="extraAdminPreview.backUrl" [src]="extraAdminPreview.backUrl" alt="back" style="width:100%; height:100%; object-fit:cover" />
+                    <div *ngIf="!extraAdminPreview.backUrl" style="color:#9ca3af">Verso</div>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:13px; color:#374151">{{ extraAdmin.backIdFile?.name || 'Aucune photo' }}</div>
+                    <div style="margin-top:6px; display:flex; gap:0.5rem; align-items:center">
+                      <input type="file" (change)="handleFile($event,'back')" style="display:none" #adminBackInput />
+                      <button class="btn-outline" (click)="adminBackInput.click()">Choisir</button>
+                      <button class="btn-outline" *ngIf="extraAdminPreview.backUrl" (click)="viewFile('back')">Voir</button>
+                      <button class="btn-outline" *ngIf="extraAdminPreview.backUrl" (click)="clearFile('back')">Effacer</button>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.5rem; justify-content:flex-end">
+            <button class="btn-outline" (click)="showForm.set(false)">Annuler</button>
+            <button class="btn-primary" [disabled]="sending()" (click)="submitRequest()">Soumettre la demande</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="awaiting()" style="margin-top:0.6rem; padding:0.75rem; border-radius:8px; background:#f8fafc">
+        <h4 style="margin:0">Demande envoyée</h4>
+        <p style="color:#6b7280">Votre demande pour le rôle <strong>{{ selected() }}</strong> est en attente d'approbation par l'administration.</p>
+      </div>
+    </div>
+  </div>
+</div>
