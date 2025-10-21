@@ -1,0 +1,7 @@
+# Global defaults
+spring:
+  profiles:
+    active: main
+  cloud:
+    compatibility-verifier:
+      enabled: false
