@@ -18,6 +18,8 @@ import { AuthService } from '../../services/auth.service';
     .layout{ display:flex; gap:1rem; align-items:flex-start }
     .left-panel{ flex:1; background:transparent }
     .right-panel{ width:440px }
+  .banner{ width:100%; height:140px; object-fit:cover; border-radius:12px; display:block }
+  .banner-wrap{ width:100% }
     .card-option{ background:#fff; border-radius:10px; padding:0.9rem; box-shadow:0 8px 20px rgba(2,6,23,0.06); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:transform .18s ease, box-shadow .18s ease }
     .card-option:hover{ transform:translateY(-4px); box-shadow:0 18px 40px rgba(2,6,23,0.08) }
     .card-option.selected{ border:2px solid #e6eef8; box-shadow:0 20px 50px rgba(2,6,23,0.08) }
@@ -25,6 +27,9 @@ import { AuthService } from '../../services/auth.service';
     .arrow{ font-size:18px; color:#9ca3af }
     .label{ display:block; font-weight:600; margin-bottom:6px }
     .input{ width:100%; padding:0.6rem; border-radius:8px; border:1px solid #e6eef8; background:#fff }
+  .form-box.outline{ border:1px solid #e6eef8; padding:1rem; border-radius:10px; background:#fff }
+  .file-drop{ border-radius:8px; padding:0.4rem }
+  .file-drop:hover{ background:#fbfdff }
     .btn-primary{ background:linear-gradient(90deg,#3b82f6 0%,#06b6d4 100%); color:#fff; padding:0.6rem 0.9rem; border-radius:8px; border:0 }
     .btn-outline{ background:transparent; border:1px solid #e6eef8; padding:0.5rem 0.75rem; border-radius:8px }
     .form-box{ background:#fff; padding:1rem; border-radius:10px; box-shadow:0 10px 30px rgba(2,6,23,0.06) }

@@ -12,7 +12,7 @@ public class CorsConfig implements WebFluxConfigurer {
     // Allow any localhost origin during local development (any port)
     System.out.println("[CorsConfig] registering CORS mappings for /api/**");
         registry.addMapping("/api/**")
-            .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "https://localhost:*", "https://127.0.0.1:*", "http://localhost:64442")
+            .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*")
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
         .allowedHeaders("*")
         .allowCredentials(true)

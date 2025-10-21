@@ -9,6 +9,7 @@
         <module name="gestion-auth-service" />
         <module name="soutenance-service" />
         <module name="inscription-service" />
+        <module name="eureka-server" />
         <module name="gateway" />
         <module name="notification-service" />
       </profile>

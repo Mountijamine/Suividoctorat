@@ -40,6 +40,8 @@
     <module>soutenance-service</module>
     <module>notification-service</module>
     <module>gateway</module>
+    <module>eureka-server</module>
+    <module>config-server</module>
     </modules>
 
     <dependencyManagement>
