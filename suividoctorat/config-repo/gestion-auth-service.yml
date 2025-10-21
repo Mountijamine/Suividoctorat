@@ -1,0 +1,54 @@
+server:
+  port: 8091
+spring:
+  application:
+    name: gestion-auth-service
+  main:
+    allow-bean-definition-overriding: true
+
+# JPA
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/suividoctorat?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: ""
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+
+# JWT
+app:
+  jwt:
+    secret: "0f8e7a9c3b2d4f6a8c9e1b2d3f4a6c7e0f8e7a9c3b2d4f6a8c9e1b2d3f4a6c7e"
+    expiration-ms: 86400000
+
+# Email
+spring:
+  mail:
+    host: localhost
+    port: 25
+
+# Notification service
+app:
+  notification:
+    url: http://localhost:8094/api/notifications
+
+# Eureka client
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+  client.enabled: true
+
+# Development helpers
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+app:
+  dev:
+    api-open: true
