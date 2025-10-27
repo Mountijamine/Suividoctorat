@@ -22,4 +22,5 @@ Quick start
    http://localhost:8888/application/main
 
 Customize
+
 - Edit `src/main/resources/application.properties` to change `spring.cloud.config.server.git.uri` and `default-label` to the branch you want.

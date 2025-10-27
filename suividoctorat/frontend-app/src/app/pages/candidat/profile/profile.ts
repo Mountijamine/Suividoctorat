@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ToastService } from '../../services/toast.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'profile-page',
@@ -91,7 +91,7 @@ export class ProfilePage {
 
   getProgressColor(cur:number, req:number){ const p = Math.round((cur/req) * 100); if (p >= 100) return 'text-green-600'; if (p >= 75) return 'text-orange-600'; return 'text-red-600'; }
 
-  onAction(link:any){ if (link.label === 'Mes Documents') this.router.navigate(['/documents']); }
+  onAction(link:any){ if (link.label === 'Mes Documents') this.router.navigate(['/candidat/documents']); }
 
   download(doc:any){ /* stub */ }
 }

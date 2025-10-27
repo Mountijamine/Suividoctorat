@@ -21,23 +21,23 @@ export class AuthService {
   logoutIfExpired(){ try { if (this.isTokenExpired()) { this.setAuth(null, null); return true; } } catch(e){} return false; }
 
   signup(payload: any): Observable<any> {
-    return this.http.post('/api/auth/signup', payload);
+    return this.http.post('/gestion-auth-service/api/auth/signup', payload);
   }
 
   // set the user's role immediately (for candidat selection)
   updateRole(role: string){
     // try an authenticated endpoint; backend should accept { role }
-    try { return this.http.patch('/api/auth/role', { role }); } catch(e:any){ throw e; }
+    try { return this.http.patch('/gestion-auth-service/api/auth/role', { role }); } catch(e:any){ throw e; }
   }
 
   // request elevated role - sent to admins for approval
   requestRole(payload: any){
     // payload should contain role and any extra fields
-    return this.http.post('/api/auth/role-requests', payload);
+    return this.http.post('/gestion-auth-service/api/auth/role-requests', payload);
   }
 
   login(credentials: { email: string; password: string }) {
-    return this.http.post('/api/auth/login', credentials).pipe(
+    return this.http.post('/gestion-auth-service/api/auth/login', credentials).pipe(
       tap((res: any) => {
         const token = res?.token;
         let role = res?.user?.role || res?.role || null;
@@ -65,7 +65,7 @@ export class AuthService {
 
   logout(){ this.setAuth(null, null); }
 
-  getProfile(){ return this.http.get('/api/auth/me'); }
+  getProfile(){ return this.http.get('/gestion-auth-service/api/auth/me'); }
 
   getToken(): string | null { return localStorage.getItem('auth_token'); }
 }

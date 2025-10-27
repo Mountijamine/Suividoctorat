@@ -36,7 +36,7 @@ export class AdminDashboard {
 
   fetchUsers(){
     this.loading.set(true);
-    this.http.get('/api/admin/users').subscribe({
+    this.http.get('/gestion-auth-service/api/admin/users').subscribe({
       next: (res:any) => { this.users.set(Array.isArray(res) ? res : (res?.data || [])); this.loading.set(false); },
       error: () => {
         // fallback mock data
@@ -50,16 +50,16 @@ export class AdminDashboard {
     });
 
     // fetch pending role requests
-    this.http.get('/api/auth/role-requests').subscribe({ next: (res:any) => { this.requests.set(Array.isArray(res) ? res : (res?.data || [])); }, error: () => { this.requests.set([]); } });
+    this.http.get('/gestion-auth-service/api/auth/role-requests').subscribe({ next: (res:any) => { this.requests.set(Array.isArray(res) ? res : (res?.data || [])); }, error: () => { this.requests.set([]); } });
   }
 
   initials(u:any){ return ((u.firstName||'')[0] || '') + ((u.lastName||'')[0] || '') }
 
   approveRequest(r: any){
-    this.http.post(`/api/auth/role-requests/${r.id}/approve`, {}).subscribe({ next: () => { this.fetchUsers(); }, error: () => { alert('Failed to approve'); } });
+    this.http.post(`/gestion-auth-service/api/auth/role-requests/${r.id}/approve`, {}).subscribe({ next: () => { this.fetchUsers(); }, error: () => { alert('Failed to approve'); } });
   }
 
   rejectRequest(r: any){
-    this.http.post(`/api/auth/role-requests/${r.id}/reject`, {}).subscribe({ next: () => { this.fetchUsers(); }, error: () => { alert('Failed to reject'); } });
+    this.http.post(`/gestion-auth-service/api/auth/role-requests/${r.id}/reject`, {}).subscribe({ next: () => { this.fetchUsers(); }, error: () => { alert('Failed to reject'); } });
   }
 }

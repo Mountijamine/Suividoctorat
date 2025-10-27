@@ -6,7 +6,7 @@ import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { ToastService } from '../../services/toast.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'add-document',
@@ -323,7 +323,7 @@ export class AddDocumentPage {
         if (ev.type === HttpEventType.UploadProgress && ev.total) {
           this.progress = Math.round(100 * (ev.loaded / ev.total));
         } else if (ev.type === HttpEventType.Response) {
-          this.uploading = false; this.progress = 100; this.router.navigate(['/documents']);
+          this.uploading = false; this.progress = 100; this.router.navigate(['/candidat/documents']);
           try { this.ts.success('Upload successful'); } catch(e){}
         }
       },

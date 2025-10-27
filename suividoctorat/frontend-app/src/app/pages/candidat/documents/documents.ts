@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { ToastService } from '../../services/toast.service';
-import { ToastComponent } from '../../components/toast/toast';
-import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../../services/toast.service';
+import { ToastComponent } from '../../../components/toast/toast';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'documents-page',
@@ -365,9 +365,9 @@ export class DocumentsPage {
   // navigate to add document page or to login with redirect when not authenticated
   gotoAdd(){
     if (this.auth.isLoggedIn && this.auth.isLoggedIn()){
-      this.router.navigate(['/documents','add']);
+      this.router.navigate(['/candidat/documents','add']);
     } else {
-      try { this.router.navigate(['/auth/login'], { queryParams: { redirect: '/documents/add' } }); } catch(e){ this.router.navigate(['/auth/login']); }
+      try { this.router.navigate(['/auth/login'], { queryParams: { redirect: '/candidat/documents/add' } }); } catch(e){ this.router.navigate(['/auth/login']); }
     }
   }
 

@@ -269,7 +269,7 @@ export class AuthPage {
             // if role is missing or generic 'user' send to profile selection mandatory step
             if (!rr || rr === 'user' || rr === 'null' || rr === 'undefined') {
               try { this.router.navigate(['/profile-selection']); } catch(e){ this.router.navigate(['/']); }
-            } else if (rr === 'candidat' || rr.includes('candidat')) this.router.navigate(['/dashboard']);
+            } else if (rr === 'candidat' || rr.includes('candidat')) this.router.navigate(['/candidat/dashboard']);
             else if (rr.includes('admin')) this.router.navigate(['/admin']);
             else if (rr.includes('directeur') || rr.includes('encadrant')) {
               // directors without full approval should see awaiting state; send to profile-selection

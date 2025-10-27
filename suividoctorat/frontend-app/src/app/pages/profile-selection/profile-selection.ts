@@ -103,11 +103,11 @@ export class ProfileSelectionPage {
   choose(id: string){
     this.selected.set(id);
     if (id === 'candidat') {
-      // immediately set role and navigate to dashboard
+      // immediately set role and navigate to candidat dashboard
       this.sending.set(true);
       this.auth.updateRole('candidat').subscribe({ next: () => {
         this.sending.set(false);
-        try{ this.router.navigate(['/dashboard']); } catch(e){}
+        try{ this.router.navigate(['/candidat/dashboard']); } catch(e){}
       }, error: () => { this.sending.set(false); alert('Erreur lors de la mise à jour du rôle'); } });
     } else {
       // open small form to collect extra data and submit a role-request
