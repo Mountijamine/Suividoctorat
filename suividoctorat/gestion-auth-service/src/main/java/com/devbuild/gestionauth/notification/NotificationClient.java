@@ -25,13 +25,17 @@ public class NotificationClient {
 
     public NotificationClient(@Value("${app.notification.url:}") String baseUrl, WebClient.Builder builder,
                               @Value("${app.notification.internal-secret:}") String internalSecret,
-                              CircuitBreakerRegistry cbRegistry,
-                              MeterRegistry meterRegistry) {
+                              org.springframework.beans.factory.ObjectProvider<CircuitBreakerRegistry> cbRegistryProvider,
+                              org.springframework.beans.factory.ObjectProvider<MeterRegistry> meterRegistryProvider) {
         this.baseUrl = baseUrl;
         this.internalSecret = internalSecret;
         this.client = builder.baseUrl(baseUrl).build();
-        this.circuitBreaker = cbRegistry.circuitBreaker("notificationClient");
-        this.notificationCounter = Counter.builder("notifications.sent.count").description("Number of notification attempts").register(meterRegistry);
+        // Use provided CircuitBreakerRegistry if available, otherwise create a default one
+    CircuitBreakerRegistry cbRegistry = cbRegistryProvider.getIfAvailable(() -> CircuitBreakerRegistry.ofDefaults());
+    this.circuitBreaker = cbRegistry.circuitBreaker("notificationClient");
+        // Use provided MeterRegistry if available, otherwise fall back to a simple in-memory registry
+        MeterRegistry mr = meterRegistryProvider.getIfAvailable(() -> new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+        this.notificationCounter = Counter.builder("notifications.sent.count").description("Number of notification attempts").register(mr);
     }
 
     public Mono<Void> sendProfileRequest(Map<String, String> payload) {

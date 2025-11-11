@@ -31,7 +31,6 @@ public class TokenFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
             token = header.substring(7);
         } else {
-            // try cookie named JWT
             if (request.getCookies() != null) {
                 for (jakarta.servlet.http.Cookie c : request.getCookies()) {
                     if ("JWT".equals(c.getName()) && StringUtils.hasText(c.getValue())) {
@@ -51,7 +50,6 @@ public class TokenFilter extends OncePerRequestFilter {
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception ex) {
-                // DEBUG: log token parse errors for troubleshooting
                 try { System.err.println("[TokenFilter] token parse error: " + ex.getMessage()); } catch (Throwable t) {}
             }
         }

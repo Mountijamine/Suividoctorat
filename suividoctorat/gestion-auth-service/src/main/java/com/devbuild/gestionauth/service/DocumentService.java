@@ -21,7 +21,6 @@ public class DocumentService {
     @Value("${app.upload.max-bytes:10485760}")
     private long maxUploadBytes; // default 10MB
 
-    // allow free-form categories provided by users (sanitized/length-checked)
 
     public DocumentService(DocumentRepository documentRepository) {
         this.documentRepository = documentRepository;
@@ -32,7 +31,6 @@ public class DocumentService {
         if (!dir.exists()) dir.mkdirs();
         String savedName = System.currentTimeMillis() + "-" + java.util.UUID.randomUUID() + "-" + file.getOriginalFilename();
         if (file.getSize() > maxUploadBytes) throw new IllegalArgumentException("File too large (max " + maxUploadBytes + " bytes)");
-        // normalize and validate title and category
         String normTitle = normalizeTitle(title);
         String normCategory = normalizeCategory(category);
 
@@ -64,11 +62,8 @@ public class DocumentService {
         return documentRepository.findById(id);
     }
 
-    // New helper: list documents for a username (email) with optional search q and pageable
     public org.springframework.data.domain.Page<Document> listForUser(String email, String q, int page, int size) {
-        // resolve user by owner email (join query via repository may be better; keep simple for now)
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"));
-        // Simple approach: fetch all and filter if q provided
         List<Document> all = documentRepository.findAll();
         java.util.stream.Stream<Document> s = all.stream().filter(d -> d.getOwner() != null && email.equals(d.getOwner().getEmail()));
         if (q != null && !q.isBlank()) {
@@ -90,10 +85,7 @@ public class DocumentService {
         return documentRepository.findByOwner_Affiliation(affiliation);
     }
 
-    /**
-     * Return all documents for a user (by owner email) optionally filtered by search term and category.
-     * This is used by export endpoints that need the full result set.
-     */
+    
     public java.util.List<Document> findForUserAll(String email, String q, String category) {
         List<Document> all = documentRepository.findAll();
         java.util.stream.Stream<Document> s = all.stream().filter(d -> d.getOwner() != null && email.equals(d.getOwner().getEmail()));
@@ -108,9 +100,7 @@ public class DocumentService {
         return s.collect(java.util.stream.Collectors.toList());
     }
 
-    /**
-     * Return distinct non-null categories used by a user's documents (order by frequency not required).
-     */
+   
     public java.util.List<String> findDistinctCategoriesForUser(String email) {
         List<Document> all = documentRepository.findAll();
         return all.stream()
@@ -122,7 +112,6 @@ public class DocumentService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    // Load file as Resource and ensure permissions (owner or admin) are respected by caller
     public org.springframework.core.io.Resource loadAsResource(Long id, String requestingUsername) throws java.io.IOException {
         Document d = documentRepository.findById(id).orElseThrow();
         boolean allowed = false;
@@ -159,9 +148,7 @@ public class DocumentService {
         if (category == null) return null;
         String v = category.trim();
         if (v.isEmpty()) return null;
-        // collapse multiple spaces
         v = v.replaceAll("\\s+", " ");
-        // remove path separators or control characters
         v = v.replaceAll("[\\\\/\\r\\n\t]+", "-");
         return v;
     }
@@ -171,7 +158,6 @@ public class DocumentService {
         String v = title.trim();
         if (v.isEmpty()) return null;
         v = v.replaceAll("\\s+", " ");
-        // strip CR/LF and tabs
         v = v.replaceAll("[\\r\\n\t]", " ");
         return v;
     }

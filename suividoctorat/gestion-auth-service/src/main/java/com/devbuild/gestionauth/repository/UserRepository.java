@@ -9,7 +9,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     List<User> findByRolesContaining(Role role);
-    // legacy compatibility
     default Optional<User> findByUsername(String username) {
         return findByEmail(username);
     }

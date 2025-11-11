@@ -1,13 +1,21 @@
 {
   "/gestion-auth-service": {
-    "target": "http://localhost:8080",
+    "target": "http://localhost:8091",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/gestion-auth-service": "" },
+    "logLevel": "debug"
+  }
+
+  ,"/uploads": {
+    "target": "http://localhost:8091",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   }
 
-  ,"/uploads": {
-    "target": "http://localhost:8080",
+  ,"/api": {
+    "target": "http://localhost:8091",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

@@ -21,18 +21,21 @@ public class JwtUtil {
     public JwtUtil(@Value("${app.jwt.secret:}") String secret,
                    @Value("${app.jwt.expiration-ms:86400000}") long expirationMs) {
         if (secret == null || secret.isBlank()) {
-            throw new IllegalStateException("JWT secret is not configured. Set 'app.jwt.secret' environment variable or property.");
-        }
-        byte[] keyBytes;
-        if (secret.startsWith("base64:")) {
-            keyBytes = java.util.Base64.getDecoder().decode(secret.substring(7));
+           
+            try { System.err.println("[JwtUtil] WARNING: 'app.jwt.secret' is not set. Generating a temporary key for development."); } catch (Throwable t) {}
+            this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
         } else {
-            keyBytes = secret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            byte[] keyBytes;
+            if (secret.startsWith("base64:")) {
+                keyBytes = java.util.Base64.getDecoder().decode(secret.substring(7));
+            } else {
+                keyBytes = secret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            }
+            if (keyBytes.length < 32) {
+                throw new IllegalStateException("JWT secret is too short; require at least 32 bytes of entropy (use a base64 string or a longer secret).");
+            }
+            this.key = Keys.hmacShaKeyFor(keyBytes);
         }
-        if (keyBytes.length < 32) {
-            throw new IllegalStateException("JWT secret is too short; require at least 32 bytes of entropy (use a base64 string or a longer secret).");
-        }
-        this.key = Keys.hmacShaKeyFor(keyBytes);
         this.expirationMs = expirationMs;
     }
 

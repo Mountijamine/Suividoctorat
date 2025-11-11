@@ -12,10 +12,16 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private injector: Injector) {}
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = localStorage.getItem('auth_token');
-    try { console.debug('[AuthInterceptor] url=', req.url, ' tokenPresent=', !!token); } catch(e){}
+    try { console.log('[AuthInterceptor] url=', req.url, ' tokenPresent=', !!token); } catch(e){}
     let outReq = req;
-    if (token) {
+    // Do not attach Authorization header for login/signup endpoints to avoid sending stale tokens
+    const url = (req.url || '').toLowerCase();
+    const isAuthEndpoint = url.includes('/api/auth/login') || url.includes('/api/auth/signup');
+    if (token && !isAuthEndpoint) {
       outReq = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+      try { console.log('[AuthInterceptor] attached Authorization header for', req.method, req.url); } catch(e){}
+    } else if (isAuthEndpoint) {
+      try { console.log('[AuthInterceptor] skipping Authorization header for auth endpoint', req.url); } catch(e){}
     }
     return next.handle(outReq).pipe(
       catchError((err:any) => {
@@ -25,6 +31,7 @@ export class AuthInterceptor implements HttpInterceptor {
           // if token expired or unauthorized, clear auth and redirect to login
           if (err && (err.status === 401 || err.status === 403)){
             console.warn('[AuthInterceptor] response status', err.status, '— logging out');
+            try { console.warn('[AuthInterceptor] response body:', err?.error); } catch(e){}
             auth.setAuth(null, null);
             try{ router.navigate(['/auth'], { queryParams: { sessionExpired: '1' } }); } catch(e){}
           }

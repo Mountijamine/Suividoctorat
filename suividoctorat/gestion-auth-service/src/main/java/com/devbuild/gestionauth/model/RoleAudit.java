@@ -17,7 +17,7 @@ public class RoleAudit {
     private String roleName;
 
     @Column(nullable = false)
-    private String action; // ASSIGNED or REMOVED
+    private String action; 
 
     @Column(nullable = false)
     private String performedBy;

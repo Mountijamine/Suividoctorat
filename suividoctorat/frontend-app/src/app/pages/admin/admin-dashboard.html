@@ -9,36 +9,108 @@
     </div>
   </div>
 
+  <div style="margin-top:0.75rem; display:flex; gap:0.5rem">
+    <button class="btn" [class.outline]="view() !== 'users'" (click)="view.set('users')">Users</button>
+    <button class="btn" [class.outline]="view() !== 'requests'" (click)="view.set('requests')">Requests</button>
+  </div>
+
   <div style="margin-top:1rem">
     <div *ngIf="loading()" style="color:#6b7280">Chargement des utilisateurs...</div>
 
-  <div class="requests" *ngIf="requests().length > 0">
-      <h3 style="margin:0 0 0.5rem 0">Demandes en attente</h3>
-      <div *ngFor="let r of requests()" class="req">
-        <div>
-          <div style="font-weight:700">{{ r.firstName }} {{ r.lastName }} <span style="color:#6b7280; font-size:0.9rem">({{ r.email }})</span></div>
-          <div style="color:#6b7280">Demande: <strong>{{ r.role }}</strong> — {{ r.justification || '' }}</div>
-        </div>
-        <div style="display:flex; gap:0.5rem">
-          <button class="btn outline" (click)="rejectRequest(r)">Rejeter</button>
-          <button class="btn" (click)="approveRequest(r)">Approuver</button>
+    <div *ngIf="view() === 'requests'">
+      <div class="requests" *ngIf="requests().length > 0">
+        <h3 style="margin:0 0 0.5rem 0">Demandes de rôle en attente</h3>
+        <div class="requests-grid">
+          <div *ngFor="let r of requests()" class="req-card">
+            <div class="req-media">
+              <div class="thumb" *ngIf="getFrontUrl(r); else noFront">
+                <img [src]="getFrontUrl(r)" alt="recto" (click)="openFile(getFrontUrl(r))" />
+              </div>
+              <ng-template #noFront>
+                <div class="thumb" title="Pas de photo recto">Recto</div>
+              </ng-template>
+
+              <div class="thumb" *ngIf="getBackUrl(r); else noBack">
+                <img [src]="getBackUrl(r)" alt="verso" (click)="openFile(getBackUrl(r))" />
+              </div>
+              <ng-template #noBack>
+                <div class="thumb" title="Pas de photo verso">Verso</div>
+              </ng-template>
+            </div>
+
+            <div class="req-body">
+              <div class="req-title">{{ r.user?.firstName || '' }} {{ r.user?.lastName || '' }} <span style="color:#6b7280; font-weight:500">({{ r.user?.email || '' }})</span></div>
+              <div class="req-meta">Demande: <strong>{{ r.requestedRole }}</strong> · <span>{{ r.status }}</span></div>
+              <div class="req-note">
+                <div *ngIf="r.affiliation"><strong>Affiliation:</strong> {{ r.affiliation }}</div>
+                <div *ngIf="r.justification"><strong>Justification:</strong> {{ r.justification }}</div>
+                <div *ngIf="r.username"><strong>Username:</strong> {{ r.username }}</div>
+                <div *ngIf="r.province"><strong>Province:</strong> {{ r.province }}</div>
+                <div style="margin-top:0.5rem; color:#9ca3af">Soumis: {{ r.createdAt }}</div>
+              </div>
+            </div>
+
+            <div class="req-actions">
+              <button class="btn outline" (click)="rejectRequest(r)">Rejeter</button>
+              <button class="btn" (click)="approveRequest(r)">Approuver</button>
+              <button class="btn outline" (click)="sendMessage(r)">Message</button>
+            </div>
+          </div>
         </div>
       </div>
+      <div *ngIf="requests().length === 0" style="color:#6b7280">Aucune demande en attente</div>
+      <div *ngIf="requestsError()" style="margin-top:0.5rem; color:#b91c1c">Erreur lors de la récupération des demandes: {{ requestsError() }}</div>
     </div>
-    <div class="grid">
+    <div *ngIf="view() === 'users'" class="grid">
       <div *ngFor="let u of users()" class="user-card">
         <div class="meta">
           <div class="avatar">{{ initials(u).toUpperCase() }}</div>
           <div>
             <div style="font-weight:700">{{ u.firstName }} {{ u.lastName }}</div>
             <div class="role">{{ u.email }} · {{ u.role }}</div>
+            <div style="margin-top:6px; font-size:0.85rem; color:#9ca3af">
+              <span *ngIf="requestCounts()[u.id]">Demandes en attente: <strong>{{ requestCounts()[u.id] }}</strong></span>
+              <span *ngIf="!requestCounts()[u.id]">Aucune demande</span>
+            </div>
           </div>
         </div>
         <div style="margin-top:0.5rem; color:#374151">ID: {{ u.id }}</div>
         <div class="actions">
-          <button class="btn outline">Voir</button>
+          <button class="btn outline" (click)="toggleUserRequests(u)">{{ expandedUsers()[u.id] ? 'Cacher' : 'Voir' }}</button>
           <button class="btn">Modifier</button>
         </div>
+        <div *ngIf="expandedUsers()[u.id]" style="margin-top:0.75rem; background:#f8fafc; padding:0.6rem; border-radius:8px">
+          <div style="font-weight:700; margin-bottom:0.4rem">Demandes pour {{ u.firstName }} {{ u.lastName }}</div>
+          <div *ngFor="let r of getRequestsForUser(u.id)" style="padding:0.4rem 0; border-bottom:1px solid #eef2f7">
+            <div><strong>{{ r.requestedRole }}</strong> — {{ r.status }}</div>
+            <div style="font-size:0.9rem; color:#6b7280">{{ r.createdAt }} · {{ r.justification || '' }}</div>
+            <div style="margin-top:0.25rem">
+              <button class="btn outline" (click)="rejectRequest(r)">Rejeter</button>
+              <button class="btn" (click)="approveRequest(r)">Approuver</button>
+              <button class="btn outline" (click)="sendMessage(r)">Message</button>
+            </div>
+          </div>
+          <div *ngIf="getRequestsForUser(u.id).length === 0" style="color:#6b7280">Aucune demande</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation modal -->
+  <div *ngIf="modalVisible()" style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:2000">
+    <div style="width:520px; background:#fff; padding:1rem; border-radius:8px; box-shadow:0 20px 50px rgba(2,6,23,0.3)">
+      <h3 style="margin-top:0">{{ modalAction === 'approve' ? 'Confirmer l\'approbation' : 'Confirmer le rejet' }}</h3>
+      <p style="color:#6b7280">{{ modalAction === 'approve' ? 'Êtes-vous sûr de vouloir approuver cette demande ? Vous pouvez ajouter un message optionnel ci-dessous.' : 'Êtes-vous sûr de vouloir rejeter cette demande ? Vous pouvez ajouter un message expliquant le motif.' }}</p>
+      <div style="margin-top:0.5rem">
+        <textarea [(ngModel)]="modalMessage" rows="4" style="width:100%; padding:0.6rem; border-radius:6px; border:1px solid #e6eef8"></textarea>
+      </div>
+      <div style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem">
+        <input type="checkbox" id="notify" [(ngModel)]="modalNotify" />
+        <label for="notify" style="font-size:0.95rem; color:#374151">Notify by email</label>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.75rem">
+        <button class="btn outline" (click)="cancelModal()" [disabled]="modalLoading()">Annuler</button>
+        <button class="btn" (click)="confirmModal()" [disabled]="modalLoading()">{{ modalAction === 'approve' ? 'Approuver' : 'Rejeter' }}</button>
       </div>
     </div>
   </div>

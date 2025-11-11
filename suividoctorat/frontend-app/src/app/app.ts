@@ -9,7 +9,8 @@ import { AuthService } from './services/auth.service';
   imports: [RouterOutlet, CommonModule, RouterLink],
   template: `
     <div class="app-root">
-      <header class="app-header">
+      <!-- Hide header for users with role 'user' who need to select their profile -->
+      <header class="app-header" *ngIf="showNavbar()">
         <div class="bar">
           <div class="left">
             <a class="brand" href="#/">Portail Doctorat</a>
@@ -18,20 +19,20 @@ import { AuthService } from './services/auth.service';
           <button class="hamburger" (click)="navOpen.set(!navOpen())" aria-label="Menu">☰</button>
 
           <nav class="nav-links" [class.open]="navOpen()">
-            <a [routerLink]="isLoggedIn() ? '/dashboard' : '/'" (click)="closeNav()">Tableau de bord</a>
-            <a routerLink="/auth" (click)="closeNav()">Inscription</a>
-            <a routerLink="/soutenance" (click)="closeNav()">Soutenance</a>
-            <ng-container *ngIf="isLoggedIn()">
-              <a routerLink="/documents" (click)="closeNav()">Documents</a>
+            <a [routerLink]="getCandidatLink()" (click)="closeNav()">Tableau de bord</a>
+            <a routerLink="/auth" (click)="closeNav()" *ngIf="!isLoggedIn()">Inscription</a>
+            <a routerLink="/soutenance" (click)="closeNav()" *ngIf="isCandidat()">Soutenance</a>
+            <ng-container *ngIf="isCandidat()">
+              <a routerLink="/candidat/documents" (click)="closeNav()">Documents</a>
             </ng-container>
-            <ng-container *ngIf="(role() || '').toLowerCase().includes('admin')">
+            <ng-container *ngIf="isAdmin()">
               <a routerLink="/admin" (click)="closeNav()">Admin</a>
             </ng-container>
           </nav>
 
           <div class="right">
             <ng-container *ngIf="isLoggedIn()">
-              <a routerLink="/profile" class="profile-link" (click)="closeNav()" style="display:flex; align-items:center; gap:0.5rem; text-decoration:none">
+              <a [routerLink]="getProfileLink()" class="profile-link" (click)="closeNav()" style="display:flex; align-items:center; gap:0.5rem; text-decoration:none">
                 <img *ngIf="profile?.avatar" [src]="profile.avatar" alt="avatar" style="width:32px; height:32px; border-radius:999px; object-fit:cover; border:2px solid #fff" />
                 <span class="cta">Mon espace</span>
               </a>
@@ -44,7 +45,7 @@ import { AuthService } from './services/auth.service';
         </div>
       </header>
 
-      <div style="min-height:calc(100vh - 64px)">
+      <div [style.min-height]="showNavbar() ? 'calc(100vh - 64px)' : '100vh'">
         <router-outlet></router-outlet>
       </div>
     </div>
@@ -89,6 +90,37 @@ export class App {
     try {
       this.auth.getProfile().subscribe({ next: (res:any) => { this.profile = res || null; }, error: () => { this.profile = null; } });
     } catch(e) { this.profile = null; }
+  }
+
+  // Helper methods for navbar visibility and role-based routing
+  showNavbar(): boolean {
+    const r = (this.role() || '').toLowerCase();
+    // Hide navbar for users with role 'user' - they should only see profile-selection
+    if (r === 'user' || r === '' || r === 'null' || r === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+
+  isCandidat(): boolean {
+    const r = (this.role() || '').toLowerCase();
+    return r.includes('candidat');
+  }
+
+  isAdmin(): boolean {
+    const r = (this.role() || '').toLowerCase();
+    return r.includes('admin');
+  }
+
+  getCandidatLink(): string {
+    return this.isCandidat() ? '/candidat/dashboard' : '/';
+  }
+
+  getProfileLink(): string {
+    const r = (this.role() || '').toLowerCase();
+    if (r.includes('candidat')) return '/candidat/profile';
+    if (r.includes('admin')) return '/admin';
+    return '/profile-selection';
   }
 
   logout(){

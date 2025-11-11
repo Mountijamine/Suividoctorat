@@ -20,8 +20,6 @@ public class ProfileController {
 
     @GetMapping("/profile")
     public String profile(Model model, java.security.Principal principal) {
-        // Serve the SPA which will render the profile client-side. If clients POST to /profile
-        // the POST mapping will continue to process updates and redirect back to the SPA.
         return "forward:/index.html";
     }
 

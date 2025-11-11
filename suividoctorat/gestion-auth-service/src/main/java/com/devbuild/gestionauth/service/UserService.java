@@ -33,7 +33,6 @@ public class UserService {
         u.setPassword(passwordEncoder.encode(rawPassword));
         u.getRoles().add(Role.ROLE_USER);
         User saved = userRepository.save(u);
-        // Notify admins about the new profile request (best-effort, async)
         try {
             String req = saved.getRequestedProfile();
             if (notificationUrl != null && !notificationUrl.isBlank() && req != null) {
@@ -41,11 +40,9 @@ public class UserService {
                 payload.put("type", "profile_request");
                 payload.put("email", saved.getEmail());
                 payload.put("requestedProfile", req);
-                // fire-and-forget
                 notificationClient.sendProfileRequest(payload).subscribe();
             }
         } catch (Exception ex) {
-            // swallow - notification is best-effort
         }
         return saved;
     }
@@ -65,7 +62,6 @@ public class UserService {
         return userRepository.save(u);
     }
 
-    // Backward-compatible overloads
     public User createUserWithProfile(String email, String rawPassword, String firstName, String lastName, String phone, boolean acceptTerms) {
         return createUserWithProfile(email, rawPassword, firstName, lastName, phone, acceptTerms, null, null);
     }
@@ -74,7 +70,6 @@ public class UserService {
         return createUserWithProfile(email, rawPassword, firstName, lastName, phone, acceptTerms, requestedProfile, null);
     }
 
-    // Approve and assign using approver email (records audit)
     public User approveAndAssign(String email, String approver) {
         User u = userRepository.findByEmail(email).orElseThrow();
         if (u.getRequestedProfile() == null) return u;
@@ -91,7 +86,6 @@ public class UserService {
         }
     }
 
-    // Backward-compatible method (no approver provided)
     public User approveAndAssign(String email) {
         return approveAndAssign(email, "system");
     }
@@ -117,11 +111,9 @@ public class UserService {
         return userRepository.findByRolesContaining(role);
     }
 
-    // New signature records actor who performed the change. Backwards-compatible overloads below.
     public User assignRole(String email, Role role, String performedBy) {
         User u = userRepository.findByEmail(email).orElseThrow();
         u.getRoles().add(role);
-        // audit
         try {
             com.devbuild.gestionauth.model.RoleAudit a = new com.devbuild.gestionauth.model.RoleAudit();
             a.setTargetEmail(email);
@@ -169,7 +161,6 @@ public class UserService {
         return userRepository.save(u);
     }
 
-    // Update profile fields. If requestedProfile changes, mark approved=false and clear approval audit.
     public User updateProfile(String email, String firstName, String lastName, String phone, String affiliation, String requestedProfile) {
         User u = userRepository.findByEmail(email).orElseThrow();
         boolean profileChanged = false;

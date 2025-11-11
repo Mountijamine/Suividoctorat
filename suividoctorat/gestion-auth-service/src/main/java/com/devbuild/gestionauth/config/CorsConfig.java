@@ -9,10 +9,9 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // Allow the Angular dev server and gateway to access API endpoints during local development
-        registry.addMapping("/api/**")
-                .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "https://localhost:*", "https://127.0.0.1:*", "http://localhost:64442")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+    registry.addMapping("/api/**")
+        .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "https://localhost:*", "https://127.0.0.1:*", "http://localhost:64442")
+        .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .exposedHeaders("Authorization");
