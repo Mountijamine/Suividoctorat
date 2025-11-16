@@ -7,7 +7,7 @@
         <p class="subtitle">Suivi du processus de soutenance de thèse</p>
       </div>
       <div class="actions" *ngIf="currentView() === 'list'">
-        <button class="btn-primary" (click)="showCreateForm()">
+        <button class="btn-primary" (click)="showCreateForm()" *ngIf="userRole() === 'ROLE_ENCADRANT'">
           <span>➕</span> Nouvelle Demande
         </button>
       </div>
@@ -238,7 +238,7 @@
           </div>
           
           <!-- Add jury member form (for directeur) -->
-          <div *ngIf="userRole() === 'ROLE_ENCADRANT' && selectedDemande()!.directeurEmail === userEmail() && ['PREREQUIS_VALIDES', 'EN_ATTENTE_JURY', 'JURY_PROPOSE'].includes(selectedDemande()!.statut)" class="add-membre-form">
+          <div *ngIf="userRole() === 'ROLE_ENCADRANT' && selectedDemande()!.directeurEmail === userEmail()" class="add-membre-form">
             <h4>Ajouter un membre du jury</h4>
             <div class="form-row">
               <div class="form-group">

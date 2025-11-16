@@ -108,7 +108,6 @@ export class SoutenancePage implements OnInit {
       return;
     }
     
-    // Get email from token
     const token = this.authService.getToken();
     if (token) {
       const payload = this.parseJwt(token);
@@ -117,10 +116,12 @@ export class SoutenancePage implements OnInit {
     
     const role = this.authService.role() || '';
     this.userRole.set(role);
+    console.log('[Soutenance] User role:', role);
+    console.log('[Soutenance] User email:', this.userEmail());
     
-    // Restrict access to ROLE_ENCADRANT only
+    // ONLY ROLE_ENCADRANT can access this page
     if (role !== 'ROLE_ENCADRANT') {
-      this.toastService.error('Accès réservé aux encadrants');
+      this.toastService.error('Accès réservé aux encadrants uniquement');
       this.router.navigate(['/']);
       return;
     }
@@ -146,11 +147,11 @@ export class SoutenancePage implements OnInit {
       
       console.log('[Soutenance] Loading demandes - Role:', role, 'Email:', email);
       
-      let params: any = {};
-      if (role === 'ROLE_ENCADRANT') {
-        params.role = 'directeur';
-        params.email = email;
-      }
+      // Only ROLE_ENCADRANT loads demandes where they are the director
+      let params: any = {
+        role: 'directeur',
+        email: email
+      };
       
       console.log('[Soutenance] API URL:', `${this.apiUrl}/demandes`, 'Params:', params);
       
@@ -170,15 +171,30 @@ export class SoutenancePage implements OnInit {
       this.toastService.error('Veuillez remplir tous les champs requis');
       return;
     }
-    
+
     this.loading.set(true);
     try {
+      // ENCADRANT creates demande: auto-fill their email as directeur
       this.newDemande.directeurEmail = this.userEmail();
+
+      console.log('[Soutenance] Creating demande (ENCADRANT):', this.newDemande);
+
       const demande = await this.http.post<DemandeSoutenance>(`${this.apiUrl}/demandes`, this.newDemande).toPromise();
+
+      console.log('[Soutenance] createDemande response:', demande);
+      if (!demande || !demande.id) {
+        this.toastService.error('La création a échoué (réponse invalide)');
+        await this.loadDemandes();
+        return;
+      }
+
       this.toastService.success('Demande créée avec succès');
-      this.currentView.set('list');
-      await this.loadDemandes();
-      
+
+      // Open the created demande in detail view so the encadrant can add jury members
+      this.selectedDemande.set(demande);
+      this.currentView.set('detail');
+      await this.loadPrerequisAndJury(demande.id);
+
       // Reset form
       this.newDemande = {
         doctorantEmail: '',
@@ -187,13 +203,16 @@ export class SoutenancePage implements OnInit {
         resume: ''
       };
     } catch (error: any) {
-      this.toastService.error(error?.error?.error || 'Erreur de création');
+      console.error('[Soutenance] createDemande error:', error);
+      this.toastService.error(error?.error?.error || 'Erreur de création - vérifiez si le backend est démarré');
     } finally {
       this.loading.set(false);
     }
   }
   
   async viewDemande(demande: DemandeSoutenance) {
+    console.log('[Soutenance] viewDemande called', demande);
+    console.log('[Soutenance] demande.statut:', demande.statut, 'directeurEmail:', demande.directeurEmail);
     this.selectedDemande.set(demande);
     this.currentView.set('detail');
     await this.loadPrerequisAndJury(demande.id);
