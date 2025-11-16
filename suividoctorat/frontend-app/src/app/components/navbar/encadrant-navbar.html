@@ -1,0 +1,166 @@
+<nav class="navbar">
+  <!-- Left Section: Menu + Logo -->
+  <div class="nav-left">
+    <button class="menu-btn" aria-label="Toggle sidebar" (click)="toggleSidebar()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <path d="M16 3L3 9v8c0 7.732 5.076 13 13 13s13-5.268 13-13V9L16 3z" fill="currentColor" opacity="0.15"/>
+          <path d="M16 3L3 9v8c0 7.732 5.076 13 13 13s13-5.268 13-13V9L16 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 11v7m0 3h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="brand-text">SuiviDoctorat - Encadrant</span>
+    </div>
+  </div>
+
+  <!-- Center Section: Search -->
+  <div class="nav-center">
+    <div class="search-container">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+        <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <input 
+        type="search" 
+        placeholder="Rechercher..." 
+        aria-label="Search"
+        class="search-input" />
+    </div>
+  </div>
+
+  <!-- Right Section: Theme + Language + Profile -->
+  <div class="nav-right">
+    <button 
+      class="icon-button" 
+      title="Changer le thème" 
+      aria-label="Toggle dark mode"
+      (click)="toggleTheme()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <button 
+      class="icon-button" 
+      title="Changer la langue" 
+      aria-label="Language selector"
+      (click)="changeLanguage()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </button>
+
+    <button 
+      class="profile-button" 
+      title="Profil" 
+      aria-label="User profile"
+      (click)="toggleProfileMenu()">
+      <img 
+        *ngIf="profileImage"
+        [src]="profileImage" 
+        alt="User profile"
+        class="profile-image"
+        (error)="profileImage = null" />
+      <div *ngIf="!profileImage" class="profile-initials">{{ userInitials }}</div>
+    </button>
+
+    <!-- Profile Dropdown Menu -->
+    <div class="profile-dropdown" *ngIf="showProfileMenu" (click)="closeProfileMenu()">
+      <div class="dropdown-overlay" (click)="closeProfileMenu()"></div>
+      <div class="dropdown-content" (click)="$event.stopPropagation()">
+        <div class="dropdown-header">
+          <div class="dropdown-avatar-container">
+            <img 
+              *ngIf="profileImage"
+              [src]="profileImage" 
+              alt="User profile"
+              class="dropdown-avatar"
+              (error)="profileImage = null" />
+            <div *ngIf="!profileImage" class="dropdown-avatar-initials">{{ userInitials }}</div>
+          </div>
+          <div class="dropdown-email">{{ userEmail || 'Encadrant' }}</div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a [routerLink]="['/encadrant/profile']" class="dropdown-item" (click)="closeProfileMenu()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span>Gérer votre compte</span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" (click)="logout()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="16 17 21 12 16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Se déconnecter</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Sidebar Panel -->
+<div class="sidebar-container" [class.show]="showSidebar">
+  <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+  <div class="sidebar" (click)="$event.stopPropagation()">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M16 3L3 9v8c0 7.732 5.076 13 13 13s13-5.268 13-13V9L16 3z" fill="currentColor" opacity="0.15"/>
+            <path d="M16 3L3 9v8c0 7.732 5.076 13 13 13s13-5.268 13-13V9L16 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 11v7m0 3h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="sidebar-brand-text">Encadrant</span>
+      </div>
+      <button class="sidebar-close" (click)="closeSidebar()" aria-label="Close sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="sidebar-nav">
+      <a 
+        *ngFor="let item of navItems" 
+        [routerLink]="item.path" 
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeSidebar()">
+        <svg class="nav-item-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" [innerHTML]="getNavIcon(item.icon)"></svg>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">
+          <img 
+            *ngIf="profileImage"
+            [src]="profileImage" 
+            alt="User profile"
+            (error)="profileImage = null" />
+          <div *ngIf="!profileImage" class="sidebar-avatar-initials">{{ userInitials }}</div>
+        </div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-email">{{ userEmail || 'Encadrant' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

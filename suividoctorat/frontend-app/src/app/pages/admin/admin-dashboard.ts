@@ -34,6 +34,12 @@ import { AdminNavbarComponent } from '../../components/navbar/admin-navbar';
     .h-filter-btn { padding:0.5rem 1rem; border-radius:8px; border:1px solid #e6eef8; background:#fff; cursor:pointer; font-size:0.875rem; font-weight:500; color:#475569; transition:all 0.2s }
     .h-filter-btn:hover { background:#f8fafc; border-color:#cbd5e1 }
     .h-filter-btn.active { background:#0f172a; color:#fff; border-color:#0f172a }
+    .pagination { display:flex; gap:0.5rem; align-items:center; justify-content:center; margin-top:1.5rem; padding:1rem }
+    .page-btn { padding:0.5rem 0.75rem; border-radius:8px; border:1px solid #e6eef8; background:#fff; cursor:pointer; font-size:0.875rem; font-weight:500; color:#475569; transition:all 0.2s; min-width:40px; text-align:center }
+    .page-btn:hover:not(:disabled) { background:#f8fafc; border-color:#cbd5e1 }
+    .page-btn.active { background:#0f172a; color:#fff; border-color:#0f172a }
+    .page-btn:disabled { opacity:0.4; cursor:not-allowed }
+    .page-info { font-size:0.875rem; color:#6b7280; padding:0 0.5rem }
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-top:1rem }
     .user-card { background:#fff; border-radius:12px; padding:1.25rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid #f3f4f6; display:flex; flex-direction:column; gap:0.75rem; transition:all 0.2s }
     .user-card:hover{ box-shadow:0 8px 24px rgba(2,6,23,0.08); border-color:#e6eef8 }
@@ -85,6 +91,13 @@ export class AdminDashboard {
   // filters for users
   userSearchQuery = signal('');
   userRoleFilter = signal<string>('all');
+  userDemandesFilter = signal<string>('all');
+  
+  // pagination
+  usersPage = signal(1);
+  usersPerPage = signal(12);
+  requestsPage = signal(1);
+  requestsPerPage = signal(10);
   
   // modal state for approve/reject confirmation
   modalVisible = signal(false);
@@ -132,9 +145,13 @@ export class AdminDashboard {
       const arr = Array.isArray(res) ? res : (res?.data || []);
       this.requests.set(arr);
       this.requestsError.set(null);
-      // compute counts per user
+      // compute counts per user (exclude CANCELLED/CANCELED requests)
       const counts: Record<string, number> = {};
       for (const r of arr) {
+        // Skip cancelled requests
+        if (r.status && (r.status.toUpperCase() === 'CANCELLED' || r.status.toUpperCase() === 'CANCELED')) {
+          continue;
+        }
         const id = r.user?.id || r.userId || 'unknown';
         counts[id] = (counts[id] || 0) + 1;
       }
@@ -260,6 +277,13 @@ export class AdminDashboard {
       );
     }
     
+    // Apply demandes filter (exclude cancelled requests in count)
+    if (this.userDemandesFilter() === 'with') {
+      filtered = filtered.filter(u => this.requestCounts()[u.id] > 0);
+    } else if (this.userDemandesFilter() === 'without') {
+      filtered = filtered.filter(u => !this.requestCounts()[u.id]);
+    }
+    
     // Apply search query
     const query = this.userSearchQuery().toLowerCase();
     if (query) {
@@ -272,6 +296,36 @@ export class AdminDashboard {
     }
     
     return filtered;
+  }
+
+  // Get paginated users
+  paginatedUsers() {
+    const filtered = this.filteredUsers();
+    const start = (this.usersPage() - 1) * this.usersPerPage();
+    const end = start + this.usersPerPage();
+    return filtered.slice(start, end);
+  }
+
+  // Get total pages for users
+  usersTotalPages() {
+    return Math.ceil(this.filteredUsers().length / this.usersPerPage());
+  }
+
+  // Change users page
+  setUsersPage(page: number) {
+    if (page >= 1 && page <= this.usersTotalPages()) {
+      this.usersPage.set(page);
+    }
+  }
+  
+  // Reset users page when filters change
+  resetUsersPage() {
+    this.usersPage.set(1);
+  }
+  
+  // Reset requests page when filters change
+  resetRequestsPage() {
+    this.requestsPage.set(1);
   }
 
   // Get unique roles from requests
@@ -290,6 +344,26 @@ export class AdminDashboard {
       if (u.role) roles.add(u.role);
     });
     return Array.from(roles).sort();
+  }
+
+  // Get paginated requests
+  paginatedRequests() {
+    const filtered = this.filteredRequests();
+    const start = (this.requestsPage() - 1) * this.requestsPerPage();
+    const end = start + this.requestsPerPage();
+    return filtered.slice(start, end);
+  }
+
+  // Get total pages for requests
+  requestsTotalPages() {
+    return Math.ceil(this.filteredRequests().length / this.requestsPerPage());
+  }
+
+  // Change requests page
+  setRequestsPage(page: number) {
+    if (page >= 1 && page <= this.requestsTotalPages()) {
+      this.requestsPage.set(page);
+    }
   }
 
   // open confirmation modal for approve/reject

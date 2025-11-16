@@ -1,0 +1,291 @@
+<div class="soutenance-page">
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <h1 class="title">Gestion des Soutenances</h1>
+        <p class="subtitle">Suivi du processus de soutenance de thèse</p>
+      </div>
+      <div class="actions" *ngIf="currentView() === 'list'">
+        <button class="btn-primary" (click)="showCreateForm()">
+          <span>➕</span> Nouvelle Demande
+        </button>
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div *ngIf="currentView() === 'list'" class="list-view">
+      <div *ngIf="loading()" class="loading">Chargement...</div>
+      
+      <div *ngIf="!loading() && demandes().length === 0" class="empty">
+        <p>Aucune demande de soutenance pour le moment.</p>
+      </div>
+      
+      <div *ngIf="!loading() && demandes().length > 0" class="demandes-grid">
+        <div *ngFor="let demande of demandes()" class="demande-card" (click)="viewDemande(demande)">
+          <div class="card-header">
+            <h3 class="card-title">{{ demande.titreThese }}</h3>
+            <span class="badge" [class.badge-success]="demande.statut === 'AUTORISEE'" 
+                  [class.badge-warning]="demande.statut === 'BROUILLON'"
+                  [class.badge-danger]="demande.statut === 'REJETEE'">
+              {{ getStatutLabel(demande.statut) }}
+            </span>
+          </div>
+          <div class="card-body">
+            <p class="card-info"><strong>Doctorant:</strong> {{ demande.doctorantEmail }}</p>
+            <p class="card-info"><strong>Directeur:</strong> {{ demande.directeurEmail }}</p>
+            <p class="card-info"><strong>Créée le:</strong> {{ demande.dateCreation | date:'dd/MM/yyyy' }}</p>
+            <p *ngIf="demande.dateSoutenance" class="card-info highlight">
+              <strong>Date soutenance:</strong> {{ demande.dateSoutenance | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Form -->
+    <div *ngIf="currentView() === 'create'" class="form-view">
+      <button class="btn-back" (click)="goBack()">← Retour</button>
+      
+      <div class="form-card">
+        <h2>Nouvelle Demande de Soutenance</h2>
+        
+        <div class="form-group">
+          <label>Email du doctorant *</label>
+          <input type="email" [(ngModel)]="newDemande.doctorantEmail" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Titre de la thèse *</label>
+          <input type="text" [(ngModel)]="newDemande.titreThese" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Résumé</label>
+          <textarea [(ngModel)]="newDemande.resume" class="form-control" rows="6"></textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button class="btn-secondary" (click)="goBack()">Annuler</button>
+          <button class="btn-primary" (click)="createDemande()" [disabled]="loading()">
+            {{ loading() ? 'Création...' : 'Créer la demande' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail View -->
+    <div *ngIf="currentView() === 'detail' && selectedDemande()" class="detail-view">
+      <button class="btn-back" (click)="goBack()">← Retour</button>
+      
+      <div class="detail-header">
+        <h2>{{ selectedDemande()!.titreThese }}</h2>
+        <span class="badge-large" [class.badge-success]="selectedDemande()!.statut === 'AUTORISEE'"
+              [class.badge-warning]="selectedDemande()!.statut === 'BROUILLON'"
+              [class.badge-danger]="selectedDemande()!.statut === 'REJETEE'">
+          {{ getStatutLabel(selectedDemande()!.statut) }}
+        </span>
+      </div>
+      
+      <div class="detail-grid">
+        <!-- Information Section -->
+        <div class="section">
+          <h3>Informations générales</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Doctorant</label>
+              <span>{{ selectedDemande()!.doctorantEmail }}</span>
+            </div>
+            <div class="info-item">
+              <label>Directeur de thèse</label>
+              <span>{{ selectedDemande()!.directeurEmail }}</span>
+            </div>
+            <div class="info-item">
+              <label>Date de création</label>
+              <span>{{ selectedDemande()!.dateCreation | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-item" *ngIf="selectedDemande()!.dateSoutenance">
+              <label>Date de soutenance</label>
+              <span class="highlight">{{ selectedDemande()!.dateSoutenance | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="info-item" *ngIf="selectedDemande()!.lieuSoutenance">
+              <label>Lieu</label>
+              <span>{{ selectedDemande()!.lieuSoutenance }}</span>
+            </div>
+          </div>
+          <div *ngIf="selectedDemande()!.resume" class="resume">
+            <label>Résumé</label>
+            <p>{{ selectedDemande()!.resume }}</p>
+          </div>
+          
+          <!-- Actions for doctorant -->
+          <div *ngIf="userRole() === 'ROLE_DOCTORANT' && selectedDemande()!.statut === 'BROUILLON'" class="action-box">
+            <button class="btn-primary" (click)="submitDemande()" [disabled]="loading()">
+              Soumettre la demande
+            </button>
+          </div>
+        </div>
+
+        <!-- Prerequisites Section -->
+        <div class="section" *ngIf="prerequis()">
+          <h3>Prérequis</h3>
+          
+          <div class="prerequis-stats">
+            <div class="stat-item">
+              <label>Publications scientifiques</label>
+              <div class="stat-value">
+                <span class="number">{{ prerequis()!.nombrePublications }}</span> / 
+                <span class="required">{{ prerequis()!.nombrePublicationsRequises }}</span>
+                <span class="check" *ngIf="prerequis()!.publicationsValides">✓</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <label>Crédits de formation</label>
+              <div class="stat-value">
+                <span class="number">{{ prerequis()!.creditsFormation }}</span> / 
+                <span class="required">{{ prerequis()!.creditsFormationRequis }}</span>
+                <span class="check" *ngIf="prerequis()!.creditsValides">✓</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Edit form for doctorant -->
+          <div *ngIf="userRole() === 'ROLE_DOCTORANT' && selectedDemande()!.statut === 'BROUILLON'" class="edit-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre de publications</label>
+                <input type="number" [(ngModel)]="prerequisForm.nombrePublications" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Crédits de formation</label>
+                <input type="number" [(ngModel)]="prerequisForm.creditsFormation" class="form-control">
+              </div>
+            </div>
+            <button class="btn-secondary" (click)="updatePrerequisDoctorant()" [disabled]="loading()">
+              Mettre à jour
+            </button>
+          </div>
+          
+          <!-- Document checklist -->
+          <div class="checklist">
+            <h4>Documents requis</h4>
+            <div class="checklist-item" [class.checked]="prerequis()!.demandeManuscrite">
+              <span class="checkbox">{{ prerequis()!.demandeManuscrite ? '✓' : '☐' }}</span>
+              Demande manuscrite adressée au chef d'établissement
+            </div>
+            <div class="checklist-item" [class.checked]="prerequis()!.rapportThese">
+              <span class="checkbox">{{ prerequis()!.rapportThese ? '✓' : '☐' }}</span>
+              Rapport de thèse
+            </div>
+            <div class="checklist-item" [class.checked]="prerequis()!.rapportAntiPlagiat">
+              <span class="checkbox">{{ prerequis()!.rapportAntiPlagiat ? '✓' : '☐' }}</span>
+              Rapport anti-plagiat
+            </div>
+            <div class="checklist-item" [class.checked]="prerequis()!.rapportPublications">
+              <span class="checkbox">{{ prerequis()!.rapportPublications ? '✓' : '☐' }}</span>
+              Rapport contenant les publications et communications
+            </div>
+            <div class="checklist-item" [class.checked]="prerequis()!.attestationsFormation">
+              <span class="checkbox">{{ prerequis()!.attestationsFormation ? '✓' : '☐' }}</span>
+              Copies d'attestations de formations
+            </div>
+            <div class="checklist-item" [class.checked]="prerequis()!.autorisationSoutenance">
+              <span class="checkbox">{{ prerequis()!.autorisationSoutenance ? '✓' : '☐' }}</span>
+              Autorisation de soutenance
+            </div>
+          </div>
+          
+          <div *ngIf="prerequis()!.prerequisValides" class="success-box">
+            ✓ Prérequis validés par l'administration
+          </div>
+          
+          <!-- Admin validation -->
+          <div *ngIf="(userRole() === 'ROLE_ADMIN' || userRole() === 'ROLE_PERSONNEL') && !prerequis()!.prerequisValides" class="admin-actions">
+            <button class="btn-success" (click)="validatePrerequisAdmin(true)" [disabled]="loading()">
+              Valider les prérequis
+            </button>
+            <button class="btn-danger" (click)="validatePrerequisAdmin(false)" [disabled]="loading()">
+              Refuser
+            </button>
+          </div>
+        </div>
+
+        <!-- Jury Section -->
+        <div class="section">
+          <h3>Composition du jury</h3>
+          
+          <div *ngIf="juryMembers().length === 0" class="empty-message">
+            Aucun membre du jury proposé pour le moment.
+          </div>
+          
+          <div *ngIf="juryMembers().length > 0" class="jury-list">
+            <div *ngFor="let membre of juryMembers()" class="jury-card">
+              <div class="jury-header">
+                <h4>{{ membre.prenom }} {{ membre.nom }}</h4>
+                <span class="role-badge">{{ getRoleJuryLabel(membre.role) }}</span>
+              </div>
+              <p class="jury-info">{{ membre.grade }} - {{ membre.etablissement }}</p>
+              <p class="jury-info">{{ membre.email }}</p>
+              <div *ngIf="membre.role === 'RAPPORTEUR'" class="rapport-status">
+                <span *ngIf="membre.rapportSoumis && membre.rapportFavorable" class="status-success">
+                  ✓ Rapport favorable
+                </span>
+                <span *ngIf="!membre.rapportSoumis" class="status-pending">
+                  En attente du rapport
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Add jury member form (for directeur) -->
+          <div *ngIf="userRole() === 'ROLE_ENCADRANT' && selectedDemande()!.directeurEmail === userEmail() && ['PREREQUIS_VALIDES', 'EN_ATTENTE_JURY', 'JURY_PROPOSE'].includes(selectedDemande()!.statut)" class="add-membre-form">
+            <h4>Ajouter un membre du jury</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nom *</label>
+                <input type="text" [(ngModel)]="newMembre.nom" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Prénom *</label>
+                <input type="text" [(ngModel)]="newMembre.prenom" class="form-control">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email *</label>
+                <input type="email" [(ngModel)]="newMembre.email" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Établissement *</label>
+                <input type="text" [(ngModel)]="newMembre.etablissement" class="form-control">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Grade</label>
+                <input type="text" [(ngModel)]="newMembre.grade" class="form-control" placeholder="Professeur, MCF, etc.">
+              </div>
+              <div class="form-group">
+                <label>Rôle *</label>
+                <select [(ngModel)]="newMembre.role" class="form-control">
+                  <option value="RAPPORTEUR">Rapporteur</option>
+                  <option value="EXAMINATEUR">Examinateur</option>
+                  <option value="PRESIDENT">Président</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary" (click)="addJuryMember()" [disabled]="loading()">
+                Ajouter au jury
+              </button>
+              <button *ngIf="juryMembers().length > 0 && selectedDemande()!.statut !== 'JURY_PROPOSE'" 
+                      class="btn-success" (click)="submitJuryProposal()" [disabled]="loading()">
+                Soumettre la composition du jury
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

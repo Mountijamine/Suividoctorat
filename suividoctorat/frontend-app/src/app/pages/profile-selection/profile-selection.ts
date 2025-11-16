@@ -198,7 +198,34 @@ export class ProfileSelectionPage implements OnDestroy {
     if (!this.auth.isLoggedIn || !this.auth.isLoggedIn()) {
       console.warn('User not logged in, redirecting to auth');
       this.router.navigate(['/auth']);
+      return;
     }
+    
+    // Check current role and redirect if already assigned
+    try {
+      const currentRole = this.auth.role ? this.auth.role() : null;
+      console.log('[ProfileSelection] Current role:', currentRole);
+      
+      if (currentRole && currentRole !== 'ROLE_USER' && currentRole !== 'USER') {
+        // User already has a role assigned, redirect to appropriate dashboard
+        if (currentRole === 'ROLE_CANDIDAT' || currentRole.toLowerCase().includes('candidat')) {
+          console.log('[ProfileSelection] Redirecting to candidat dashboard');
+          this.router.navigate(['/candidat/dashboard']);
+          return;
+        } else if (currentRole === 'ROLE_ENCADRANT' || currentRole.toLowerCase().includes('encadrant')) {
+          console.log('[ProfileSelection] Redirecting to encadrant dashboard');
+          this.router.navigate(['/encadrant/dashboard']);
+          return;
+        } else if (currentRole === 'ROLE_ADMIN' || currentRole.toLowerCase().includes('admin')) {
+          console.log('[ProfileSelection] Redirecting to admin dashboard');
+          this.router.navigate(['/admin']);
+          return;
+        }
+      }
+    } catch(e) {
+      console.error('[ProfileSelection] Error checking role:', e);
+    }
+    
     // check if there's an existing pending request for this user
     try { this.checkPendingRequests(); } catch(e){}
   }
