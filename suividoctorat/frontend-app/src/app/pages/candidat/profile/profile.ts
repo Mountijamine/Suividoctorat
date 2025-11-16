@@ -133,8 +133,8 @@ import { CandidatNavbarComponent } from '../../../components/navbar/candidat-nav
 
     /* Avatar initials - navbar and profile */
     .profile-initials, .dropdown-avatar-initials { display:flex; align-items:center; justify-content:center; border-radius:50%; color:#fff; font-weight:700; }
-    .profile-initials { width:36px; height:36px; font-size:0.875rem; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); }
-    .dropdown-avatar-initials { width:72px; height:72px; font-size:1.75rem; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); }
+    .profile-initials { width:36px; height:36px; font-size:0.875rem; background: #000; }
+    .dropdown-avatar-initials { width:72px; height:72px; font-size:1.75rem; background: #000; }
 
     /* Form labels and inputs follow theme */
     .label{ display:block; font-size:12px; color:var(--zinc-700); margin-bottom:6px; font-weight:600 }

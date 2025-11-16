@@ -40,9 +40,12 @@ import { AdminNavbarComponent } from '../../components/navbar/admin-navbar';
     .page-btn.active { background:#0f172a; color:#fff; border-color:#0f172a }
     .page-btn:disabled { opacity:0.4; cursor:not-allowed }
     .page-info { font-size:0.875rem; color:#6b7280; padding:0 0.5rem }
+    .center-search { flex:1; display:flex; justify-content:center; padding:0 1rem }
+    .center-search .search-box { max-width:540px; width:100%; }
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-top:1rem }
     .user-card { background:#fff; border-radius:12px; padding:1.25rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid #f3f4f6; display:flex; flex-direction:column; gap:0.75rem; transition:all 0.2s }
     .user-card:hover{ box-shadow:0 8px 24px rgba(2,6,23,0.08); border-color:#e6eef8 }
+    .user-card{ position:relative }
     .avatar { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; flex-shrink:0 }
     .meta { display:flex; gap:0.875rem; align-items:flex-start }
     .role { font-size:0.875rem; color:#6b7280; margin-top:0.2rem }
@@ -56,7 +59,7 @@ import { AdminNavbarComponent } from '../../components/navbar/admin-navbar';
   .requests { margin-top:1rem; background:#fff; padding:1rem; border-radius:12px; border:1px solid #f3f4f6; box-shadow:0 2px 8px rgba(0,0,0,0.04) }
   .requests h3{ font-size:1.125rem; font-weight:700; color:#0f172a; margin:0 0 1rem 0 }
   .requests-grid { display:flex; flex-direction:column; gap:1rem }
-  .req-card { display:flex; gap:1.25rem; align-items:flex-start; padding:1.25rem; border-radius:12px; background:#fafbfc; border:1px solid #eef2f7; transition:all 0.2s }
+  .req-card { display:flex; gap:1.25rem; align-items:flex-start; padding:1.25rem; border-radius:12px; background:#fafbfc; border:1px solid #eef2f7; transition:all 0.2s; position:relative }
   .req-card:hover{ background:#fff; border-color:#d1d5db; box-shadow:0 4px 12px rgba(0,0,0,0.06) }
   .req-media { display:flex; flex-direction:column; gap:0.625rem; width:130px; flex-shrink:0 }
   .thumb { width:130px; height:90px; border-radius:10px; overflow:hidden; background:#fff; border:1px solid #e6eef8; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.04); font-size:0.85rem; color:#9ca3af }
@@ -71,6 +74,44 @@ import { AdminNavbarComponent } from '../../components/navbar/admin-navbar';
   .req-note > div{ margin-bottom:0.25rem }
   .req-note strong{ color:#0f172a }
     @media (max-width:900px){ .wrap{ flex-direction:column } .sidebar{ width:100% } .header{ flex-direction:column; align-items:flex-start } .req-card{ flex-direction:column } .req-media{ width:100% } .thumb{ width:100%; max-width:200px } }
+    .req-footer{ position:absolute; right:16px; bottom:16px; display:flex; gap:0.5rem }
+    .req-footer .icon-btn{ width:40px; height:40px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1px solid #e6eef8; cursor:pointer; color:#0f172a }
+    .req-footer .icon-btn:hover{ background:#f8fafc; transform:translateY(-2px) }
+    .icon-approved { color: #065f46 !important }
+    .icon-rejected { color: #991b1b !important }
+    .icon-tooltip{ position:absolute; bottom:calc(100% + 6px); right:0; background:#111827; color:#fff; padding:6px 8px; border-radius:6px; font-size:12px; white-space:nowrap; opacity:0; transform:translateY(6px); transition:all 0.12s ease }
+    .req-footer .icon-btn{ position:relative }
+    .req-footer .icon-btn:hover .icon-tooltip{ opacity:1; transform:translateY(0) }
+    /* User card eye and print styles */
+    .user-eye{ position:absolute; right:12px; top:12px; width:36px; height:36px; border-radius:8px; border:1px solid #e6eef8; background:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:#0f172a }
+    .user-eye:hover{ background:#f8fafc; transform:translateY(-2px) }
+    .actions .icon-btn{ width:40px; height:40px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1px solid #e6eef8; cursor:pointer; color:#0f172a; margin-left:8px }
+    .actions .icon-btn:hover{ background:#f8fafc; transform:translateY(-2px) }
+    .actions .icon-btn .icon-tooltip{ right:0; bottom:calc(100% + 6px) }
+    /* Modern modal styles */
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; z-index:2000 }
+    .modal-card{ width:760px; max-width:94%; background:#ffffff; border-radius:12px; box-shadow:0 20px 50px rgba(2,6,23,0.3); padding:18px; color:#0f172a }
+    .modal-header{ display:flex; justify-content:space-between; align-items:center; gap:12px }
+    .modal-title{ font-size:1.125rem; font-weight:700 }
+    .modal-sub{ color:#6b7280; font-size:0.95rem }
+    .modal-body{ display:flex; gap:18px; margin-top:12px }
+    .modal-avatar{ width:88px; height:88px; border-radius:12px; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.25rem }
+    .info-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px 16px }
+    .info-row{ display:flex; gap:8px; align-items:center }
+    .info-label{ color:#374151; font-weight:700; min-width:110px }
+    .info-value{ color:#475569 }
+    .modal-input{ width:100%; padding:8px 10px; border-radius:8px; border:1px solid #e6eef8; font-size:0.95rem; box-sizing:border-box }
+    .modal-input:focus{ outline:none; border-color:#3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,0.06) }
+    .modal-actions{ display:flex; gap:8px; align-items:center }
+    .field-error{ color:#b91c1c; font-size:0.88rem; margin-top:6px }
+    .form-error{ color:#b91c1c; font-weight:700; margin-top:8px }
+    .requests-list{ margin-top:12px; border-top:1px solid #eef2f7; padding-top:12px; max-height:320px; overflow:auto }
+    .request-item{ padding:10px; border-radius:10px; background:#fbfdff; border:1px solid #eef6ff; margin-bottom:8px }
+    .request-item .r-meta{ display:flex; justify-content:space-between; align-items:center }
+    .small-badge{ font-weight:700; padding:6px 8px; border-radius:999px; font-size:0.8rem }
+    .badge-approved{ background:#d1fae5; color:#065f46 }
+    .badge-rejected{ background:#fee2e2; color:#991b1b }
+    .badge-pending{ background:#f3f4f6; color:#475569 }
   `]
 })
 export class AdminDashboard {
@@ -107,6 +148,17 @@ export class AdminDashboard {
   modalMessage: string = '';
   modalLoading = signal(false);
   modalNotify: boolean = false;
+
+  // modal state for viewing a user's full info
+  userModalVisible = signal(false);
+  userModalData: any = null;
+  // editing state
+  isEditingUser = signal(false);
+  editingUser: any = null;
+  saveLoading = signal(false);
+  // Inline form errors
+  fieldErrors = signal<Record<string,string>>({} as any);
+  formError = signal<string | null>(null);
 
   constructor(private http: HttpClient) {
     this.fetchUsers();
@@ -146,14 +198,16 @@ export class AdminDashboard {
       this.requests.set(arr);
       this.requestsError.set(null);
       // compute counts per user (exclude CANCELLED/CANCELED requests)
+      // Only count requests that are still PENDING (we show 'demandes en attente')
       const counts: Record<string, number> = {};
       for (const r of arr) {
-        // Skip cancelled requests
-        if (r.status && (r.status.toUpperCase() === 'CANCELLED' || r.status.toUpperCase() === 'CANCELED')) {
-          continue;
-        }
-        const id = r.user?.id || r.userId || 'unknown';
-        counts[id] = (counts[id] || 0) + 1;
+        try {
+          if (!r || !r.status) continue;
+          const st = (r.status || '').toString().toUpperCase();
+          if (st !== 'PENDING') continue; // only pending count
+          const id = r.user?.id || r.userId || 'unknown';
+          counts[id] = (counts[id] || 0) + 1;
+        } catch (e) { continue; }
       }
       this.requestCounts.set(counts);
     }, error: (err:any) => {
@@ -172,6 +226,101 @@ export class AdminDashboard {
     map[u.id] = !map[u.id];
     this.expandedUsers.set(map);
   }
+
+  // View full user info in a modal
+  viewUser(u: any){
+    if(!u) return;
+    this.userModalData = u;
+    this.userModalVisible.set(true);
+  }
+
+  // Start editing a user (opens modal in edit mode)
+  startEditUser(u: any){
+    if(!u) return;
+    // shallow copy to avoid mutating original until saved
+    this.editingUser = JSON.parse(JSON.stringify(u));
+    this.userModalData = u;
+    this.isEditingUser.set(true);
+    this.userModalVisible.set(true);
+  }
+
+  // Cancel editing
+  cancelEditUser(){
+    this.isEditingUser.set(false);
+    this.editingUser = null;
+    this.fieldErrors.set({} as any);
+    this.formError.set(null);
+  }
+
+  // Save edited user (calls backend and updates local list)
+  saveUser(){
+    if(!this.editingUser) return;
+    this.saveLoading.set(true);
+    this.fieldErrors.set({} as any);
+    this.formError.set(null);
+    // cookie fallback for auth
+    try { const t = localStorage.getItem('auth_token'); if (t) { document.cookie = 'JWT=' + t + ';path=/'; } } catch(e) {}
+    const id = this.editingUser.id;
+    // Send only profile fields to avoid overwriting unrelated data
+    const payload: any = {
+      firstName: this.editingUser.firstName,
+      lastName: this.editingUser.lastName,
+      email: this.editingUser.email,
+      phone: this.editingUser.phone || this.editingUser.phoneNumber || this.editingUser.telephone,
+      address: this.editingUser.address
+    };
+
+    this.http.put(`/gestion-auth-service/api/admin/users/${id}`, payload).subscribe({ next: (res:any) => {
+        // update local users list
+        const arr = (this.users() || []).map(u => u.id === id ? { ...(u || {}), ...(this.editingUser || {}) } : u);
+        this.users.set(arr);
+        this.saveLoading.set(false);
+        this.isEditingUser.set(false);
+        this.editingUser = null;
+        // refresh requests counts in case role changed
+        this.fetchUsers();
+      }, error: (err:any) => {
+        console.error('saveUser failed', err);
+        // Try to parse validation errors defensively
+        try {
+          const body = err?.error;
+          const map: Record<string,string> = {} as any;
+          if (body) {
+            if (body.fieldErrors && typeof body.fieldErrors === 'object') {
+              for (const k of Object.keys(body.fieldErrors)) { map[k] = body.fieldErrors[k]; }
+            } else if (body.errors && Array.isArray(body.errors)) {
+              for (const e of body.errors) { if (e.field && e.message) map[e.field] = e.message; }
+            } else if (typeof body === 'object') {
+              for (const k of Object.keys(body)) { if (typeof body[k] === 'string') map[k] = body[k]; }
+            }
+          }
+          if (Object.keys(map).length > 0) {
+            this.fieldErrors.set(map);
+          } else {
+            this.formError.set(err?.message || (err?.status ? `${err.status} ${err.statusText || ''}` : 'Erreur serveur'));
+          }
+        } catch(e){
+          this.formError.set('Erreur lors de la sauvegarde');
+        }
+        this.saveLoading.set(false);
+      }
+    });
+  }
+
+  // Print user full info (open print window)
+  printUser(u: any){
+    try {
+      const html = this.buildUserPrintHtml(u);
+      const w = window.open('', '_blank', 'width=900,height=900');
+      if (!w) { alert('Unable to open print window (blocked).'); return; }
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+      setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){ console.warn('printUser failed', e);} }, 700);
+    } catch(e){ console.error('printUser error', e); alert('Print failed'); }
+  }
+
+  closeUserModal(){ this.userModalVisible.set(false); this.userModalData = null; }
 
   // Helpers to extract front/back image URLs from a request object.
   getFrontUrl(r: any): string | null {
@@ -222,12 +371,162 @@ export class AdminDashboard {
     try { window.open(url, '_blank'); } catch(e){ console.warn('openFile failed', e); }
   }
 
+  // Print a nicely formatted view of the request (opens print dialog)
+  printRequest(r: any){
+    try {
+      const html = this.buildRequestPrintHtml(r);
+      const w = window.open('', '_blank', 'width=900,height=900');
+      if (!w) { alert('Unable to open print window (blocked).'); return; }
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+      // wait for images to load before printing
+      const tryPrint = () => {
+        try {
+          w.focus();
+          w.print();
+        } catch(e){ console.warn('print failed', e); }
+      };
+      // Give time for images to load
+      setTimeout(tryPrint, 700);
+    } catch(e){ console.error('printRequest error', e); alert('Print failed'); }
+  }
+
+  // Save to PDF: uses the browser print dialog; user can choose 'Save as PDF'
+  saveRequestAsPdf(r: any){
+    // This is identical to printRequest because the browser print dialog provides Save as PDF
+    this.printRequest(r);
+  }
+
+  // Build the HTML used for printing/saving PDF
+  private buildRequestPrintHtml(r: any): string {
+    const front = this.getFrontUrl(r) || '';
+    const back = this.getBackUrl(r) || '';
+    const name = (r.user?.firstName || '') + ' ' + (r.user?.lastName || '');
+    const email = r.user?.email || '';
+    const role = r.requestedRole || '';
+    const status = r.status || '';
+    const created = r.createdAt || '';
+    const aff = r.affiliation || '';
+    const just = r.justification || '';
+
+    const styles = `
+      body{ font-family: Arial, Helvetica, sans-serif; color:#0f172a; padding:18px }
+      .card{ border:1px solid #e6eef8; border-radius:8px; padding:18px; max-width:760px }
+      .header{ display:flex; justify-content:space-between; align-items:center }
+      .meta{ color:#475569 }
+      .images{ display:flex; gap:12px; margin-top:12px }
+      .images img{ width:320px; height:220px; object-fit:cover; border:1px solid #e6eef8; border-radius:6px }
+      .info{ margin-top:12px }
+      .label{ font-weight:700; margin-right:6px }
+      @media print{ img{ max-width:100%; height:auto } }
+    `;
+
+    const imgHtml = `
+      <div class="images">
+        ${ front ? `<img src="${front}" alt="recto"/>` : `<div style="width:320px;height:220px;border:1px dashed #e6eef8;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af">Recto</div>` }
+        ${ back ? `<img src="${back}" alt="verso"/>` : `<div style="width:320px;height:220px;border:1px dashed #e6eef8;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af">Verso</div>` }
+      </div>
+    `;
+
+    const html = `
+      <html>
+        <head>
+          <title>Role Request - ${name}</title>
+          <meta charset="utf-8" />
+          <style>${styles}</style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="header">
+              <div>
+                <div style="font-size:20px;font-weight:700">${name}</div>
+                <div class="meta">${email} · ${role} · ${status}</div>
+              </div>
+              <div style="text-align:right; color:#6b7280">Soumis: ${created}</div>
+            </div>
+            ${imgHtml}
+            <div class="info">
+              <div><span class="label">Affiliation:</span>${aff}</div>
+              <div style="margin-top:8px"><span class="label">Justification:</span>${just}</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    return html;
+  }
+
+  // Build print HTML for a single user (includes basic profile + pending requests)
+  private buildUserPrintHtml(u: any): string {
+    if (!u) u = {};
+    const name = ((u.firstName || '') + ' ' + (u.lastName || '')).trim();
+    const email = u.email || '';
+    const role = u.role || '';
+    const created = u.createdAt || '';
+    const requests = this.requests().filter((r:any) => (r.user && r.user.id ? r.user.id : r.userId) === u.id);
+
+    const styles = `body{ font-family: Arial, Helvetica, sans-serif; color:#0f172a; padding:18px } .card{ border:1px solid #e6eef8; border-radius:8px; padding:18px; max-width:760px } .header{ display:flex; justify-content:space-between; align-items:center } .meta{ color:#475569 } .req{ padding:8px 0; border-bottom:1px dashed #eef2f7 } .label{ font-weight:700; margin-right:6px }`;
+
+    // For printing user profile we only include user info (no demandes)
+    const html = `
+      <html>
+        <head>
+          <title>User - ${name}</title>
+          <meta charset="utf-8" />
+          <style>${styles}</style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="header">
+              <div>
+                <div style="font-size:20px;font-weight:700">${name}</div>
+                <div class="meta">${email} · ${role}</div>
+              </div>
+              <div style="text-align:right; color:#6b7280">${created}</div>
+            </div>
+            <div style="margin-top:12px">
+              <div><span class="label">Prénom:</span>${u.firstName || '—'}</div>
+              <div style="margin-top:6px"><span class="label">Nom:</span>${u.lastName || '—'}</div>
+              <div style="margin-top:6px"><span class="label">Email:</span>${email}</div>
+              <div style="margin-top:6px"><span class="label">Role:</span>${role}</div>
+              ${ !( (u.role||'').toString().toLowerCase().includes('encadrant') ) ? `<div style="margin-top:6px"><span class="label">ID:</span>${u.id || '—'}</div>` : '' }
+              <div style="margin-top:6px"><span class="label">Téléphone:</span>${u.phone || u.phoneNumber || u.telephone || '—'}</div>
+              <div style="margin-top:6px"><span class="label">Adresse:</span>${u.address || '—'}</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    return html;
+  }
+
   // Return requests for a given user id
   getRequestsForUser(userId: number){
     const all = this.requests() || [];
+    // Only show pending requests per user in the expanded view (hide approved/rejected/cancelled)
     return all.filter(r => {
-      const rid = (r.user && r.user.id) ? r.user.id : (r.userId || null);
-      return rid === userId;
+      try {
+        const rid = (r.user && r.user.id) ? r.user.id : (r.userId || null);
+        if (rid !== userId) return false;
+        const st = (r.status || '').toString().toUpperCase();
+        return st === 'PENDING';
+      } catch (e) { return false; }
+    });
+  }
+
+  // Return all requests for a given user id (used in modal to show full history)
+  getAllRequestsForUser(userId: number){
+    const all = this.requests() || [];
+    return all.filter(r => {
+      try {
+        const rid = (r.user && r.user.id) ? r.user.id : (r.userId || null);
+        if (rid !== userId) return false;
+        const st = (r.status || '').toString().toUpperCase();
+        // exclude cancelled requests
+        if (st === 'CANCELLED' || st === 'CANCELED') return false;
+        return true;
+      } catch(e){ return false; }
     });
   }
 

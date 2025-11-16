@@ -15,6 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -237,6 +241,17 @@ public class AuthApiController {
             requestMap.put("createdAt", r.getCreatedAt().toString());
             requestMap.put("frontIdPath", r.getFrontIdPath() != null ? r.getFrontIdPath() : "");
             requestMap.put("backIdPath", r.getBackIdPath() != null ? r.getBackIdPath() : "");
+            // expose convenient URLs so frontend can fetch the images
+            if (r.getFrontIdPath() != null) {
+                requestMap.put("frontIdUrl", "/api/auth/role-requests/" + r.getId() + "/file/front");
+            } else {
+                requestMap.put("frontIdUrl", "");
+            }
+            if (r.getBackIdPath() != null) {
+                requestMap.put("backIdUrl", "/api/auth/role-requests/" + r.getId() + "/file/back");
+            } else {
+                requestMap.put("backIdUrl", "");
+            }
             requestMap.put("reviewReason", r.getReviewReason() != null ? r.getReviewReason() : "");
             requestMap.put("notifyByEmail", r.getNotifyByEmail() != null ? r.getNotifyByEmail() : false);
             
@@ -262,6 +277,8 @@ public class AuthApiController {
             requestMap.put("justification", r.getJustification() != null ? r.getJustification() : "");
             requestMap.put("frontIdPath", r.getFrontIdPath() != null ? r.getFrontIdPath() : "");
             requestMap.put("backIdPath", r.getBackIdPath() != null ? r.getBackIdPath() : "");
+            if (r.getFrontIdPath() != null) requestMap.put("frontIdUrl", "/api/auth/role-requests/" + r.getId() + "/file/front"); else requestMap.put("frontIdUrl", "");
+            if (r.getBackIdPath() != null) requestMap.put("backIdUrl", "/api/auth/role-requests/" + r.getId() + "/file/back"); else requestMap.put("backIdUrl", "");
             requestMap.put("reviewReason", r.getReviewReason() != null ? r.getReviewReason() : "");
             requestMap.put("notifyByEmail", r.getNotifyByEmail() != null ? r.getNotifyByEmail() : false);
             return requestMap;
@@ -296,7 +313,10 @@ public class AuthApiController {
         request.setNotifyByEmail(notify);
         roleRequestRepository.save(request);
 
-        // Assign the role to the user
+        // Remove default ROLE_USER if present, then assign the requested role
+        try {
+            userService.removeRole(request.getUser().getEmail(), com.devbuild.gestionauth.model.Role.ROLE_USER, auth.getName());
+        } catch (Exception ignored) {}
         userService.assignRole(request.getUser().getEmail(), request.getRequestedRole(), auth.getName());
 
         // If requested, send a notification (placeholder logging for now)
@@ -393,5 +413,33 @@ public class AuthApiController {
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file", e);
         }
+    }
+
+    // Serve stored role-request front/back files to authorized users (owner or admin)
+    @GetMapping("/role-requests/{id}/file/{side}")
+    public ResponseEntity<?> getRoleRequestFile(@PathVariable("id") Long id, @PathVariable("side") String side, Authentication auth) {
+        RoleRequest request = roleRequestRepository.findById(id).orElseThrow(() -> new RuntimeException("Request not found"));
+        if (auth == null || !auth.isAuthenticated()) return ResponseEntity.status(401).body(Map.of("message","Authentication required"));
+        User requesting = userService.findByEmail(auth.getName()).orElseThrow();
+        boolean isAdmin = requesting.getRoles().stream().anyMatch(r -> r.name().equals("ROLE_ADMIN"));
+        boolean owner = request.getUser().getId().equals(requesting.getId());
+        if (!isAdmin && !owner) return ResponseEntity.status(403).body(Map.of("message","Forbidden"));
+
+        String path = null;
+        if ("front".equalsIgnoreCase(side)) path = request.getFrontIdPath();
+        else if ("back".equalsIgnoreCase(side)) path = request.getBackIdPath();
+        if (path == null || path.isBlank()) return ResponseEntity.notFound().build();
+
+        java.io.File f = new java.io.File(path);
+        if (!f.exists()) return ResponseEntity.notFound().build();
+
+        FileSystemResource fsr = new FileSystemResource(f);
+        String contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        try { contentType = java.nio.file.Files.probeContentType(f.toPath()); } catch (Exception ignored) {}
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + f.getName() + "\"")
+                .contentLength(f.length())
+                .contentType(MediaType.parseMediaType(contentType == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : contentType))
+                .body(fsr);
     }
 }

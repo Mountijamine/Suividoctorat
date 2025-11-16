@@ -53,9 +53,11 @@ import { CandidatNavbarComponent } from '../../../components/navbar/candidat-nav
     .meta-top{ color:#6b7280; margin-bottom:0.5rem }
   .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem }
     .card{ background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(2,6,23,0.06); display:flex; flex-direction:column }
-  .card-media{ position:relative; height:160px; background:#f8fafc; display:flex; align-items:center; justify-content:center; overflow:hidden }
-  .card-media img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; background:#f8fafc }
-  .placeholder{ width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc }
+  /* thumbnail: use provided color to blend images into the card */
+  .card-media{ position:relative; height:160px; background:#dbd8d3; display:flex; align-items:center; justify-content:center; overflow:hidden }
+  /* keep full image visible (contain) and make any empty area match the bg color */
+  .card-media img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; background:#dbd8d3 }
+  .placeholder{ width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#dbd8d3 }
   .placeholder-icon{ width:100%; height:100%; display:flex; align-items:center; justify-content:center }
   .placeholder-icon svg{ width:100%; height:100%; object-fit:cover; max-width:120px; max-height:96px }
     .media-overlay{ position:absolute; bottom:8px; left:8px; right:8px; display:flex; gap:8px; opacity:0; transition:opacity 160ms }
@@ -438,7 +440,7 @@ export class DocumentsPage {
       pdf: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%23E53E3E" width="24" height="24" rx="3"/><text x="12" y="16" font-size="10" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">PDF</text></svg>',
       docx: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%23007ACC" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">DOCX</text></svg>',
       zip: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%23000000" width="24" height="24" rx="3"/><text x="12" y="16" font-size="9" font-family="Arial" font-weight="700" fill="white" text-anchor="middle">ZIP</text></svg>',
-      default: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 24 24"><rect fill="%238B8B8B" width="24" height="24" rx="3"/><path d="M6 4h9l5 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="%23fff" opacity="0.15"/></svg>'
+      default: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="96" viewBox="0 0 64 64"><g fill="none" fill-rule="evenodd"><rect x="6" y="6" width="44" height="52" rx="6" stroke="%23373737" stroke-width="2" fill="%23ffffff" fill-opacity="0.9"/><path d="M40 6v14a2 2 0 0 0 2 2h14" stroke="%23373737" stroke-width="2" fill="none"/><g stroke="%23373737" stroke-width="1.6" stroke-linecap="round"><path d="M18 28h24"/><path d="M18 36h24"/><path d="M18 44h14"/></g></g></svg>'
     };
     return icons[e] || icons['default'];
   }

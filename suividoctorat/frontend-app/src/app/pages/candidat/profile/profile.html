@@ -9,7 +9,7 @@
       <div class="flex items-start gap-6">
         <!-- Avatar Section -->
         <div class="relative">
-          <div *ngIf="!profileImage" class="w-32 h-32 rounded-full border-4 border-zinc-100 flex items-center justify-center text-4xl font-semibold text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+          <div *ngIf="!profileImage" class="w-32 h-32 rounded-full border-4 border-zinc-100 flex items-center justify-center text-4xl font-semibold text-white" style="background: #000">
             {{ userInitials }}
           </div>
           <img *ngIf="profileImage" [src]="profileImage" alt="profile" class="w-32 h-32 rounded-full object-cover border-4 border-zinc-100" (error)="profileImage = null" />
