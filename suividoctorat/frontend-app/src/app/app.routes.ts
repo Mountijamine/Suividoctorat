@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { StartPage } from './pages/start-page/start-page';
 import { AuthPage } from './pages/auth/auth';
-import { DashboardPage, DocumentsPage, AddDocumentPage, ProfilePage } from './pages/candidat';
+import { DashboardPage, DocumentsPage, AddDocumentPage, ProfilePage, SoutenancesPage, CampaignsPage } from './pages/candidat';
 import { AdminDashboard } from './pages/admin/admin-dashboard';
 import { ProfileSelectionPage } from './pages/profile-selection/profile-selection';
 
@@ -17,6 +17,8 @@ export const routes: Routes = [
   { path: 'candidat/documents', component: DocumentsPage },
   { path: 'candidat/documents/add', component: AddDocumentPage },
   { path: 'candidat/profile', component: ProfilePage },
+  { path: 'candidat/soutenances', component: SoutenancesPage },
+  { path: 'candidat/campaigns', component: CampaignsPage },
   
   // Legacy redirects for backward compatibility
   { path: 'dashboard', redirectTo: 'candidat/dashboard', pathMatch: 'full' },

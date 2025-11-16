@@ -87,6 +87,28 @@ public class AuthApiController {
         return ResponseEntity.ok(tok);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("message", "Authentication required"));
+        }
+        try {
+            User user = userService.findByEmail(auth.getName()).orElse(null);
+            if (user == null) return ResponseEntity.status(404).body(Map.of("message", "User not found"));
+            java.util.Map<String, Object> resp = new java.util.HashMap<>();
+            resp.put("email", user.getEmail());
+            resp.put("firstName", user.getFirstName() != null ? user.getFirstName() : "");
+            resp.put("lastName", user.getLastName() != null ? user.getLastName() : "");
+            resp.put("phone", user.getPhone() != null ? user.getPhone() : "");
+            resp.put("enrollmentDate", user.getCreatedAt() != null ? user.getCreatedAt().toString() : "");
+            resp.put("roles", user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()));
+            return ResponseEntity.ok(resp);
+        } catch (Exception ex) {
+            try { System.err.println("[AuthApiController] /me error: " + ex.getMessage()); } catch (Throwable t) {}
+            return ResponseEntity.status(500).body(Map.of("message", "Server error"));
+        }
+    }
+
     // Form handlers moved to WebController (MVC controller) so redirects render correctly
 
     @PostMapping("/assign-role")
@@ -124,9 +146,16 @@ public class AuthApiController {
                 return ResponseEntity.badRequest().body(Map.of("message", "Only candidat role can be self-assigned"));
             }
             String email = auth.getName();
-            User user = userService.findByEmail(email).orElseThrow();
-            userService.assignRole(email, Role.ROLE_CANDIDAT, "self");
-            return ResponseEntity.ok(Map.of("message", "Role updated successfully"));
+            // Replace default ROLE_USER with ROLE_CANDIDAT atomically in service layer
+            User user = userService.replaceUserRoleWithCandidat(email, "self");
+            // Generate a refreshed token reflecting new roles so clients can update immediately
+            Set<String> roles = user.getRoles().stream().map(Enum::name).collect(Collectors.toSet());
+            String token = jwtUtil.generateToken(user.getEmail(), roles);
+            java.util.Map<String, Object> resp = new java.util.HashMap<>();
+            resp.put("message", "Role updated successfully");
+            resp.put("token", token);
+            resp.put("roles", roles);
+            return ResponseEntity.ok(resp);
         } catch (Exception ex) {
             // Log and return a helpful JSON body during development to aid debugging
             try { System.err.println("[AuthApiController] updateRole error: " + ex.getClass().getName() + ": " + ex.getMessage()); ex.printStackTrace(); } catch (Throwable t) {}

@@ -6,49 +6,13 @@ import { AuthService } from './services/auth.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, RouterLink],
+  imports: [RouterOutlet, CommonModule],
   template: `
-    <div class="app-root">
-      <!-- Hide header for users with role 'user' who need to select their profile -->
-      <header class="app-header" *ngIf="showNavbar()">
-        <div class="bar">
-          <div class="left">
-            <a class="brand" href="#/">Portail Doctorat</a>
-          </div>
+   <!-- remove the <header ...> ... </header> block entirely -->
 
-          <button class="hamburger" (click)="navOpen.set(!navOpen())" aria-label="Menu">☰</button>
-
-          <nav class="nav-links" [class.open]="navOpen()">
-            <a [routerLink]="getCandidatLink()" (click)="closeNav()">Tableau de bord</a>
-            <a routerLink="/auth" (click)="closeNav()" *ngIf="!isLoggedIn()">Inscription</a>
-            <a routerLink="/soutenance" (click)="closeNav()" *ngIf="isCandidat()">Soutenance</a>
-            <ng-container *ngIf="isCandidat()">
-              <a routerLink="/candidat/documents" (click)="closeNav()">Documents</a>
-            </ng-container>
-            <ng-container *ngIf="isAdmin()">
-              <a routerLink="/admin" (click)="closeNav()">Admin</a>
-            </ng-container>
-          </nav>
-
-          <div class="right">
-            <ng-container *ngIf="isLoggedIn()">
-              <a [routerLink]="getProfileLink()" class="profile-link" (click)="closeNav()" style="display:flex; align-items:center; gap:0.5rem; text-decoration:none">
-                <img *ngIf="profile?.avatar" [src]="profile.avatar" alt="avatar" style="width:32px; height:32px; border-radius:999px; object-fit:cover; border:2px solid #fff" />
-                <span class="cta">Mon espace</span>
-              </a>
-              <button (click)="logout()" class="logout">Se déconnecter</button>
-            </ng-container>
-            <ng-container *ngIf="!isLoggedIn()">
-              <a routerLink="/auth" class="cta" (click)="closeNav()">Se connecter</a>
-            </ng-container>
-          </div>
-        </div>
-      </header>
-
-      <div [style.min-height]="showNavbar() ? 'calc(100vh - 64px)' : '100vh'">
-        <router-outlet></router-outlet>
-      </div>
-    </div>
+<div [style.min-height]="'100vh'">
+  <router-outlet></router-outlet>
+</div>
   `,
   styles: [`
     .app-root { font-family: Inter, Arial, Helvetica, sans-serif; min-height: 100vh; margin:0; }
@@ -84,19 +48,54 @@ export class App {
   constructor(private router: Router, public auth: AuthService) {
     this.isLoggedIn = this.auth.isLoggedIn;
     this.role = this.auth.role;
+    
+    // Log auth state on app initialization
+    const token = this.auth.getToken();
+    console.log('[App] Initializing - Token present:', !!token);
+    console.log('[App] Initializing - Token value:', token ? token.substring(0, 20) + '...' : 'null');
+    console.log('[App] Initializing - Role:', this.role());
+    console.log('[App] Initializing - isLoggedIn signal:', this.isLoggedIn());
+    
     // clear expired token at startup
-    try { if (this.auth.logoutIfExpired()) { try{ this.router.navigate(['/auth'], { queryParams: { sessionExpired: '1' } }); }catch(e){} } } catch(e){}
-    // attempt to load profile for header avatar/name
-    try {
-      this.auth.getProfile().subscribe({ next: (res:any) => { this.profile = res || null; }, error: () => { this.profile = null; } });
-    } catch(e) { this.profile = null; }
+    try { 
+      if (this.auth.logoutIfExpired()) { 
+        console.log('[App] Token was expired, redirecting to login');
+        try{ this.router.navigate(['/auth'], { queryParams: { sessionExpired: '1' } }); }catch(e){} 
+      } 
+    } catch(e){
+      console.error('[App] Error checking token expiration:', e);
+    }
+    
+    // attempt to load profile for header avatar/name (only if logged in)
+    if (this.isLoggedIn() && token) {
+      console.log('[App] Attempting to load profile...');
+      try {
+        this.auth.getProfile().subscribe({ 
+          next: (res:any) => { 
+            this.profile = res || null; 
+            console.log('[App] Profile loaded successfully:', res);
+          }, 
+          error: (err) => { 
+            this.profile = null; 
+            console.error('[App] Failed to load profile - Status:', err?.status, 'Message:', err?.message);
+            console.error('[App] Error details:', err);
+          } 
+        });
+      } catch(e) { 
+        this.profile = null; 
+        console.error('[App] Exception loading profile:', e);
+      }
+    } else {
+      console.log('[App] Skipping profile load - not logged in');
+    }
   }
 
   // Helper methods for navbar visibility and role-based routing
   showNavbar(): boolean {
     const r = (this.role() || '').toLowerCase();
     // Hide navbar for users with role 'user' - they should only see profile-selection
-    if (r === 'user' || r === '' || r === 'null' || r === 'undefined') {
+    // Also hide for candidat - they have their own Gmail-style navbar
+    if (r === 'user' || r === '' || r === 'null' || r === 'undefined' || r.includes('candidat')) {
       return false;
     }
     return true;

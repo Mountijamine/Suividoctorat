@@ -1,5 +1,0 @@
-# Global defaults
-spring:
-  cloud:
-    compatibility-verifier:
-      enabled: false

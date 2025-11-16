@@ -12,10 +12,39 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   // helper: check if stored token is expired (JWT exp claim)
-  private parseJwt(token: string | null){ if (!token) return null; try { const parts = token.split('.'); if (parts.length < 2) return null; const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/'))); return payload; } catch(e){ return null; } }
+  private parseJwt(token: string | null){ 
+    if (!token) return null; 
+    try { 
+      const parts = token.split('.'); 
+      if (parts.length < 2) return null; 
+      const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/'))); 
+      return payload; 
+    } catch(e){ 
+      console.error('[AuthService] Failed to parse JWT:', e);
+      return null; 
+    } 
+  }
 
   isTokenExpired(): boolean {
-    const t = this.getToken(); if (!t) return true; const p = this.parseJwt(t); if (!p) return true; if (!p.exp) return true; const now = Math.floor(Date.now() / 1000); return p.exp <= now; }
+    const t = this.getToken(); 
+    if (!t) {
+      console.log('[AuthService] No token found');
+      return true; 
+    }
+    const p = this.parseJwt(t); 
+    if (!p) {
+      console.log('[AuthService] Failed to parse token');
+      return true; 
+    }
+    if (!p.exp) {
+      console.log('[AuthService] Token has no expiration claim');
+      return true; 
+    }
+    const now = Math.floor(Date.now() / 1000); 
+    const isExpired = p.exp < now;
+    console.log('[AuthService] Token expiration check - exp:', new Date(p.exp * 1000), 'now:', new Date(now * 1000), 'expired:', isExpired);
+    return isExpired;
+  }
 
   // call at app startup to clear expired token
   logoutIfExpired(){ try { if (this.isTokenExpired()) { this.setAuth(null, null); return true; } } catch(e){} return false; }
@@ -28,9 +57,16 @@ export class AuthService {
   updateRole(role: string){
     // try an authenticated endpoint; backend should accept { role }
     return this.http.patch('/gestion-auth-service/api/auth/role', { role }).pipe(
-      tap(() => {
-        // Update local storage and signals
-        this.setAuth(this.getToken(), role);
+      tap((res: any) => {
+        // Backend returns a refreshed token and roles; update local storage and signals
+        const token = res?.token || this.getToken();
+        let newRole: string | null = null;
+        try {
+          const roles = res?.roles || (res?.roles instanceof Array ? res.roles : null);
+          if (roles && Array.isArray(roles) && roles.length > 0) newRole = roles[0];
+          else if (res?.role) newRole = res.role;
+        } catch (e) { newRole = role; }
+        this.setAuth(token || null, newRole || role);
       })
     );
   }
@@ -63,8 +99,23 @@ export class AuthService {
   }
 
   setAuth(token: string | null, role: string | null){
-    try { if (token) localStorage.setItem('auth_token', token); else localStorage.removeItem('auth_token'); } catch(e) {}
-    try { if (role) localStorage.setItem('auth_role', role); else localStorage.removeItem('auth_role'); } catch(e) {}
+    try { 
+      if (token) {
+        localStorage.setItem('auth_token', token); 
+        console.log('[AuthService] Token saved to localStorage');
+      } else {
+        localStorage.removeItem('auth_token'); 
+        console.log('[AuthService] Token removed from localStorage');
+      }
+    } catch(e) { console.error('[AuthService] Failed to save token:', e); }
+    try { 
+      if (role) {
+        localStorage.setItem('auth_role', role); 
+        console.log('[AuthService] Role saved:', role);
+      } else {
+        localStorage.removeItem('auth_role'); 
+      }
+    } catch(e) {}
     this.isLoggedIn.set(!!token);
     this.role.set(role);
     // synchronize cookie fallback whenever auth changes

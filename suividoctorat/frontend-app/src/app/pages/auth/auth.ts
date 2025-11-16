@@ -11,136 +11,502 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './auth.html',
-  styles: [
-    `
-    /* Portal layout */
-    .auth-portal { display:flex; align-items:center; justify-content:center; min-height:100vh; background: linear-gradient(180deg,#f3f6fb 0%,#ffffff 100%); padding:2rem }
-    .card { display:flex; width:900px; max-width:95%; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 20px 40px rgba(16,24,40,0.08) }
+  styles: [`
+    /* ========== CSS Variables ========== */
+    :host {
+      --color-primary: #1e40af;
+      --color-primary-hover: #1e3a8a;
+      --color-primary-light: #dbeafe;
+      --color-secondary: #64748b;
+      --color-success: #059669;
+      --color-error: #dc2626;
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #475569;
+      --color-text-muted: #64748b;
+      --color-border: #e2e8f0;
+      --color-bg-primary: #ffffff;
+      --color-bg-secondary: #f8fafc;
+      --color-bg-tertiary: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --transition: all 0.2s ease;
+    }
 
-    /* Left side visual */
-    .left { flex:1; background: linear-gradient(135deg,#0ea5e9 0%,#7c3aed 100%); color:#fff; padding:2.25rem; display:flex; flex-direction:column; align-items:flex-start; gap:1rem }
-    .left .logo { font-weight:700; font-size:1.4rem }
-    .left .tagline { opacity:0.95; margin-top:0.25rem; font-size:0.95rem }
-    .illustration { margin-top:auto; width:100%; max-width:260px; opacity:0.95 }
-
-    /* Right side form */
-    .right { flex:1; padding:2rem 2.25rem; display:flex; flex-direction:column }
-    .switch { display:flex; gap:0.5rem; margin-bottom:1rem }
-    .switch button { flex:1; padding:0.6rem; border-radius:8px; border:1px solid #eef2f7; background:#fbfdff; cursor:pointer; font-weight:600 }
-    .switch button.active { background:#eef2ff; border-color:#cfe0ff }
-
-    h1 { margin:0 0 1rem 0; font-size:1.25rem; color:#0f172a; text-align:center; width:100% }
-    .page-header { text-align: center; margin-bottom: 1rem; }
-    .page-logo { display: block; margin: 0 auto 12px; max-width: 160px; height: auto; }
-
-    .form { display:flex; flex-direction:column; gap:0.75rem }
-    .form label { display:flex; flex-direction:column; gap:0.35rem; font-size:0.9rem; color:#0f172a }
-    input[type="text"], input[type="email"], input[type="password"] { padding:0.6rem 0.75rem; border-radius:8px; border:1px solid #e6eef8; background:#fbfdff; font-size:0.95rem }
-
-    .row-2 { display:flex; gap:0.75rem }
-    .row-2 label { flex:1 }
-
-    /* LEFT-ALIGNED checkbox row */
-    .checkbox-row {
-      width: 100%;
+    /* ========== Base Layout ========== */
+    .auth-portal {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       display: flex;
-      justify-content: flex-start; /* left align the row */
       align-items: center;
-      padding: 0.25rem 0;
+      justify-content: center;
+      padding: 2rem 1rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    .auth-container {
+      display: grid;
+      grid-template-columns: 480px 520px;
+      max-width: 1000px;
+      width: 100%;
+      background: var(--color-bg-primary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ========== Brand Panel ========== */
+    .brand-panel {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .brand-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 3rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      color: white;
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-headline {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0 0 2rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      opacity: 0.95;
+    }
+
+    .feature-list svg {
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+      stroke-width: 2.5;
+    }
+
+    .brand-footer {
+      position: relative;
+      z-index: 1;
+      opacity: 0.8;
+      font-size: 0.875rem;
+    }
+
+    /* ========== Form Panel ========== */
+    .form-panel {
+      padding: 3rem 2.5rem;
+      background: var(--color-bg-primary);
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+
+    .form-wrapper {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* ========== Tab Switcher ========== */
+    .tab-switcher {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.25rem;
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-md);
+      margin-bottom: 2rem;
+    }
+
+    .tab-switcher button {
+      flex: 1;
+      padding: 0.625rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab-switcher button:hover {
+      color: var(--color-text-primary);
+    }
+
+    .tab-switcher button.active {
+      background: var(--color-bg-primary);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ========== Form Header ========== */
+    .form-header {
+      margin-bottom: 2rem;
+    }
+
+    .form-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .form-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 0.9375rem;
+      margin: 0;
+    }
+
+    /* ========== Form Styles ========== */
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      display: block;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"],
+    .form-group input[type="tel"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: 0.9375rem;
+      color: var(--color-text-primary);
+      background: var(--color-bg-primary);
+      transition: var(--transition);
       box-sizing: border-box;
     }
 
-    /* keep checkbox and label inline with small gap */
-    .checkbox {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      white-space: nowrap; /* prevent the label from wrapping under the box */
-      margin: 0; /* remove any centering margins */
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-light);
     }
 
-    .checkbox input[type="checkbox"] {
+    .form-group input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    /* ========== Checkbox ========== */
+    .checkbox-group {
+      margin-top: 0.25rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      cursor: pointer;
+      font-weight: 400 !important;
+    }
+
+    .checkbox-label input[type="checkbox"] {
       width: 18px;
       height: 18px;
-      margin: 0;
-      flex: 0 0 auto;
+      margin-top: 0.125rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      accent-color: var(--color-primary);
     }
 
     .checkbox-text {
-      margin-right: 0.25rem;
-      color: var(--text-color, #222);
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
     }
 
-    .checkbox a {
-      margin-left: 0.25rem;
-      color: var(--link-color, #1565d8);
+    .checkbox-text a {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .checkbox-text a:hover {
       text-decoration: underline;
     }
 
-    /* Responsive: allow wrapping on very small screens but keep checkbox at left */
-    @media (max-width: 420px) {
-      .checkbox-row { align-items: flex-start; }
-      .checkbox { white-space: normal; gap: 0.35rem; }
+    /* ========== Buttons ========== */
+    .btn-primary {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
     }
 
-    .form-actions { display:flex; justify-content:flex-end; margin-top:0.5rem }
-    button.primary { background:linear-gradient(90deg,#3b82f6 0%,#06b6d4 100%); color:#fff; border:0; padding:0.6rem 1rem; border-radius:10px; cursor:pointer; box-shadow:0 6px 18px rgba(59,130,246,0.18) }
-
-    .error { color:#b00020; font-size:0.9rem }
-    .error.server { margin-top:0.5rem }
-    .error.summary { margin-top:0.5rem }
-    .success.server { color:#16a34a; margin-top:0.5rem }
-
-    @media (max-width:720px) {
-      .card { flex-direction:column }
-      .left { display:none }
-      .right { padding:1.25rem }
+    .btn-primary:hover {
+      background: var(--color-primary-hover);
+      box-shadow: var(--shadow-md);
     }
 
-    /* modal styles */
-    .modal-backdrop { position:fixed; inset:0; background:rgba(2,6,23,0.6); display:flex; align-items:center; justify-content:center; z-index:2000 }
-    .modal { background:#fff; border-radius:10px; width:90%; max-width:760px; box-shadow:0 10px 30px rgba(2,6,23,0.3); overflow:hidden }
-    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem; border-bottom:1px solid #eef3ff }
-    .modal-body { padding:1rem }
-    .modal-footer { padding:0.75rem 1rem; border-top:1px solid #f0f4ff; display:flex; justify-content:flex-end }
-    .close { background:transparent; border:0; font-size:1.1rem; cursor:pointer }
-
-    /* FORCE LEFT ALIGN for right column and form contents */
-    .right { text-align: left !important; align-items: stretch !important; }
-
-    /* ensure form children are left-aligned and full width */
-    .form { align-items: stretch !important; text-align: left !important; width: 100%; }
-
-    /* LEFT-ALIGNED checkbox row (stronger overrides) */
-    .checkbox-row {
-      width: 100% !important;
-      display: flex !important;
-      justify-content: flex-start !important;
-      align-items: center !important;
-      padding: 0.25rem 0 !important;
-      box-sizing: border-box !important;
+    .btn-primary:active {
+      transform: translateY(1px);
     }
 
-    .checkbox {
-      display: inline-flex !important;
-      align-items: center !important;
-      gap: 0.5rem !important;
-      white-space: nowrap !important;
-      margin: 0 !important;
+    .btn-primary svg {
+      width: 16px;
+      height: 16px;
     }
 
-    .checkbox input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      margin: 0 0.5rem 0 0 !important;
-      flex: 0 0 auto;
+    .btn-secondary {
+      padding: 0.625rem 1.5rem;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
     }
 
-    .checkbox-text { margin-right: 0.25rem; }
-    .checkbox a { margin-left: 0.25rem; display:inline-block; }
+    .btn-secondary:hover {
+      background: var(--color-border);
+    }
 
-    /* Defensive: cancel any parent text-align:center inheritance */
-    .card .right, .card .right * { text-align: inherit; }
+    /* ========== Alerts ========== */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-top: 1rem;
+    }
+
+    .alert svg {
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      color: var(--color-error);
+      border: 1px solid #fee2e2;
+    }
+
+    .alert-error svg {
+      stroke: var(--color-error);
+    }
+
+    .alert-success {
+      background: #f0fdf4;
+      color: var(--color-success);
+      border: 1px solid #dcfce7;
+    }
+
+    .alert-success svg {
+      stroke: var(--color-success);
+    }
+
+    .error-message {
+      color: var(--color-error);
+      font-size: 0.8125rem;
+      margin-top: -0.25rem;
+    }
+
+    /* ========== Modal ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-container {
+      background: var(--color-bg-primary);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-header h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .modal-body iframe {
+      width: 100%;
+      height: 500px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ========== Responsive Design ========== */
+    @media (max-width: 1024px) {
+      .auth-container {
+        grid-template-columns: 1fr;
+        max-width: 520px;
+      }
+
+      .brand-panel {
+        display: none;
+      }
+
+      .form-panel {
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .auth-portal {
+        padding: 1rem;
+      }
+
+      .form-panel {
+        padding: 2rem 1.5rem;
+      }
+
+      .form-wrapper {
+        max-width: 100%;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .form-header h1 {
+        font-size: 1.5rem;
+      }
+    }
   `]
 })
 export class AuthPage {
@@ -155,7 +521,13 @@ export class AuthPage {
   showTerms = signal<boolean>(false);
   termsUrl: SafeResourceUrl | string = '';
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private auth: AuthService, private sanitizer: DomSanitizer){
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private fb: FormBuilder,
+    private auth: AuthService,
+    private sanitizer: DomSanitizer
+  ) {
     this.route.queryParams.subscribe(q => {
       const m = q['mode'];
       if (m === 'signup') this.mode.set('signup');
@@ -164,6 +536,7 @@ export class AuthPage {
         try { this.signinForm.patchValue({ email: q['email'] }); } catch(e) { /* ignore */ }
       }
     });
+
     this.signupForm = this.fb.group({
       firstName: [''],
       lastName: [''],
@@ -173,43 +546,53 @@ export class AuthPage {
       confirmPassword: ['', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]]
     });
+
     this.signinForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
   }
 
-  openTerms(e: Event){
+  openTerms(e: Event) {
     e.preventDefault();
     const url = '/assets/CdC-Suivi-doctorat.pdf';
-    try { this.termsUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url); } catch(e) { this.termsUrl = url; }
+    try { 
+      this.termsUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url); 
+    } catch(e) { 
+      this.termsUrl = url; 
+    }
     this.showTerms.set(true);
   }
 
-  closeTerms(){ this.showTerms.set(false); }
+  closeTerms() { 
+    this.showTerms.set(false); 
+  }
 
-  switch(mode: 'signin'|'signup'){
+  switch(mode: 'signin'|'signup') {
     this.serverError.set(null);
     this.successMessage.set(null);
     this.invalidFields.set(null);
     this.router.navigate([], { queryParams: { mode } });
   }
 
-  submitSignup(){
+  submitSignup() {
     this.serverError.set(null);
     this.successMessage.set(null);
+    
     if (this.signupForm.invalid) {
-      // mark controls so validation messages appear in the UI
       try { this.signupForm.markAllAsTouched(); } catch(e) { }
-      // collect invalid control names for a clearer error
       const invalid = Object.keys(this.signupForm.controls || {}).filter(k => this.signupForm.controls[k].invalid);
       this.invalidFields.set(invalid.length ? invalid : null);
-      const list = invalid.length ? invalid.join(', ') : 'required fields';
       this.serverError.set('Please fill all required fields correctly');
       return;
     }
+
     const v = this.signupForm.value;
-    if (v.password !== v.confirmPassword) { this.serverError.set('Passwords do not match'); return; }
+    if (v.password !== v.confirmPassword) { 
+      this.serverError.set('Passwords do not match'); 
+      return; 
+    }
+
     const payload: any = {
       email: v.email,
       password: v.password,
@@ -219,13 +602,15 @@ export class AuthPage {
       phone: v.phone,
       acceptTerms: String(v.acceptTerms)
     };
-    // Clear server error when user makes changes after a server failure
-    this.signupForm.valueChanges.subscribe(() => { if (this.serverError()) this.serverError.set(null); });
+
+    this.signupForm.valueChanges.subscribe(() => { 
+      if (this.serverError()) this.serverError.set(null); 
+    });
+
     this.auth.signup(payload).subscribe({
-      next: (res:any) => {
-        this.successMessage.set('Signup successful — you can now sign in.');
-        // Switch to signin mode and prefill email
-        this.signupForm.reset({acceptTerms:false});
+      next: (res: any) => {
+        this.successMessage.set('Account created successfully! Please sign in.');
+        this.signupForm.reset({acceptTerms: false});
         this.invalidFields.set(null);
         this.router.navigate([], { queryParams: { mode: 'signin', email: payload.email } });
       },
@@ -236,53 +621,64 @@ export class AuthPage {
     });
   }
 
-  submitSignin(){
+  submitSignin() {
     this.serverError.set(null);
     this.successMessage.set(null);
-    if (this.signinForm.invalid) { this.serverError.set('Please provide email and password.'); return; }
+    
+    if (this.signinForm.invalid) { 
+      this.serverError.set('Please provide email and password.'); 
+      return; 
+    }
+
     const v = this.signinForm.value;
     this.auth.login(v).subscribe({
-      next: (res:any) => {
+      next: (res: any) => {
         const token = res?.token;
         if (token) {
-          // Save token (AuthService already stores it) and attempt to determine role
           let role = res?.user?.role || res?.role;
 
-          // If role not present in response, try decode from JWT payload
           if (!role) {
             try {
               const parts = token.split('.');
               if (parts.length >= 2) {
                 const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                // common claim names: role, roles, authority, authorities
                 role = payload.role || payload.roles || payload.authority || payload.authorities || null;
-                // normalize arrays to single value if necessary
                 if (Array.isArray(role) && role.length > 0) role = role[0];
               }
             } catch (e) { /* ignore decode errors */ }
           }
 
-          const finalize = (r:any) => {
+          const finalize = (r: any) => {
             const rr = String(r || '').toLowerCase();
-            try { if (r) localStorage.setItem('auth_role', String(r)); else localStorage.removeItem('auth_role'); } catch(e) { }
+            try { 
+              if (r) localStorage.setItem('auth_role', String(r)); 
+              else localStorage.removeItem('auth_role'); 
+            } catch(e) { }
+            
             this.successMessage.set('Login successful');
-            // if role is missing or generic 'user' send to profile selection mandatory step
+            
             if (!rr || rr === 'user' || rr === 'null' || rr === 'undefined') {
-              try { this.router.navigate(['/profile-selection']); } catch(e){ this.router.navigate(['/']); }
-            } else if (rr === 'candidat' || rr.includes('candidat')) this.router.navigate(['/candidat/dashboard']);
-            else if (rr.includes('admin')) this.router.navigate(['/admin']);
-            else if (rr.includes('directeur') || rr.includes('encadrant')) {
-              // directors without full approval should see awaiting state; send to profile-selection
-              try { this.router.navigate(['/profile-selection']); } catch(e){ this.router.navigate(['/']); }
-            } else this.router.navigate(['/']);
+              try { this.router.navigate(['/profile-selection']); } 
+              catch(e) { this.router.navigate(['/']); }
+            } else if (rr === 'candidat' || rr.includes('candidat')) {
+              this.router.navigate(['/candidat/dashboard']);
+            } else if (rr.includes('admin')) {
+              this.router.navigate(['/admin']);
+            } else if (rr.includes('directeur') || rr.includes('encadrant')) {
+              try { this.router.navigate(['/profile-selection']); } 
+              catch(e) { this.router.navigate(['/']); }
+            } else {
+              this.router.navigate(['/']);
+            }
           };
 
           if (role) {
             finalize(role);
           } else {
-            // attempt to obtain profile info from server
             this.auth.getProfile().subscribe({
-              next: (profile:any) => { finalize(profile?.role || profile?.roles || profile?.authority || null); },
+              next: (profile: any) => { 
+                finalize(profile?.role || profile?.roles || profile?.authority || null); 
+              },
               error: () => { finalize(null); }
             });
           }

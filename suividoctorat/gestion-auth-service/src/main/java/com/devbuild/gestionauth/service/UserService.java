@@ -5,6 +5,7 @@ import com.devbuild.gestionauth.model.User;
 import com.devbuild.gestionauth.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import com.devbuild.gestionauth.notification.NotificationClient;
 import reactor.core.publisher.Mono;
@@ -31,6 +32,7 @@ public class UserService {
         User u = new User();
         u.setEmail(email);
         u.setPassword(passwordEncoder.encode(rawPassword));
+        u.setCreatedAt(java.time.LocalDateTime.now());
         u.getRoles().add(Role.ROLE_USER);
         User saved = userRepository.save(u);
         try {
@@ -51,6 +53,7 @@ public class UserService {
         User u = new User();
         u.setEmail(email);
         u.setPassword(passwordEncoder.encode(rawPassword));
+        u.setCreatedAt(java.time.LocalDateTime.now());
         u.setFirstName(firstName);
         u.setLastName(lastName);
         u.setPhone(phone);
@@ -148,6 +151,40 @@ public class UserService {
 
     public void removeRole(String email, Role role) {
         removeRole(email, role, "system");
+    }
+
+    @Transactional
+    public User replaceUserRoleWithCandidat(String email, String performedBy) {
+        User u = userRepository.findByEmail(email).orElseThrow();
+        // Remove ROLE_USER if present
+        boolean removed = false;
+        if (u.getRoles().contains(Role.ROLE_USER)) {
+            u.getRoles().remove(Role.ROLE_USER);
+            removed = true;
+            try {
+                com.devbuild.gestionauth.model.RoleAudit a = new com.devbuild.gestionauth.model.RoleAudit();
+                a.setTargetEmail(email);
+                a.setRoleName(Role.ROLE_USER.name());
+                a.setAction("REMOVED");
+                a.setPerformedBy(performedBy != null ? performedBy : "system");
+                a.setTimestamp(java.time.LocalDateTime.now());
+                roleAuditRepository.save(a);
+            } catch (Exception ignored) {}
+        }
+        // Assign ROLE_CANDIDAT if not already present
+        if (!u.getRoles().contains(Role.ROLE_CANDIDAT)) {
+            u.getRoles().add(Role.ROLE_CANDIDAT);
+            try {
+                com.devbuild.gestionauth.model.RoleAudit a = new com.devbuild.gestionauth.model.RoleAudit();
+                a.setTargetEmail(email);
+                a.setRoleName(Role.ROLE_CANDIDAT.name());
+                a.setAction("ASSIGNED");
+                a.setPerformedBy(performedBy != null ? performedBy : "system");
+                a.setTimestamp(java.time.LocalDateTime.now());
+                roleAuditRepository.save(a);
+            } catch (Exception ignored) {}
+        }
+        return userRepository.save(u);
     }
 
     public void deleteUser(String email) {

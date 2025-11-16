@@ -1,11 +1,12 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { CandidatNavbarComponent } from '../../../components/navbar/candidat-navbar';
 
 @Component({
   selector: 'dashboard-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CandidatNavbarComponent],
   templateUrl: './dashboard.html',
   styles: [`
     .dash { padding:2rem; max-width:1200px; margin:1.5rem auto; }

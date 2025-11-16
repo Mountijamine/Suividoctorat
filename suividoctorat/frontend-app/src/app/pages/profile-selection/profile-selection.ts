@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HttpEventType } from '@angular/common/http';
+import { UserNavbarComponent } from '../../components/navbar/user-navbar';
 
 @Component({
   selector: 'profile-selection',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserNavbarComponent],
   templateUrl: './profile-selection.html',
   styles: [
     `
@@ -28,6 +29,8 @@ import { HttpEventType } from '@angular/common/http';
   .role-card{ position:relative; padding:1.25rem; border-radius:0.75rem; cursor:pointer; transition:all 0.22s ease; border:1.5px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03) }
   .role-card:hover{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.14) }
   .role-card.selected{ background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28); box-shadow:0 12px 20px -6px rgba(0,0,0,0.08) }
+  .role-card.disabled{ opacity:0.4; cursor:not-allowed; pointer-events:none }
+  .role-card.disabled:hover{ background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.08) }
   .role-header{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem }
   .role-title{ font-size:1.05rem; font-weight:600; color:white; padding-right:0.75rem }
   .role-tag{ padding:0.2rem 0.6rem; border-radius:9999px; font-size:0.72rem; font-weight:500; white-space:nowrap }
@@ -49,6 +52,16 @@ import { HttpEventType } from '@angular/common/http';
   .right-logo{ display:flex; align-items:center; justify-content:center; width:64px; height:64px; background:#f8fafc; border-radius:8px; box-shadow:0 6px 18px rgba(2,6,23,0.04) }
   .right-illustration{ display:flex; justify-content:center; margin-top:1rem }
   .right-illustration svg{ width:220px; max-width:100%; height:auto; opacity:0.95; filter:drop-shadow(0 8px 18px rgba(2,6,23,0.06)) }
+
+  /* Empty state improvements */
+  .empty-state{ display:flex; justify-content:center; align-items:center; padding:2rem 0 }
+  .empty-content{ text-align:center; max-width:560px; margin:0 auto }
+  .empty-title{ font-size:1.25rem; color:#0f172a; margin:0 0 0.5rem 0 }
+  .empty-subtitle{ color:#64748b; margin:0 0 1rem 0 }
+  .empty-illustration{ display:flex; justify-content:center; align-items:center }
+  .empty-image{ max-width:360px; width:100%; height:auto; border-radius:12px; box-shadow:0 10px 20px rgba(2,6,23,0.06) }
+  .empty-placeholder{ display:flex; flex-direction:column; align-items:center; gap:0.6rem }
+  .placeholder-note{ color:#94a3b8; font-size:0.9rem }
 
   .form-section{ margin-bottom:1.25rem }
   .form-label{ display:block; font-size:0.8rem; font-weight:600; color:#0f172a; margin-bottom:0.5rem }
@@ -458,5 +471,10 @@ export class ProfileSelectionPage implements OnDestroy {
       return !!(this.extraAdmin.username && this.extraAdmin.province && this.extraAdmin.frontIdFile && this.extraAdmin.backIdFile);
     }
     return false;
+  }
+
+  canSelectRole(): boolean {
+    // Allow role selection only when no form is shown and not awaiting approval
+    return !this.showForm() && !this.awaiting();
   }
 }

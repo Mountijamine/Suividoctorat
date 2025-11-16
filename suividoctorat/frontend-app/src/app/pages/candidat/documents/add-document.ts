@@ -7,11 +7,12 @@ import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http'
 import { Router } from '@angular/router';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { ToastService } from '../../../services/toast.service';
+import { CandidatNavbarComponent } from '../../../components/navbar/candidat-navbar';
 
 @Component({
   selector: 'add-document',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule, CandidatNavbarComponent],
   templateUrl: './add-document.html',
   styles: [
     `

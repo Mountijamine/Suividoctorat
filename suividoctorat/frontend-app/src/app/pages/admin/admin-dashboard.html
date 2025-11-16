@@ -1,13 +1,91 @@
+<admin-navbar></admin-navbar>
 <div class="wrap">
-  <div class="header">
-    <div>
-      <h1 style="margin:0">Admin — Utilisateurs</h1>
-      <div style="color:#6b7280">Chaque utilisateur est affiché comme une carte moderne</div>
+  <!-- Sidebar with filters (only show on requests view) -->
+  <div class="sidebar" *ngIf="view() === 'requests'">
+    <div class="filter-card">
+      <div class="filter-title">Rechercher</div>
+      <input 
+        type="text" 
+        class="search-box" 
+        placeholder="Rechercher par nom, email, rôle..." 
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+      />
     </div>
-    <div>
-      <button class="btn" (click)="fetchUsers()">Rafraîchir</button>
+
+    <div class="filter-card">
+      <div class="filter-title">Filtres</div>
+      
+      <div class="filter-group">
+        <label class="filter-label">Rôle demandé</label>
+        <div 
+          class="filter-option" 
+          [class.active]="selectedRole() === 'all'"
+          (click)="selectedRole.set('all')"
+        >
+          <input type="radio" name="role" [checked]="selectedRole() === 'all'" readonly />
+          <span>Tous les rôles</span>
+        </div>
+        <div 
+          *ngFor="let role of availableRoles()"
+          class="filter-option"
+          [class.active]="selectedRole() === role"
+          (click)="selectedRole.set(role)"
+        >
+          <input type="radio" name="role" [checked]="selectedRole() === role" readonly />
+          <span>{{ role }}</span>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Statut</label>
+        <div 
+          class="filter-option"
+          [class.active]="selectedStatus() === 'all'"
+          (click)="selectedStatus.set('all')"
+        >
+          <input type="radio" name="status" [checked]="selectedStatus() === 'all'" readonly />
+          <span>Tous les statuts</span>
+        </div>
+        <div 
+          class="filter-option"
+          [class.active]="selectedStatus() === 'PENDING'"
+          (click)="selectedStatus.set('PENDING')"
+        >
+          <input type="radio" name="status" [checked]="selectedStatus() === 'PENDING'" readonly />
+          <span>En attente</span>
+        </div>
+        <div 
+          class="filter-option"
+          [class.active]="selectedStatus() === 'APPROVED'"
+          (click)="selectedStatus.set('APPROVED')"
+        >
+          <input type="radio" name="status" [checked]="selectedStatus() === 'APPROVED'" readonly />
+          <span>Approuvé</span>
+        </div>
+        <div 
+          class="filter-option"
+          [class.active]="selectedStatus() === 'REJECTED'"
+          (click)="selectedStatus.set('REJECTED')"
+        >
+          <input type="radio" name="status" [checked]="selectedStatus() === 'REJECTED'" readonly />
+          <span>Rejeté</span>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Main content area -->
+  <div class="main-content">
+    <div class="header">
+      <div>
+        <h1 style="margin:0">Admin — {{ view() === 'users' ? 'Utilisateurs' : 'Demandes' }}</h1>
+        <div style="color:#6b7280">{{ view() === 'users' ? 'Chaque utilisateur est affiché comme une carte moderne' : 'Gérez les demandes de rôles' }}</div>
+      </div>
+      <div>
+        <button class="btn" (click)="fetchUsers()">Rafraîchir</button>
+      </div>
+    </div>
 
   <div style="margin-top:0.75rem; display:flex; gap:0.5rem">
     <button class="btn" [class.outline]="view() !== 'users'" (click)="view.set('users')">Users</button>
@@ -18,10 +96,10 @@
     <div *ngIf="loading()" style="color:#6b7280">Chargement des utilisateurs...</div>
 
     <div *ngIf="view() === 'requests'">
-      <div class="requests" *ngIf="requests().length > 0">
-        <h3 style="margin:0 0 0.5rem 0">Demandes de rôle en attente</h3>
+      <div class="requests" *ngIf="filteredRequests().length > 0">
+        <h3 style="margin:0 0 0.5rem 0">Demandes de rôle ({{ filteredRequests().length }})</h3>
         <div class="requests-grid">
-          <div *ngFor="let r of requests()" class="req-card">
+          <div *ngFor="let r of filteredRequests()" class="req-card">
             <div class="req-media">
               <div class="thumb" *ngIf="getFrontUrl(r); else noFront">
                 <img [src]="getFrontUrl(r)" alt="recto" (click)="openFile(getFrontUrl(r))" />
@@ -58,11 +136,45 @@
           </div>
         </div>
       </div>
-      <div *ngIf="requests().length === 0" style="color:#6b7280">Aucune demande en attente</div>
+      <div *ngIf="filteredRequests().length === 0 && !loading()" style="color:#6b7280; text-align:center; padding:2rem">
+        Aucune demande trouvée avec les filtres appliqués
+      </div>
       <div *ngIf="requestsError()" style="margin-top:0.5rem; color:#b91c1c">Erreur lors de la récupération des demandes: {{ requestsError() }}</div>
     </div>
-    <div *ngIf="view() === 'users'" class="grid">
-      <div *ngFor="let u of users()" class="user-card">
+    <div *ngIf="view() === 'users'">
+      <!-- Horizontal filters for users -->
+      <div class="horizontal-filters">
+        <div class="h-filter-group" style="flex:1; min-width:250px">
+          <input 
+            type="text" 
+            class="h-search-box" 
+            placeholder="Rechercher par nom, email..." 
+            [value]="userSearchQuery()"
+            (input)="userSearchQuery.set($any($event.target).value)"
+          />
+        </div>
+        <div class="h-filter-group">
+          <label class="h-filter-label">Rôle:</label>
+          <button 
+            class="h-filter-btn" 
+            [class.active]="userRoleFilter() === 'all'"
+            (click)="userRoleFilter.set('all')"
+          >
+            Tous
+          </button>
+          <button 
+            *ngFor="let role of availableUserRoles()"
+            class="h-filter-btn"
+            [class.active]="userRoleFilter() === role"
+            (click)="userRoleFilter.set(role)"
+          >
+            {{ role }}
+          </button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div *ngFor="let u of filteredUsers()" class="user-card">
         <div class="meta">
           <div class="avatar">{{ initials(u).toUpperCase() }}</div>
           <div>
@@ -74,7 +186,6 @@
             </div>
           </div>
         </div>
-        <div style="margin-top:0.5rem; color:#374151">ID: {{ u.id }}</div>
         <div class="actions">
           <button class="btn outline" (click)="toggleUserRequests(u)">{{ expandedUsers()[u.id] ? 'Cacher' : 'Voir' }}</button>
           <button class="btn">Modifier</button>
@@ -94,6 +205,12 @@
         </div>
       </div>
     </div>
+      
+      <div *ngIf="filteredUsers().length === 0 && !loading()" style="color:#6b7280; text-align:center; padding:2rem">
+        Aucun utilisateur trouvé avec les filtres appliqués
+      </div>
+    </div>
+  </div>
   </div>
 
   <!-- Confirmation modal -->

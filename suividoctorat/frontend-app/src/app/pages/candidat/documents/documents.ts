@@ -7,11 +7,12 @@ import { firstValueFrom } from 'rxjs';
 import { ToastService } from '../../../services/toast.service';
 import { ToastComponent } from '../../../components/toast/toast';
 import { AuthService } from '../../../services/auth.service';
+import { CandidatNavbarComponent } from '../../../components/navbar/candidat-navbar';
 
 @Component({
   selector: 'documents-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, CandidatNavbarComponent],
   templateUrl: './documents.html',
   styles: [
     `
@@ -53,7 +54,7 @@ import { AuthService } from '../../../services/auth.service';
   .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem }
     .card{ background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(2,6,23,0.06); display:flex; flex-direction:column }
   .card-media{ position:relative; height:160px; background:#f8fafc; display:flex; align-items:center; justify-content:center; overflow:hidden }
-  .card-media img{ width:100%; height:100%; object-fit:cover; display:block }
+  .card-media img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; background:#f8fafc }
   .placeholder{ width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc }
   .placeholder-icon{ width:100%; height:100%; display:flex; align-items:center; justify-content:center }
   .placeholder-icon svg{ width:100%; height:100%; object-fit:cover; max-width:120px; max-height:96px }

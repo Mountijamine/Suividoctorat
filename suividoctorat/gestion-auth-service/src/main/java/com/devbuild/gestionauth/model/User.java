@@ -55,6 +55,9 @@ public class User {
     @Column(nullable = true)
     private java.time.LocalDateTime approvedAt;
 
+    @Column(name = "created_at")
+    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+
     @Column(nullable = true)
     private String rejectionReason;
 
@@ -87,4 +90,7 @@ public class User {
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
     public Boolean getDisabled() { return disabled; }
     public void setDisabled(Boolean disabled) { this.disabled = disabled; }
+
+    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
