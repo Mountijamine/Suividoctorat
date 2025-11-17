@@ -46,23 +46,28 @@
     <!-- Right Panel: Authentication Form -->
     <div class="form-panel">
       <div class="form-wrapper">
-        <!-- Tab Switcher -->
-        <div class="tab-switcher">
-          <button 
-            [class.active]="mode() === 'signin'" 
-            (click)="switch('signin')"
-            type="button">
-            Sign In
-          </button>
-          <button 
-            [class.active]="mode() === 'signup'" 
-            (click)="switch('signup')"
-            type="button">
-            Sign Up
-          </button>
+        <!-- Sticky Header: Tab Switcher + Logo -->
+        <div class="sticky-header">
+          <!-- Tab Switcher -->
+          <div class="tab-switcher">
+            <button 
+              [class.active]="mode() === 'signin'" 
+              (click)="switch('signin')"
+              type="button">
+              Sign In
+            </button>
+            <button 
+              [class.active]="mode() === 'signup'" 
+              (click)="switch('signup')"
+              type="button">
+              Sign Up
+            </button>
+          </div>
         </div>
 
-        <!-- Form Header -->
+        <!-- Scrollable Form Content -->
+        <div class="form-content">
+          <!-- Form Header -->
         <div class="form-header">
           <h1 *ngIf="mode() === 'signin'">Welcome Back</h1>
           <h1 *ngIf="mode() === 'signup'">Create Your Account</h1>
@@ -72,6 +77,10 @@
           <p *ngIf="mode() === 'signup'" class="form-subtitle">
             Join the academic community today
           </p>
+          <!-- Moved Logo: now below title and subtitle -->
+          <div class="form-logo">
+            <img src="/assets/logo_white.png" alt="SuiviDoctorat Logo" />
+          </div>
         </div>
 
         <!-- Sign In Form -->
@@ -227,6 +236,7 @@
           </svg>
           <span>{{ successMessage() }}</span>
         </div>
+        </div><!-- /form-content -->
       </div>
     </div>
   </div>

@@ -1,10 +1,79 @@
-<div class="start">
-  <div class="card">
-    <h1>Welcome to SuiviDoctorat</h1>
-    <p>Track your PhD progress easily.</p>
-    <div>
-      <button class="primary" (click)="goToAuth('signin')">Login</button>
-      <button class="outline" (click)="goToAuth('signup')">Signup</button>
+<public-navbar></public-navbar>
+
+<main class="landing">
+  <!-- Hero Section with Banner -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Manage Your PhD Journey</h1>
+      <p class="hero-subtitle">Track progress, collaborate with supervisors, and prepare for defense — all in one platform</p>
+      <div class="hero-cta">
+        <button class="btn-primary" (click)="goToAuth('signup')">Get Started Free</button>
+        <button class="btn-secondary" (click)="goToAuth('signin')">Sign In</button>
+      </div>
     </div>
-  </div>
-</div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="features-container">
+      <h2 class="section-title">Everything You Need for Your Doctorate</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" opacity="0.2"/>
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Campaign Management</h3>
+          <p>Browse PhD opportunities, submit applications, and track your candidacy status in real-time.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M3 10h18M9 4v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Defense Scheduling</h3>
+          <p>Plan and coordinate thesis defenses, invite jury members, and manage all defense logistics.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+              <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+              <line x1="9" y1="15" x2="15" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Document Hub</h3>
+          <p>Centralize all your research documents, publications, and administrative files in one secure place.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+              <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Collaboration Tools</h3>
+          <p>Stay connected with your advisors, co-authors, and research team throughout your journey.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-container">
+      <h2>Ready to Start Your Journey?</h2>
+      <p>Join thousands of PhD students managing their research with SuiviDoctorat</p>
+      <button class="btn-cta" (click)="goToAuth('signup')">Create Your Account</button>
+    </div>
+  </section>
+</main>

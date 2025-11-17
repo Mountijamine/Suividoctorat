@@ -59,8 +59,8 @@ export class App {
     // clear expired token at startup
     try { 
       if (this.auth.logoutIfExpired()) { 
-        console.log('[App] Token was expired, redirecting to login');
-        try{ this.router.navigate(['/auth'], { queryParams: { sessionExpired: '1' } }); }catch(e){} 
+        console.log('[App] Token was expired — cleared token (no redirect)');
+        // Do not redirect to /auth automatically on startup; keep landing page public.
       } 
     } catch(e){
       console.error('[App] Error checking token expiration:', e);

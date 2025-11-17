@@ -40,28 +40,27 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     /* ========== Base Layout ========== */
     .auth-portal {
       min-height: 100vh;
+      height: 100vh;
       background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
 
     .auth-container {
       display: grid;
-      grid-template-columns: 480px 520px;
-      max-width: 1000px;
+      grid-template-columns: 1fr 1fr;
       width: 100%;
+      height: 100%;
       background: var(--color-bg-primary);
-      border-radius: var(--radius-lg);
       overflow: hidden;
-      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(0, 0, 0, 0.05);
     }
 
     /* ========== Brand Panel ========== */
     .brand-panel {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      background-image: url('/assets/login_screen.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       color: white;
       padding: 3rem 2.5rem;
       display: flex;
@@ -74,17 +73,20 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     .brand-panel::before {
       content: '';
       position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(1px);
       pointer-events: none;
+      z-index: 0;
     }
 
     .brand-content {
       position: relative;
-      z-index: 1;
+      z-index: 2;
+      display: none;
     }
 
     .logo-section {
@@ -140,22 +142,40 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
     .brand-footer {
       position: relative;
-      z-index: 1;
-      opacity: 0.8;
+      z-index: 2;
+      opacity: 0.95;
       font-size: 0.875rem;
+      display: none;
     }
 
     /* ========== Form Panel ========== */
     .form-panel {
-      padding: 3rem 2.5rem;
       background: var(--color-bg-primary);
-      overflow-y: auto;
-      max-height: 90vh;
+      display: flex;
+      /* center the form vertically in the right panel */
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
     .form-wrapper {
-      max-width: 400px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ========== Sticky Header ========== */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      background: var(--color-bg-primary);
+      padding: 1.5rem 2rem;
+      z-index: 10;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--color-border);
     }
 
     /* ========== Tab Switcher ========== */
@@ -165,7 +185,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       padding: 0.25rem;
       background: var(--color-bg-tertiary);
       border-radius: var(--radius-md);
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
+      width: 100%;
     }
 
     .tab-switcher button {
@@ -193,7 +214,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
     /* ========== Form Header ========== */
     .form-header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
+      text-align: center;
     }
 
     .form-header h1 {
@@ -214,7 +236,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     .auth-form {
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1rem;
     }
 
     .form-row {
@@ -297,6 +319,39 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
     .checkbox-text a:hover {
       text-decoration: underline;
+    }
+
+    /* ========== Form Logo ========== */
+    .form-logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 0.75rem;
+      margin-bottom: 0;
+    }
+
+    /* allow tall/vertical logos to show their full height while staying centered */
+    .form-logo img {
+      width: auto;
+      height: 280px; /* slightly increased height */
+      max-height: 70vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* ========== Scrollable Form Content ========== */
+    .form-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 2rem 3rem;
+      display: flex;
+      justify-content: center;
+      align-items: center; /* vertically center the inner form card */
+    }
+
+    .form-content > * {
+      width: 100%;
+      max-width: 520px; /* allow wider form layout */
     }
 
     /* ========== Buttons ========== */
@@ -474,29 +529,34 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     @media (max-width: 1024px) {
       .auth-container {
         grid-template-columns: 1fr;
-        max-width: 520px;
       }
 
       .brand-panel {
         display: none;
       }
+    }
 
-      .form-panel {
-        max-height: none;
+    @media (max-width: 768px) {
+      .sticky-header {
+        padding: 1.25rem 1.5rem;
+      }
+
+      .form-content {
+        padding: 1.5rem 1.5rem 2rem;
+      }
+
+      .form-header h1 {
+        font-size: 1.5rem;
       }
     }
 
     @media (max-width: 640px) {
-      .auth-portal {
-        padding: 1rem;
+      .sticky-header {
+        padding: 1rem 1rem;
       }
 
-      .form-panel {
-        padding: 2rem 1.5rem;
-      }
-
-      .form-wrapper {
-        max-width: 100%;
+      .form-content {
+        padding: 1rem 1rem 1.5rem;
       }
 
       .form-row {
@@ -504,7 +564,13 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       }
 
       .form-header h1 {
-        font-size: 1.5rem;
+        font-size: 1.375rem;
+      }
+
+      .form-logo img {
+        width: auto;
+        height: 180px; /* slightly larger mobile height */
+        max-height: 45vh;
       }
     }
   `]
