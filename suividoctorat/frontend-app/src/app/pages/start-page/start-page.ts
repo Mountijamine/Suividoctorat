@@ -2,11 +2,13 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PublicNavbarComponent } from '../../components/navbar/public-navbar';
+import { UserNavbarComponent } from '../../components/navbar/user-navbar';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'start-page',
   standalone: true,
-  imports: [CommonModule, PublicNavbarComponent],
+  imports: [CommonModule, PublicNavbarComponent, UserNavbarComponent],
   templateUrl: './start-page.html',
   styles: [`
     :host { display:block }
@@ -60,7 +62,11 @@ import { PublicNavbarComponent } from '../../components/navbar/public-navbar';
   `]
 })
 export class StartPage {
-  constructor(private router: Router) {}
+  constructor(private router: Router, public auth: AuthService) {}
+
+  get isLoggedIn(): boolean {
+    return this.auth.isLoggedIn ? this.auth.isLoggedIn() : false;
+  }
 
   goToAuth(mode: 'signin'|'signup'){
     this.router.navigate(['/auth'], { queryParams: { mode } });

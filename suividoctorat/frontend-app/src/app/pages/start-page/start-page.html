@@ -1,4 +1,5 @@
-<public-navbar></public-navbar>
+<public-navbar *ngIf="!isLoggedIn"></public-navbar>
+<user-navbar *ngIf="isLoggedIn"></user-navbar>
 
 <main class="landing">
   <!-- Hero Section with Banner -->
