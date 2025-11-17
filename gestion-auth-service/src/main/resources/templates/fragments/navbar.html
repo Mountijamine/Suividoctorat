@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<!-- Simple navbar fragment used on authenticated pages -->
+<div th:fragment="nav">
+    <nav style="background:#eee;padding:10px;margin-bottom:10px;">
+        <a href="/">Home</a> |
+        <a th:href="@{/campaigns}">Campaigns</a> |
+        <a th:href="@{/dashboard}">Dashboard</a> |
+        <a th:if="${isAuthenticated}" th:href="@{/profile}">Profile</a> |
+        <a th:if="${isAuthenticated}" th:href="@{/candidat/documents}">Documents</a> |
+        <a th:if="${isAdmin}" th:href="@{/admin/users}">Admin</a> |
+        <a th:if="${isEncadrant}" href="#">Encadrant Area</a> |
+        <a th:if="${isPersonnel}" href="#">Personnel</a> |
+        <a th:if="${isAuthenticated}" th:href="@{/logout}">Logout</a>
+        <span style="float:right;">&nbsp;</span>
+    </nav>
+</div>

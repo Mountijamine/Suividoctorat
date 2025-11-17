@@ -1,0 +1,1 @@
+export { SoutenancesPage } from './soutenances';
