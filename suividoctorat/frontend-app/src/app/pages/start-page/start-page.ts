@@ -14,9 +14,9 @@ import { PublicNavbarComponent } from '../../components/navbar/public-navbar';
     .landing { min-height:100vh; background:#f8fafc }
     
     /* Hero Section */
-    .hero { position:relative; min-height:500px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); overflow:hidden }
-    .hero::before { content:''; position:absolute; inset:0; background:url('/assets/hero-pattern.svg') center/cover; opacity:0.1 }
-    .hero-overlay { position:absolute; inset:0; background:linear-gradient(135deg, rgba(30,64,175,0.9) 0%, rgba(59,130,246,0.8) 100%) }
+    .hero { position:relative; min-height:500px; display:flex; align-items:center; justify-content:center; background:url('/assets/start-banner.jpg') center/cover; overflow:hidden }
+    .hero::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.4) }
+    .hero-overlay { position:absolute; inset:0; background:linear-gradient(135deg, rgba(30,64,175,0.7) 0%, rgba(59,130,246,0.6) 100%) }
     .hero-content { position:relative; z-index:2; text-align:center; max-width:800px; padding:2rem; color:white }
     .hero-title { font-size:3rem; font-weight:800; margin:0 0 1rem 0; letter-spacing:-0.02em; line-height:1.1 }
     .hero-subtitle { font-size:1.25rem; margin:0 0 2rem 0; opacity:0.95; line-height:1.6 }
