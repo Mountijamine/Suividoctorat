@@ -29,7 +29,8 @@ export class AuthInterceptor implements HttpInterceptor {
           const router = this.injector.get(Router);
           const auth = this.injector.get(AuthService);
           // if token expired or unauthorized, clear auth and redirect to login
-          if (err && (err.status === 401 || err.status === 403)){
+          // BUT: don't logout if the 401 is from a login/signup attempt (invalid credentials)
+          if (err && (err.status === 401 || err.status === 403) && !isAuthEndpoint){
             console.warn('[AuthInterceptor] response status', err.status, '— logging out');
             try { console.warn('[AuthInterceptor] response body:', err?.error); } catch(e){}
             auth.setAuth(null, null);

@@ -112,6 +112,23 @@
             </div>
           </div>
 
+          <!-- Error/Success Messages -->
+          <div *ngIf="serverError()" class="alert alert-error">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>{{ serverError() }}</span>
+          </div>
+          
+          <div *ngIf="successMessage()" class="alert alert-success">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ successMessage() }}</span>
+          </div>
+
           <button type="submit" class="btn-primary">
             Sign In
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -204,6 +221,31 @@
             </div>
           </div>
 
+          <!-- Error/Success Messages -->
+          <div *ngIf="invalidFields()" class="alert alert-error">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Please correct: <strong>{{ invalidFields()!.join(', ') }}</strong></span>
+          </div>
+
+          <div *ngIf="serverError()" class="alert alert-error">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>{{ serverError() }}</span>
+          </div>
+          
+          <div *ngIf="successMessage()" class="alert alert-success">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ successMessage() }}</span>
+          </div>
+
           <button type="submit" class="btn-primary">
             Create Account
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -211,31 +253,6 @@
             </svg>
           </button>
         </form>
-
-        <!-- Feedback Messages -->
-        <div *ngIf="invalidFields()" class="alert alert-error">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
-            <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <span>Please correct: <strong>{{ invalidFields()!.join(', ') }}</strong></span>
-        </div>
-        
-        <div *ngIf="serverError()" class="alert alert-error">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
-            <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <span>{{ serverError() }}</span>
-        </div>
-        
-        <div *ngIf="successMessage()" class="alert alert-success">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
-            <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span>{{ successMessage() }}</span>
-        </div>
         </div><!-- /form-content -->
       </div>
     </div>
