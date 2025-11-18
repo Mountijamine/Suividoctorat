@@ -58,8 +58,10 @@ import { UserNavbarComponent } from '../../components/navbar/user-navbar';
   .empty-content{ text-align:center; max-width:560px; margin:0 auto }
   .empty-title{ font-size:1.25rem; color:#0f172a; margin:0 0 0.5rem 0 }
   .empty-subtitle{ color:#64748b; margin:0 0 1rem 0 }
-  .empty-illustration{ display:flex; justify-content:center; align-items:center }
+  .empty-illustration{ display:flex; flex-direction:column; justify-content:center; align-items:center; gap:0.75rem }
   .empty-image{ max-width:360px; width:100%; height:auto; border-radius:12px; box-shadow:0 10px 20px rgba(2,6,23,0.06) }
+  .banner-image{ max-width:720px; width:100%; height:auto; border-radius:12px; box-shadow:0 10px 20px rgba(2,6,23,0.06) }
+  .banner-caption{ margin-top:0.75rem; color:#64748b; font-weight:600; font-size:0.98rem; text-align:center }
   .empty-placeholder{ display:flex; flex-direction:column; align-items:center; gap:0.6rem }
   .placeholder-note{ color:#94a3b8; font-size:0.9rem }
 

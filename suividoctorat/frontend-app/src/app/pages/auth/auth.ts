@@ -83,6 +83,27 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       z-index: 0;
     }
 
+    /* back button over brand-panel (left image) - low-contrast "blend" style */
+    .brand-back {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255,255,255,0.06); /* subtle light glass */
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.9);
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(2,6,23,0.06);
+      cursor: pointer;
+      z-index: 3; /* above brand-panel overlay */
+    }
+    .brand-back:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.10); }
+
     .brand-content {
       position: relative;
       z-index: 2;
@@ -632,6 +653,18 @@ export class AuthPage {
 
   closeTerms() { 
     this.showTerms.set(false); 
+  }
+
+  goBack() {
+    try {
+      if (window.history && window.history.length > 1) {
+        window.history.back();
+      } else {
+        this.router.navigate(['/']);
+      }
+    } catch (e) {
+      try { this.router.navigate(['/']); } catch (_) {}
+    }
   }
 
   switch(mode: 'signin'|'signup') {

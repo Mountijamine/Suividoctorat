@@ -67,21 +67,13 @@
       <div class="form-section" *ngIf="!showForm() && !awaiting()">
         <div class="empty-state">
           <div class="empty-content">
-            <h3 class="empty-title">Choisissez un rôle à gauche</h3>
-            <p class="empty-subtitle">Sélectionnez l'un des rôles (Candidat, Directeur, Admin) pour continuer.</p>
+           <h3 class="empty-title">Choisissez un rôle à gauche</h3>
             <div class="empty-illustration" aria-hidden="true">
-              <!-- show provided illustration when available, otherwise a tasteful placeholder -->
-              <img *ngIf="showIllustration" [src]="illustrationPath" class="empty-image" alt="illustration" (error)="onIllustrationError()" />
-              <div *ngIf="!showIllustration" class="empty-placeholder">
-                <svg width="200" height="140" viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <rect x="8" y="12" width="184" height="116" rx="10" fill="#f8fafc" stroke="#e6eef8"/>
-                  <path d="M28 96h144" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
-                  <circle cx="60" cy="52" r="22" fill="#06b6d4" opacity="0.9"/>
-                  <rect x="96" y="40" width="70" height="14" rx="6" fill="#7c3aed" opacity="0.92"/>
-                  <rect x="96" y="62" width="50" height="10" rx="5" fill="#3b82f6" opacity="0.9"/>
-                </svg>
-                <div class="placeholder-note">Vous pouvez ajouter une image personnalisée plus tard.</div>
-              </div>
+              <!-- Display the profile selection banner and caption. -->
+              <!-- Place your banner at: assets/images/profileselectionbanner.jpg (or .png) -->
+              <img src="assets/profileselectionbanner.jpg" class="empty-image banner-image" alt="profileselection banner" (error)="onIllustrationError()" />
+               
+            <p class="empty-subtitle">Sélectionnez l'un des rôles (Candidat, Encadrant, Admin) pour continuer.</p>
             </div>
           </div>
         </div>
