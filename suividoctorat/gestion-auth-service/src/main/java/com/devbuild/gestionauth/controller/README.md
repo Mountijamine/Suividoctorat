@@ -1,0 +1,1 @@
+This folder holds the authentication controllers (signup/login/role assignment)
