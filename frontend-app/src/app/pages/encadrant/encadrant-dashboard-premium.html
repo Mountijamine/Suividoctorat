@@ -1,0 +1,193 @@
+<encadrant-navbar></encadrant-navbar>
+
+<!-- Premium Encadrant Dashboard - Luxury Blue Design -->
+<div class="dashboard-premium">
+  
+  <!-- Hero Header with Blue Gradient -->
+  <div class="hero-header-premium">
+    <div class="hero-background"></div>
+    <div class="hero-content-premium">
+      <div class="hero-text">
+        <div class="hero-label">ESPACE ENCADRANT DOCTORAL</div>
+        <h1 class="hero-title">Tableau de Bord</h1>
+        <p class="hero-welcome">Bienvenue, {{ userName() || 'Professeur' }}</p>
+      </div>
+      <div class="hero-date-card">
+        <div class="date-number">{{ getCurrentDate() }}</div>
+        <div class="date-info">
+          <div class="date-month">{{ getCurrentMonth() }}</div>
+          <div class="date-year">{{ getCurrentYear() }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="dashboard-content-premium">
+
+    <!-- Statistics Cards - Premium Design -->
+    <div class="stats-grid-premium">
+      
+      <div class="stat-card-premium blue-card">
+        <div class="stat-gradient-bar"></div>
+        <div class="stat-content">
+          <div class="stat-header-row">
+            <span class="stat-label">Doctorants Actifs</span>
+            <span class="stat-badge">En cours</span>
+          </div>
+          <div class="stat-number">{{ totalDoctorants() }}</div>
+          <div class="stat-footer">Encadrements en cours</div>
+        </div>
+      </div>
+
+      <div class="stat-card-premium purple-card">
+        <div class="stat-gradient-bar"></div>
+        <div class="stat-content">
+          <div class="stat-header-row">
+            <span class="stat-label">Actions Requises</span>
+            <span class="stat-badge urgent">Urgent</span>
+          </div>
+          <div class="stat-number">{{ pendingActions() }}</div>
+          <div class="stat-footer">Demandes en attente</div>
+        </div>
+      </div>
+
+      <div class="stat-card-premium teal-card">
+        <div class="stat-gradient-bar"></div>
+        <div class="stat-content">
+          <div class="stat-header-row">
+            <span class="stat-label">Soutenances à Venir</span>
+            <span class="stat-badge upcoming">Planifié</span>
+          </div>
+          <div class="stat-number">{{ upcomingSoutenances() }}</div>
+          <div class="stat-footer">Événements programmés</div>
+        </div>
+      </div>
+
+      <div class="stat-card-premium green-card">
+        <div class="stat-gradient-bar"></div>
+        <div class="stat-content">
+          <div class="stat-header-row">
+            <span class="stat-label">Soutenances Complétées</span>
+            <span class="stat-badge success">Succès</span>
+          </div>
+          <div class="stat-number">{{ completedDefenses() }}</div>
+          <div class="stat-footer">Total réalisé</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="main-grid-premium">
+
+      <!-- Activity Timeline Section -->
+      <div class="section-card-premium">
+        <div class="section-header-premium">
+          <h2 class="section-title-premium">Activité Récente</h2>
+          <span class="section-count">{{ recentActivity().length }} entrées</span>
+        </div>
+
+        <div class="activity-timeline" *ngIf="!loading() && recentActivity().length > 0">
+          <div class="activity-item-premium" *ngFor="let activity of recentActivity()">
+            <div class="activity-indicator" [class]="'status-' + activity.status.toLowerCase()"></div>
+            <div class="activity-details">
+              <div class="activity-doctorant">{{ activity.doctorant }}</div>
+              <div class="activity-action">{{ activity.action }}</div>
+              <div class="activity-timestamp">{{ formatDate(activity.date) }}</div>
+            </div>
+            <div class="activity-status-pill" [class]="'pill-' + activity.status.toLowerCase()">
+              {{ getStatusLabel(activity.status) }}
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-activity" *ngIf="!loading() && recentActivity().length === 0">
+          <p class="empty-message">Aucune activité récente</p>
+        </div>
+
+        <div class="loading-activity" *ngIf="loading()">
+          <div class="loading-spinner"></div>
+          <p class="loading-message">Chargement en cours...</p>
+        </div>
+      </div>
+
+      <!-- Demandes Section -->
+      <div class="section-card-premium">
+        <div class="section-header-premium">
+          <h2 class="section-title-premium">Mes Demandes de Soutenance</h2>
+          <button class="btn-view-all-premium" (click)="goToSoutenance()">
+            Voir toutes les demandes →
+          </button>
+        </div>
+
+        <div class="demandes-grid-premium" *ngIf="!loading() && demandes().length > 0">
+          <div class="demande-card-premium" 
+               *ngFor="let demande of demandes().slice(0, 6)"
+               (click)="viewDemande(demande.id)">
+            
+            <div class="demande-gradient-line" [class]="'line-' + demande.statut.toLowerCase()"></div>
+            
+            <div class="demande-header-premium">
+              <span class="demande-number">Demande N° {{ demande.id }}</span>
+              <span class="demande-status-badge" [class]="'badge-' + demande.statut.toLowerCase()">
+                {{ getStatusLabel(demande.statut) }}
+              </span>
+            </div>
+
+            <div class="demande-body-premium">
+              <h3 class="demande-title-premium">{{ demande.titre }}</h3>
+              <div class="demande-info-row">
+                <span class="info-label">Doctorant:</span>
+                <span class="info-value">{{ demande.doctorantPrenom }} {{ demande.doctorantNom }}</span>
+              </div>
+              <div class="demande-info-row" *ngIf="demande.specialite">
+                <span class="info-label">Spécialité:</span>
+                <span class="info-value">{{ demande.specialite }}</span>
+              </div>
+              <div class="demande-info-row">
+                <span class="info-label">Créée le:</span>
+                <span class="info-value">{{ formatDate(demande.dateCreation) }}</span>
+              </div>
+            </div>
+
+            <div class="demande-footer-premium">
+              <span class="view-link">Consulter les détails →</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="empty-demandes" *ngIf="!loading() && demandes().length === 0">
+          <p class="empty-message">Aucune demande disponible</p>
+          <button class="btn-primary-premium" (click)="goToSoutenance()">
+            Nouvelle Demande
+          </button>
+        </div>
+
+        <div class="loading-demandes" *ngIf="loading()">
+          <div class="loading-spinner"></div>
+          <p class="loading-message">Chargement des demandes...</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="quick-actions-premium">
+      <h3 class="actions-title">Actions Rapides</h3>
+      <div class="actions-buttons">
+        <button class="action-btn-premium primary" (click)="goToSoutenance()">
+          <span class="action-title">Gérer les Soutenances</span>
+          <span class="action-subtitle">Consulter et valider les demandes</span>
+        </button>
+        <button class="action-btn-premium secondary">
+          <span class="action-title">Rapports & Analyses</span>
+          <span class="action-subtitle">Statistiques détaillées</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

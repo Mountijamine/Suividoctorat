@@ -1,0 +1,679 @@
+<div class="soutenance-modern">
+  <!-- Hero Section with Background Image -->
+  <div class="hero-soutenance" [style.backgroundImage]="'url(assets/soutenance/banner (1).png)'">
+    <div class="hero-overlay"></div>
+    <div class="hero-content-soutenance">
+      <h1 class="hero-title-soutenance">
+        <svg class="hero-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        Soutenance de Thèse de Doctorat
+      </h1>
+      <p class="hero-subtitle-soutenance">L'aboutissement de votre parcours doctoral</p>
+      <div class="hero-actions">
+        <button class="btn-hero-primary" (click)="showCreateForm()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Nouvelle Demande
+        </button>
+        <button class="btn-hero-secondary" (click)="showListView()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          Mes Demandes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="tab-btn" [class.active]="currentView() === 'info'" (click)="showInfoView()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      À propos
+    </button>
+    <button class="tab-btn" [class.active]="currentView() === 'list'" (click)="showListView()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      </svg>
+      Mes Demandes
+    </button>
+    <button class="tab-btn" [class.active]="currentView() === 'create'" (click)="showCreateForm()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      Nouvelle Demande
+    </button>
+  </div>
+
+  <div class="soutenance-container">
+    <!-- INFO VIEW: About Soutenance -->
+    <div *ngIf="currentView() === 'info'" class="info-view">
+      <!-- What is Soutenance Section -->
+      <div class="info-card hero-info">
+        <div class="info-card-header">
+          <img src="assets/soutenance/Transform Your Doctoral Journey.png" alt="Soutenance" class="info-illustration">
+        </div>
+        <div class="info-card-body">
+          <h2 class="info-title">Qu'est-ce que la soutenance de thèse ?</h2>
+          <p class="info-text">
+            La soutenance de thèse est l'acte académique final du parcours doctoral. C'est une présentation publique et 
+            formelle de vos travaux de recherche devant un jury d'experts, suivie d'une délibération privée qui 
+            déterminera l'obtention du grade de docteur.
+          </p>
+          <div class="info-highlights">
+            <div class="highlight-item">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Présentation orale de 45 minutes</span>
+            </div>
+            <div class="highlight-item">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Questions du jury (1h à 1h30)</span>
+            </div>
+            <div class="highlight-item">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Délibération privée du jury</span>
+            </div>
+            <div class="highlight-item">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Proclamation publique des résultats</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Process -->
+      <div class="timeline-section">
+        <h2 class="section-title-timeline">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Parcours Complet de la Soutenance
+        </h2>
+        <div class="timeline">
+          <div *ngFor="let step of timelineSteps; let i = index" class="timeline-item" [class]="'status-' + step.status">
+            <div class="timeline-marker">
+              <div class="marker-circle">{{ step.number }}</div>
+              <div class="marker-line" *ngIf="i < timelineSteps.length - 1"></div>
+            </div>
+            <div class="timeline-content">
+              <h3 class="timeline-title">{{ step.title }}</h3>
+              <p class="timeline-description">{{ step.description }}</p>
+              <div class="timeline-meta">
+                <span class="meta-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  {{ step.duration }}
+                </span>
+                <span class="meta-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                  {{ step.actor }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Features Grid -->
+      <div class="features-grid">
+        <div class="feature-card">
+          <img src="assets/soutenance/Active Researchers.png" alt="Researchers" class="feature-image">
+          <h3>Accompagnement Expert</h3>
+          <p>Un suivi personnalisé tout au long du processus de soutenance</p>
+        </div>
+        <div class="feature-card">
+          <img src="assets/soutenance/Documents à Fournir.png" alt="Documents" class="feature-image">
+          <h3>Documents Requis</h3>
+          <p>Guide complet des documents à fournir à chaque étape</p>
+        </div>
+        <div class="feature-card">
+          <img src="assets/soutenance/Success Rate.png" alt="Success" class="feature-image">
+          <h3>Taux de Réussite Élevé</h3>
+          <p>95% de taux de réussite grâce à un processus structuré</p>
+        </div>
+        <div class="feature-card">
+          <img src="assets/soutenance/Support Available.png" alt="Support" class="feature-image">
+          <h3>Support Disponible</h3>
+          <p>Équipe administrative à votre disposition pour toute question</p>
+        </div>
+      </div>
+
+      <!-- Recommendations Card -->
+      <div class="recommendations-card">
+        <h3 class="recommendations-title">
+          💡 Recommandations pour le Candidat
+        </h3>
+        <div class="recommendations-grid">
+          <div class="recommendation-section">
+            <h4>📌 Préparation de la présentation</h4>
+            <ul>
+              <li>Durée: 40-45 minutes maximum</li>
+              <li>Support: Diaporama professionnel (PowerPoint/Beamer)</li>
+              <li>Structure: Contexte → Problématique → Contributions → Résultats → Perspectives</li>
+            </ul>
+          </div>
+          <div class="recommendation-section">
+            <h4>📌 Le jour de la soutenance</h4>
+            <ul>
+              <li>Arriver 30 minutes en avance</li>
+              <li>Tenue vestimentaire: Formelle et professionnelle</li>
+              <li>Prévoir: bouteille d'eau, pointeur laser, backup USB</li>
+            </ul>
+          </div>
+          <div class="recommendation-section">
+            <h4>📌 Questions du jury</h4>
+            <ul>
+              <li>Écouter attentivement chaque question</li>
+              <li>Prendre le temps de réfléchir avant de répondre</li>
+              <li>Admettre si vous ne connaissez pas la réponse</li>
+            </ul>
+          </div>
+          <div class="recommendation-section">
+            <h4>📌 Après la soutenance</h4>
+            <ul>
+              <li>Délibération privée: 20-40 minutes</li>
+              <li>Intégrer les corrections dans un délai de 3 mois</li>
+              <li>Dépôt final à la bibliothèque universitaire</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST VIEW: Demandes List -->
+    <div *ngIf="currentView() === 'list'" class="list-view-modern">
+      <div class="list-header">
+        <h2 class="list-title">Mes Demandes de Soutenance</h2>
+        <button class="btn-add" (click)="showCreateForm()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Nouvelle Demande
+        </button>
+      </div>
+
+      <div *ngIf="loading()" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Chargement...</p>
+      </div>
+
+      <div *ngIf="!loading() && demandes().length === 0" class="empty-state-modern">
+        <div class="empty-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h3>Aucune demande</h3>
+        <p>Vous n'avez pas encore créé de demande de soutenance</p>
+        <button class="btn-primary-large" (click)="showCreateForm()">Créer une demande</button>
+      </div>
+
+      <div *ngIf="!loading() && demandes().length > 0" class="demandes-grid-modern">
+        <div *ngFor="let demande of demandes()" class="demande-card-luxury" (click)="viewDemande(demande)">
+          <div class="card-gradient-header"></div>
+          <div class="card-content-luxury">
+            <div class="card-top">
+              <h3 class="card-title-luxury">{{ demande.titreThese }}</h3>
+              <span class="status-badge-luxury" [class]="'status-' + demande.statut.toLowerCase()">
+                {{ getStatutLabel(demande.statut) }}
+              </span>
+            </div>
+            <div class="card-info-luxury">
+              <div class="info-item-luxury">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>{{ demande.doctorantEmail }}</span>
+              </div>
+              <div class="info-item-luxury">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>{{ demande.dateCreation | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="info-item-luxury" *ngIf="demande.dateSoutenance">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="highlight-text">{{ demande.dateSoutenance | date:'dd/MM/yyyy à HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="card-footer-luxury">
+              <button class="btn-view">
+                Voir les détails
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE VIEW: New Demande Form -->
+    <div *ngIf="currentView() === 'create'" class="create-view-modern">
+      <button class="btn-back-modern" (click)="goBack()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Retour
+      </button>
+
+      <div class="form-card-modern">
+        <div class="form-header-modern">
+          <h2>Nouvelle Demande de Soutenance</h2>
+          <p>Remplissez les informations ci-dessous pour créer votre demande</p>
+        </div>
+
+        <div class="form-body-modern">
+          <div class="form-section">
+            <label class="form-label-modern">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+              Email du doctorant *
+            </label>
+            <input type="email" [(ngModel)]="newDemande.doctorantEmail" class="form-input-modern" 
+                   placeholder="doctorant@universite.dz" required>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label-modern">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+              Titre de la thèse *
+            </label>
+            <input type="text" [(ngModel)]="newDemande.titreThese" class="form-input-modern" 
+                   placeholder="Titre complet de la thèse" required>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label-modern">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Résumé de la thèse
+            </label>
+            <textarea [(ngModel)]="newDemande.resume" class="form-textarea-modern" rows="6"
+                      placeholder="Présentez brièvement vos travaux et contributions..."></textarea>
+          </div>
+
+          <div class="info-notice">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p>Le directeur de thèse sera automatiquement notifié et devra proposer la composition du jury.</p>
+          </div>
+        </div>
+
+        <div class="form-actions-modern">
+          <button class="btn-cancel-modern" (click)="goBack()" [disabled]="loading()">Annuler</button>
+          <button class="btn-submit-modern" (click)="createDemande()" [disabled]="loading()">
+            <svg *ngIf="!loading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <div *ngIf="loading()" class="btn-spinner"></div>
+            {{ loading() ? 'Création en cours...' : 'Créer la demande' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL VIEW: Demande Details -->
+    <div *ngIf="currentView() === 'detail' && selectedDemande()" class="detail-view-modern">
+      <button class="btn-back-modern" (click)="goBack()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Retour
+      </button>
+
+      <!-- Status Banner -->
+      <div class="detail-banner" [class]="'banner-' + selectedDemande()!.statut.toLowerCase()">
+        <div class="banner-content">
+          <h1 class="banner-title">{{ selectedDemande()!.titreThese }}</h1>
+          <span class="banner-status">{{ getStatutLabel(selectedDemande()!.statut) }}</span>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="detail-grid">
+        <!-- Left Column -->
+        <div class="detail-main">
+          <!-- General Info -->
+          <div class="detail-card">
+            <div class="card-header-detail">
+              <h3>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Informations Générales
+              </h3>
+            </div>
+            <div class="card-body-detail">
+              <div class="info-grid-detail">
+                <div class="info-box">
+                  <label>Doctorant</label>
+                  <span>{{ selectedDemande()!.doctorantEmail }}</span>
+                </div>
+                <div class="info-box">
+                  <label>Directeur de thèse</label>
+                  <span>{{ selectedDemande()!.directeurEmail }}</span>
+                </div>
+                <div class="info-box">
+                  <label>Date de création</label>
+                  <span>{{ selectedDemande()!.dateCreation | date:'dd MMMM yyyy' }}</span>
+                </div>
+                <div class="info-box" *ngIf="selectedDemande()!.dateSoutenance">
+                  <label>Date de soutenance</label>
+                  <span class="highlight-value">{{ selectedDemande()!.dateSoutenance | date:'dd MMMM yyyy à HH:mm' }}</span>
+                </div>
+                <div class="info-box" *ngIf="selectedDemande()!.lieuSoutenance">
+                  <label>Lieu</label>
+                  <span>{{ selectedDemande()!.lieuSoutenance }}</span>
+                </div>
+              </div>
+              <div *ngIf="selectedDemande()!.resume" class="resume-box">
+                <label>Résumé de la thèse</label>
+                <p>{{ selectedDemande()!.resume }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prerequisites -->
+          <div class="detail-card" *ngIf="prerequis()">
+            <div class="card-header-detail">
+              <h3>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                Prérequis Académiques
+              </h3>
+              <div class="progress-indicator">
+                <div class="progress-circle">
+                  <svg viewBox="0 0 36 36">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle-progress" [attr.stroke-dasharray]="getProgressPercentage() + ', 100'" 
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  </svg>
+                  <div class="progress-text">{{ getProgressPercentage() }}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body-detail">
+              <div class="prerequis-items">
+                <div class="prerequis-item">
+                  <div class="prerequis-header">
+                    <span class="prerequis-label">Publications scientifiques</span>
+                    <span class="prerequis-value" [class.valid]="prerequis()!.publicationsValides">
+                      {{ prerequis()!.nombrePublications }} / {{ prerequis()!.nombrePublicationsRequises }}
+                      <svg *ngIf="prerequis()!.publicationsValides" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="progress-bar-prerequis">
+                    <div class="progress-fill" [style.width.%]="(prerequis()!.nombrePublications / prerequis()!.nombrePublicationsRequises) * 100"></div>
+                  </div>
+                </div>
+                <div class="prerequis-item">
+                  <div class="prerequis-header">
+                    <span class="prerequis-label">Crédits de formation</span>
+                    <span class="prerequis-value" [class.valid]="prerequis()!.creditsValides">
+                      {{ prerequis()!.creditsFormation }} / {{ prerequis()!.creditsFormationRequis }}
+                      <svg *ngIf="prerequis()!.creditsValides" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="progress-bar-prerequis">
+                    <div class="progress-fill" [style.width.%]="(prerequis()!.creditsFormation / prerequis()!.creditsFormationRequis) * 100"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="documents-checklist">
+                <h4>Documents requis</h4>
+                <div class="checklist-items">
+                  <div class="checklist-item" [class.checked]="prerequis()!.demandeManuscrite">
+                    <div class="checkbox-custom">
+                      <svg *ngIf="prerequis()!.demandeManuscrite" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <span>Demande manuscrite au chef d'établissement</span>
+                  </div>
+                  <div class="checklist-item" [class.checked]="prerequis()!.rapportThese">
+                    <div class="checkbox-custom">
+                      <svg *ngIf="prerequis()!.rapportThese" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <span>Rapport de thèse (manuscrit complet)</span>
+                  </div>
+                  <div class="checklist-item" [class.checked]="prerequis()!.rapportAntiPlagiat">
+                    <div class="checkbox-custom">
+                      <svg *ngIf="prerequis()!.rapportAntiPlagiat" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <span>Rapport anti-plagiat</span>
+                  </div>
+                  <div class="checklist-item" [class.checked]="prerequis()!.rapportPublications">
+                    <div class="checkbox-custom">
+                      <svg *ngIf="prerequis()!.rapportPublications" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <span>Rapport publications et communications</span>
+                  </div>
+                  <div class="checklist-item" [class.checked]="prerequis()!.attestationsFormation">
+                    <div class="checkbox-custom">
+                      <svg *ngIf="prerequis()!.attestationsFormation" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <span>Attestations de formations doctorales</span>
+                  </div>
+                  <div class="checklist-item" [class.checked]="prerequis()!.autorisationSoutenance">
+                    <div class="checkbox-custom">
+                      <svg *ngIf="prerequis()!.autorisationSoutenance" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <span>Autorisation de soutenance</span>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="prerequis()!.prerequisValides" class="success-banner">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Prérequis validés par l'administration
+              </div>
+            </div>
+          </div>
+
+          <!-- Jury Composition -->
+          <div class="detail-card">
+            <div class="card-header-detail">
+              <h3>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                Composition du Jury
+              </h3>
+              <button class="btn-add-small" (click)="toggleJuryForm()" 
+                      *ngIf="userRole() === 'ROLE_ENCADRANT' && selectedDemande()!.directeurEmail === userEmail()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Ajouter un membre
+              </button>
+            </div>
+            <div class="card-body-detail">
+              <div *ngIf="juryMembers().length === 0" class="empty-jury">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <p>Aucun membre du jury proposé</p>
+              </div>
+
+              <div *ngIf="juryMembers().length > 0" class="jury-members">
+                <div *ngFor="let membre of juryMembers()" class="jury-member-card">
+                  <div class="member-avatar">{{ getRoleIcon(membre.role) }}</div>
+                  <div class="member-info">
+                    <div class="member-name">{{ membre.prenom }} {{ membre.nom }}</div>
+                    <div class="member-role">
+                      <span class="role-badge-jury" [class]="'role-' + membre.role.toLowerCase()">
+                        {{ getRoleJuryLabel(membre.role) }}
+                      </span>
+                    </div>
+                    <div class="member-details">{{ membre.grade }} - {{ membre.etablissement }}</div>
+                    <div class="member-email">{{ membre.email }}</div>
+                    <div *ngIf="membre.role === 'RAPPORTEUR'" class="member-status">
+                      <span *ngIf="membre.rapportSoumis && membre.rapportFavorable" class="status-favorable">
+                        ✓ Rapport favorable
+                      </span>
+                      <span *ngIf="!membre.rapportSoumis" class="status-waiting">
+                        ⏳ En attente du rapport
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add Jury Member Form -->
+              <div *ngIf="showJuryForm()" class="jury-form">
+                <h4>Ajouter un membre du jury</h4>
+                <div class="form-row">
+                  <div class="form-group-inline">
+                    <label>Nom *</label>
+                    <input type="text" [(ngModel)]="newMembre.nom" placeholder="Nom">
+                  </div>
+                  <div class="form-group-inline">
+                    <label>Prénom *</label>
+                    <input type="text" [(ngModel)]="newMembre.prenom" placeholder="Prénom">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group-inline">
+                    <label>Email *</label>
+                    <input type="email" [(ngModel)]="newMembre.email" placeholder="email@universite.dz">
+                  </div>
+                  <div class="form-group-inline">
+                    <label>Établissement *</label>
+                    <input type="text" [(ngModel)]="newMembre.etablissement" placeholder="Université...">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group-inline">
+                    <label>Grade</label>
+                    <input type="text" [(ngModel)]="newMembre.grade" placeholder="Professeur, MCF, etc.">
+                  </div>
+                  <div class="form-group-inline">
+                    <label>Rôle *</label>
+                    <select [(ngModel)]="newMembre.role">
+                      <option value="RAPPORTEUR">Rapporteur</option>
+                      <option value="EXAMINATEUR">Examinateur</option>
+                      <option value="PRESIDENT">Président</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-actions-inline">
+                  <button class="btn-cancel-inline" (click)="toggleJuryForm()">Annuler</button>
+                  <button class="btn-add-inline" (click)="addJuryMember()" [disabled]="loading()">
+                    Ajouter
+                  </button>
+                </div>
+              </div>
+
+              <button *ngIf="juryMembers().length > 0 && selectedDemande()!.statut !== 'JURY_PROPOSE' && userRole() === 'ROLE_ENCADRANT' && selectedDemande()!.directeurEmail === userEmail()" 
+                      class="btn-submit-jury" (click)="submitJuryProposal()" [disabled]="loading()">
+                Soumettre la composition du jury
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sidebar -->
+        <div class="detail-sidebar">
+          <!-- Timeline Progress -->
+          <div class="sidebar-card-detail">
+            <h4 class="sidebar-title-detail">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Progression
+            </h4>
+            <div class="mini-timeline">
+              <div *ngFor="let step of timelineSteps.slice(0, 5)" class="mini-step" [class]="'step-' + step.status">
+                <div class="mini-marker">{{ step.number }}</div>
+                <div class="mini-content">
+                  <div class="mini-title">{{ step.title }}</div>
+                  <div class="mini-duration">{{ step.duration }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Defense Schedule (if authorized) -->
+          <div class="sidebar-card-detail calendar-card" *ngIf="selectedDemande()!.dateSoutenance">
+            <div class="calendar-header">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <h4 class="sidebar-title-detail">Planification</h4>
+            <div class="calendar-date">
+              <div class="date-large">{{ selectedDemande()!.dateSoutenance | date:'dd' }}</div>
+              <div class="date-month">{{ selectedDemande()!.dateSoutenance | date:'MMMM yyyy' }}</div>
+            </div>
+            <div class="calendar-time">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              {{ selectedDemande()!.dateSoutenance | date:'HH:mm' }}
+            </div>
+            <div class="calendar-location" *ngIf="selectedDemande()!.lieuSoutenance">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              {{ selectedDemande()!.lieuSoutenance }}
+            </div>
+          </div>
+
+          <!-- Quick Tips -->
+          <div class="sidebar-card-detail tips-sidebar">
+            <div class="tips-icon-sidebar">💡</div>
+            <h4>Conseils</h4>
+            <ul class="tips-list">
+              <li>Assurez-vous d'avoir au minimum 2 rapporteurs externes</li>
+              <li>La composition doit inclure 4 à 8 membres au total</li>
+              <li>Les rapports doivent être favorables pour autoriser la soutenance</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

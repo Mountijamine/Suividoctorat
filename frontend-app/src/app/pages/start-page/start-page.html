@@ -1,0 +1,455 @@
+<public-navbar *ngIf="!isLoggedIn"></public-navbar>
+<user-navbar *ngIf="isLoggedIn"></user-navbar>
+
+<main class="landing">
+  <!-- Hero Section with Animated Background -->
+  <section class="hero">
+    <div class="hero-bg-gradient"></div>
+    <div class="hero-particles"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Next-Generation PhD Management</div>
+      <h1 class="hero-title">
+        Transform Your
+        <span class="gradient-text">Doctoral Journey</span>
+      </h1>
+      <p class="hero-subtitle">AI-powered platform for seamless research management, collaboration, and defense preparation</p>
+      <div class="hero-cta">
+        <button class="btn-primary" (click)="goToAuth('signup')">
+          <span>Get Started Free</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 12l4-4-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-secondary" (click)="goToAuth('signin')">Watch Demo</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-number">10K+</div>
+          <div class="stat-label">Active Researchers</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-number">95%</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Support Available</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Animated Stats Section -->
+  <section class="stats-section">
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" opacity="0.2"/>
+            <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-value">15,000+</div>
+        <div class="stat-desc">PhD Students Enrolled</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-value">3.5 Yrs</div>
+        <div class="stat-desc">Average Completion Time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+            <path d="M20 7h-4V5c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="stat-value">500+</div>
+        <div class="stat-desc">Partner Universities</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-value">4.9/5</div>
+        <div class="stat-desc">User Satisfaction</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="about-container">
+      <div class="about-content">
+        <span class="section-badge">About Us</span>
+        <h2 class="section-title">Reimagining the Doctoral Experience</h2>
+        <p class="about-text">
+          SuiviDoctorat is the first comprehensive platform designed specifically for the modern PhD journey. We bridge the gap between researchers, supervisors, and administration to create a seamless, collaborative, and efficient academic ecosystem.
+        </p>
+        <div class="about-features">
+          <div class="about-feat">
+            <div class="feat-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <h4>Streamlined Workflow</h4>
+              <p>From enrollment to defense, every step is digitized and simplified.</p>
+            </div>
+          </div>
+          <div class="about-feat">
+            <div class="feat-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <h4>Enhanced Collaboration</h4>
+              <p>Real-time tools for feedback, document sharing, and mentorship.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="about-visual">
+        <div class="visual-card main">
+          <div class="vc-header">
+            <div class="vc-dot red"></div><div class="vc-dot yellow"></div><div class="vc-dot green"></div>
+          </div>
+          <div class="vc-body">
+            <div class="vc-line w-75"></div>
+            <div class="vc-line w-50"></div>
+            <div class="vc-graph">
+              <div class="bar" style="height:40%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:85%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="visual-card float">
+          <div class="vc-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="vc-text">
+            <strong>Secure & Private</strong>
+            <span>End-to-end encryption</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works">
+    <div class="how-container">
+      <div class="section-header">
+        <span class="section-badge">Simple Process</span>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Get started in minutes with our streamlined onboarding</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-marker">1</div>
+          <div class="timeline-content">
+            <h3>Create Your Account</h3>
+            <p>Sign up in seconds and set up your researcher profile with AI-assisted completion</p>
+          </div>
+        </div>
+        <div class="timeline-connector"></div>
+        <div class="timeline-item">
+          <div class="timeline-marker">2</div>
+          <div class="timeline-content">
+            <h3>Import Your Research</h3>
+            <p>Upload documents, connect repositories, and sync your bibliography automatically</p>
+          </div>
+        </div>
+        <div class="timeline-connector"></div>
+        <div class="timeline-item">
+          <div class="timeline-marker">3</div>
+          <div class="timeline-content">
+            <h3>Collaborate & Track</h3>
+            <p>Work with advisors, track milestones, and prepare for defense with real-time insights</p>
+          </div>
+        </div>
+        <div class="timeline-connector"></div>
+        <div class="timeline-item">
+          <div class="timeline-marker">4</div>
+          <div class="timeline-content">
+            <h3>Defend Successfully</h3>
+            <p>Schedule defense, invite jury members, and complete your journey with confidence</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Campaigns Section -->
+  <section class="campaigns-showcase">
+    <div class="campaigns-showcase-container">
+      <div class="section-header">
+        <span class="section-badge">Doctoral Opportunities</span>
+        <h2 class="section-title">Featured Doctoral Campaigns</h2>
+        <p class="section-subtitle">Discover exciting PhD opportunities from leading universities worldwide</p>
+      </div>
+      <div class="campaigns-showcase-grid">
+        <div class="campaign-showcase-card" *ngFor="let campaign of featuredCampaigns">
+          <div class="campaign-showcase-banner">
+            <img [src]="campaign.bannerUrl" [alt]="campaign.title" class="banner-img">
+            <div class="banner-overlay">
+              <span class="campaign-showcase-status" [ngClass]="'status-' + campaign.status">{{ getStatusLabel(campaign.status) }}</span>
+            </div>
+          </div>
+          <div class="university-showcase-logo">
+            <img [src]="campaign.universityLogo" [alt]="campaign.university" class="logo-img">
+          </div>
+          <div class="campaign-showcase-content">
+            <h3 class="campaign-showcase-title">{{ campaign.title }}</h3>
+            <div class="campaign-showcase-meta">
+              <div class="meta-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                <span>{{ campaign.university }}</span>
+              </div>
+            </div>
+            <p class="campaign-showcase-description">{{ campaign.description }}</p>
+            <div class="campaign-showcase-tags">
+              <span class="tag">{{ campaign.domain }}</span>
+              <span class="tag" *ngIf="campaign.funding">Funded</span>
+            </div>
+            <div class="campaign-showcase-footer">
+              <button class="btn-campaign-primary" [routerLink]="['/campaigns']">
+                <span>View Details</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="campaigns-cta">
+        <button class="btn-view-all" [routerLink]="['/campaigns']">
+          <span>View All Campaigns</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7.5 15l5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="features-container">
+      <div class="section-header">
+        <span class="section-badge">Platform Features</span>
+        <h2 class="section-title">Everything You Need for Your Doctorate</h2>
+        <p class="section-subtitle">Comprehensive tools designed for modern PhD research</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-glow"></div>
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" opacity="0.2"/>
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Campaign Management</h3>
+          <p>Browse PhD opportunities, submit applications, and track your candidacy status in real-time with AI-powered matching.</p>
+          <a href="#" class="feature-link">Learn more →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-glow"></div>
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M3 10h18M9 4v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Defense Scheduling</h3>
+          <p>Plan and coordinate thesis defenses, invite jury members, and manage all defense logistics seamlessly.</p>
+          <a href="#" class="feature-link">Learn more →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-glow"></div>
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+              <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+              <line x1="9" y1="15" x2="15" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Smart Document Hub</h3>
+          <p>AI-powered organization for all research documents, publications, and administrative files with version control.</p>
+          <a href="#" class="feature-link">Learn more →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-glow"></div>
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+              <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Real-time Collaboration</h3>
+          <p>Connect with advisors, co-authors, and research teams with integrated chat, video calls, and shared workspaces.</p>
+          <a href="#" class="feature-link">Learn more →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials">
+    <div class="testimonials-container">
+      <div class="section-header">
+        <span class="section-badge">Success Stories</span>
+        <h2 class="section-title">Trusted by Leading Researchers</h2>
+        <p class="section-subtitle">See what PhD students say about their experience</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"SuiviDoctorat transformed how I manage my research. The collaboration tools made working with my advisors seamless, and I defended 6 months early!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">DR</div>
+            <div class="author-info">
+              <div class="author-name">Dr. Sarah Chen</div>
+              <div class="author-title">Computer Science PhD, MIT</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"The document management and timeline tracking features are game-changers. I always know exactly where I stand and what's next."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">MK</div>
+            <div class="author-info">
+              <div class="author-name">Dr. Michael Kumar</div>
+              <div class="author-title">Biology PhD, Oxford</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Best investment in my PhD journey. The AI-powered insights helped me identify gaps in my research early and stay on track throughout."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">EL</div>
+            <div class="author-info">
+              <div class="author-name">Dr. Emma Laurent</div>
+              <div class="author-title">Physics PhD, Sorbonne</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq">
+    <div class="faq-container">
+      <div class="section-header">
+        <span class="section-badge">FAQ</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Everything you need to know about getting started</p>
+      </div>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <h3>How long does it take to set up?</h3>
+          <p>You can create your account and start managing your research in under 5 minutes. Our AI-assisted onboarding makes it incredibly fast.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Is my research data secure?</h3>
+          <p>Absolutely. We use enterprise-grade encryption, comply with GDPR, and store all data on secure servers with regular backups.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Can I collaborate with my advisors?</h3>
+          <p>Yes! Invite unlimited advisors and committee members. They get free access to collaborate on your research projects.</p>
+        </div>
+        <div class="faq-item">
+          <h3>What file formats are supported?</h3>
+          <p>We support all major formats including PDF, Word, LaTeX, Excel, and can integrate with reference managers like Zotero and Mendeley.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Is there a mobile app?</h3>
+          <p>Our platform is fully responsive and works perfectly on mobile. Native iOS and Android apps are coming in Q2 2025.</p>
+        </div>
+        <div class="faq-item">
+          <h3>What if I need help?</h3>
+          <p>We offer 24/7 support via chat, email, and video calls. Plus, access to our knowledge base and community forum anytime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+    <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-bg-gradient"></div>
+    <div class="cta-container">
+      <div class="cta-badge">Join 15,000+ Researchers</div>
+      <h2>Ready to Transform Your PhD Journey?</h2>
+      <p>Start managing your research like a pro. No credit card required.</p>
+      <div class="cta-buttons">
+        <button class="btn-cta" (click)="goToAuth('signup')">
+          <span>Start Free Trial</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 3l7 7-7 7M3 10h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-cta-secondary" (click)="goToAuth('signin')">Schedule Demo</button>
+      </div>
+      <div class="cta-trust">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 0L10.5 5.5L16 8L10.5 10.5L8 16L5.5 10.5L0 8L5.5 5.5L8 0Z" fill="currentColor" opacity="0.6"/>
+        </svg>
+        <span>Trusted by universities worldwide • 4.9/5 rating • Free forever plan available</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="contact" class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>SuiviDoctorat</h3>
+        <p>The complete platform for managing your doctoral journey, from enrollment to defense.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <div class="footer-links">
+          <a [routerLink]="['/']">Home</a>
+          <a [routerLink]="['/campaigns']">Campaigns</a>
+          <a href="#">Features</a>
+          <a href="#">Pricing</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <div class="footer-links">
+          <a href="#">Documentation</a>
+          <a href="#">Help Center</a>
+          <a href="#">Community</a>
+          <a href="#">Blog</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <div class="footer-links">
+          <a href="mailto:support@suividoctorat.com">support@suividoctorat.com</a>
+          <a href="#">+212 5 37 77 00 00</a>
+          <a href="#">Rabat, Morocco</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2025 SuiviDoctorat. All rights reserved.
+    </div>
+  </footer>
+</main>

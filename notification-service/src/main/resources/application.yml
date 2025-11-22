@@ -1,0 +1,87 @@
+server:
+  port: 8094
+
+# When true the EmailService will only log rendered emails instead of sending.
+# Set to false after configuring a working SMTP (or use Mailtrap/MailHog for dev).
+app:
+  notification:
+    dry-run: false
+    # When true, notification-service returns detailed error messages on failures (dev only)
+    debug-errors: true
+
+spring:
+  # Try to import config from Config Server if available (optional for local dev)
+  config:
+    import: "optional:configserver:http://192.168.239.1:8888"
+  # Cloud config settings (optional import + credentials)
+  cloud:
+    config:
+      # Do not fail fast when Config Server is unavailable during development
+      fail-fast: false
+      username: configClient
+      password: configSecret123
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/phd_db?createDatabaseIfNotExist=true
+    username: root
+    password: 
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: swilahtache@gmail.com
+    password: "toet scgm lnfr hekr"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: "*"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+jwt:
+  secret: 3203ee11247a24655610655dc11bfb02a55631f6ee9e97bd814958cf2ad4f874cff2da60340d71538a258a996a771fde643aa48bc922038d103da8410ffe6505
+  expiration: 86400000
+
+logging:
+  level:
+    com.phdportal.user: DEBUG
+    org.springframework.security: DEBUG
+    # Enable debug logging for notification and mail packages to help debugging
+    com.devbuild.notification: DEBUG
+    org.springframework.mail: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG

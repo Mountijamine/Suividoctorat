@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Ajouter un document</title>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+<h1>Ajouter un document</h1>
+<div th:if="${message}" style="color:green"><p th:text="${message}"></p></div>
+<div th:if="${error}" style="color:red"><p th:text="${error}"></p></div>
+<p th:text="${categoriesHint}"></p>
+<form method="post" th:action="@{/candidat/documents/upload}" enctype="multipart/form-data">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <label>Nom (titre): <input type="text" name="title" required/></label><br/>
+    <label>Catégorie (libre): <input type="text" name="category" placeholder="e.g. diplome, attestation, autre" /></label><br/>
+    <input type="file" name="file" required />
+    <button type="submit">Ajouter le document</button>
+</form>
+<p><a th:href="@{/candidat/documents}">Retour à mes documents</a></p>
+</body>
+</html>

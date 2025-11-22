@@ -1,0 +1,36 @@
+# Development profile: use MailHog (local) or Mailtrap (remote) to capture emails
+server:
+  port: 8094
+
+app:
+  notification:
+    dry-run: false
+    debug-errors: true
+
+spring:
+  mail:
+    # MailHog listens by default on localhost:1025 and provides a web UI on :8025
+    host: localhost
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+# If you prefer Mailtrap, comment the MailHog block and use the Mailtrap settings below:
+# spring:
+#   mail:
+#     host: smtp.mailtrap.io
+#     port: 2525
+#     username: <your-mailtrap-username>
+#     password: <your-mailtrap-password>
+#     properties:
+#       mail:
+#         smtp:
+#           auth: true
+#           starttls:
+#             enable: true

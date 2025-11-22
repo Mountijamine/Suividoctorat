@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Users</title>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+<h2>Admin Console</h2>
+<div th:if="${message}" style="color:green"> <p th:text="${message}"></p> </div>
+<div th:if="${error}" style="color:red"> <p th:text="${error}"></p> </div>
+
+<div>
+    <button onclick="showTab('users')">User Management</button>
+    <button onclick="showTab('encadrants')">Encadrant Management</button>
+    <a th:href="@{/admin/role-audit}" style="margin-left:12px;">Role Audit</a>
+    <form method="get" th:action="@{/admin/users.csv}" style="display:inline-block;margin-left:12px;">
+        <label>Export users by role: </label>
+        <select name="role">
+            <option value="">All roles</option>
+            <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${roleLabels.containsKey(r.name()) ? roleLabels[r.name()] : r}"></option>
+        </select>
+        <label style="margin-left:8px">Email contains: <input type="text" name="email" placeholder="email substring"/></label>
+        <label style="margin-left:8px">Page: <input type="number" name="page" min="0" value="0" style="width:60px;"/></label>
+        <label style="margin-left:8px">Size: <input type="number" name="size" min="1" value="1000" style="width:80px;"/></label>
+        <fieldset style="display:inline-block;margin-left:8px;border:1px solid #ddd;padding:6px;">
+            <legend style="font-size:smaller;margin:0 4px 4px 0">Columns</legend>
+            <label style="font-weight:normal;display:inline-block;margin-right:8px;"><input type="checkbox" id="columns-select-all"/> Select all</label>
+            <div style="display:inline-block;vertical-align:middle;max-height:90px;overflow:auto;padding-left:6px;">
+                <label><input type="checkbox" name="columns" value="id"/> id</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="email" checked/> email</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="firstName" checked/> firstName</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="lastName" checked/> lastName</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="phone"/> phone</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="affiliation"/> affiliation</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="requestedProfile"/> requestedProfile</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="approved"/> approved</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="approvedBy"/> approvedBy</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="approvedAt"/> approvedAt</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="rejectionReason"/> rejectionReason</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="roles"/> roles</label>
+                <label style="margin-left:6px"><input type="checkbox" name="columns" value="disabled"/> disabled</label>
+            </div>
+        </fieldset>
+        <button type="submit">Export Users CSV</button>
+    </form>
+</div>
+
+<div id="tab-users" style="display:block;margin-top:10px;">
+    <p>Workflow: users sign up. Admins review requests and either "Approve Request" (grants requested role) or use Assign to give a role.</p>
+    <p><a th:href="@{/}">Home</a> | <a th:href="@{/logout}">Logout</a></p>
+    <table border="1">
+    <tr><th>ID</th><th>Email</th><th>First</th><th>Last</th><th>Affiliation</th><th>Requested</th><th>Approved</th><th>Approved By</th><th>Approved At</th><th>Rejection Reason</th><th>Roles</th><th>Assign</th></tr>
+    <tr th:each="u : ${users}">
+        <td th:text="${u.id}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.firstName}"></td>
+        <td th:text="${u.lastName}"></td>
+        <td th:text="${u.affiliation}"></td>
+        
+        <td>
+            <span th:text="${u.requestedProfile != null ? (roleLabels.containsKey(u.requestedProfile) ? roleLabels[u.requestedProfile] : u.requestedProfile) : ''}"></span>
+        </td>
+        <td th:text="${u.approved}"></td>
+        <td th:text="${u.approvedBy}"></td>
+        <td th:text="${u.approvedAt}"></td>
+        <td th:text="${u.rejectionReason}"></td>
+        <td th:text="${u.roles}"></td>
+        <td>
+            <form method="post" th:action="@{/admin/assign-role}" style="display:inline-block">
+                <input type="hidden" name="email" th:value="${u.email}" />
+                <select name="role">
+                    <option th:each="r : ${roles}" th:value="${r}" th:text="${roleLabels.containsKey(r.name()) ? roleLabels[r.name()] : r}" th:selected="${r.name() == u.requestedProfile}"></option>
+                </select>
+                <button type="submit">Assign</button>
+            </form>
+            <form method="post" th:action="@{/admin/remove-role}" style="display:inline-block;margin-left:6px;" onsubmit="return confirmModal(this, 'Remove role from user?');">
+                <input type="hidden" name="email" th:value="${u.email}" />
+                <select name="role">
+                    <option th:each="r : ${u.roles}" th:value="${r.name()}" th:text="${roleLabels.containsKey(r.name()) ? roleLabels[r.name()] : r}"></option>
+                </select>
+                <button type="submit">Remove role</button>
+            </form>
+            <form method="post" th:action="@{/admin/disable-user}" style="display:inline-block;margin-left:6px;">
+                <input type="hidden" name="email" th:value="${u.email}" />
+                <input type="hidden" name="disable" th:value="${!u.disabled}" />
+                <button type="submit" th:text="${u.disabled} ? 'Enable' : 'Disable'"></button>
+            </form>
+            <form method="post" th:action="@{/admin/delete-user}" style="display:inline-block;margin-left:6px;" onsubmit="return confirmModal(this, 'Delete user? This cannot be undone.');">
+                <input type="hidden" name="email" th:value="${u.email}" />
+                <button type="submit">Delete</button>
+            </form>
+            <form method="post" th:action="@{/admin/approve-user}" style="display:inline-block" th:if="${u.approved == false and u.requestedProfile != null}">
+                <input type="hidden" name="email" th:value="${u.email}" />
+                <button type="submit">Approve Request</button>
+            </form>
+            <form method="post" th:action="@{/admin/reject-user}" style="display:inline-block" th:if="${u.approved == false and u.requestedProfile != null}">
+                <input type="hidden" name="email" th:value="${u.email}" />
+                <input type="text" name="reason" placeholder="Rejection reason (optional)" />
+                <button type="submit">Reject</button>
+            </form>
+        </td>
+    </tr>
+    </table>
+</div>
+
+<div id="tab-encadrants" style="display:none;margin-top:10px;">
+    <h3>Encadrant Management</h3>
+    <p>Assign encadrants to campaigns. Campaigns are managed by the Inscription microservice (Microservice 2). This admin UI provides a placeholder to call that service if configured (see app.inscription.url). If not configured, the UI will show instructions for manual integration.</p>
+    <div th:if="${inscriptionUrl}" style="font-style:italic">Connected to Inscription service: <span th:text="${inscriptionUrl}"></span></div>
+    <table border="1">
+        <tr><th>ID</th><th>Email</th><th>Name</th><th>Affiliation</th><th>Actions</th></tr>
+        <tr th:each="e : ${encadrants}">
+            <td th:text="${e.id}"></td>
+            <td th:text="${e.email}"></td>
+            <td th:text="${e.firstName} + ' ' + ${e.lastName}"></td>
+            <td th:text="${e.affiliation}"></td>
+            <td>
+                <form method="post" th:action="@{/admin/assign-encadrant}">
+                    <input type="hidden" name="email" th:value="${e.email}" />
+                    <label>Campaign ID (placeholder): <input type="text" name="campaignId" placeholder="camp-123" required/></label>
+                    <button type="submit">Assign to Campaign</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div th:if="${message}" style="color:green;margin-top:8px;"><p th:text="${message}"></p></div>
+<div th:if="${error}" style="color:red;margin-top:8px;"><p th:text="${error}"></p></div>
+
+<script>
+    function showTab(name) {
+        document.getElementById('tab-users').style.display = name === 'users' ? 'block' : 'none';
+        document.getElementById('tab-encadrants').style.display = name === 'encadrants' ? 'block' : 'none';
+        try { localStorage.setItem('admin-tab', name); } catch(e) {}
+    }
+
+    // restore tab on load
+    (function(){
+        try {
+            var t = localStorage.getItem('admin-tab') || 'users';
+            showTab(t);
+        } catch(e) { showTab('users'); }
+    })();
+
+    // Modal confirmation
+    function confirmModal(form, message) {
+        var modal = document.getElementById('confirm-modal');
+        document.getElementById('confirm-modal-message').textContent = message;
+        modal.__targetForm = form;
+        modal.style.display = 'block';
+        return false; // prevent immediate submit
+    }
+
+    function confirmModalYes() {
+        var modal = document.getElementById('confirm-modal');
+        var f = modal.__targetForm;
+        modal.style.display = 'none';
+        if (f) f.submit();
+    }
+
+    function confirmModalNo() {
+        var modal = document.getElementById('confirm-modal');
+        modal.style.display = 'none';
+        modal.__targetForm = null;
+    }
+</script>
+
+<!-- Modal markup -->
+<div id="confirm-modal" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;">
+    <div style="background:#fff;padding:16px;border-radius:6px;width:420px;margin:80px auto;">
+        <p id="confirm-modal-message">Are you sure?</p>
+        <div style="text-align:right;margin-top:12px;">
+            <button type="button" onclick="confirmModalNo()">No</button>
+            <button type="button" onclick="confirmModalYes()" style="margin-left:8px;">Yes</button>
+        </div>
+    </div>
+</div>
+<script>
+    // Select-all for export columns
+    (function(){
+        var sel = document.getElementById('columns-select-all');
+        if (!sel) return;
+        sel.addEventListener('change', function(){
+            var checks = document.querySelectorAll('input[name="columns"]');
+            checks.forEach(function(c){ c.checked = sel.checked; });
+        });
+    })();
+</script>
+
+</body>
+</html>

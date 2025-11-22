@@ -1,0 +1,558 @@
+<encadrant-navbar></encadrant-navbar>
+
+<div class="soutenance-premium">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>Demandes de Soutenance</h1>
+        <p>Gérez vos demandes de soutenance de thèse</p>
+      </div>
+      <div class="header-actions">
+        @if (currentView() === 'list') {
+          <button class="btn-primary" (click)="currentView.set('create')">
+            Nouvelle Demande
+          </button>
+        }
+        @if (currentView() === 'create' || currentView() === 'detail') {
+          <button class="btn-secondary" (click)="currentView.set('list'); loadDemandes()">
+            Retour à la liste
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  @if (currentView() === 'list') {
+    <div class="list-view">
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Chargement des demandes...</p>
+        </div>
+      } @else if (demandes().length === 0) {
+        <div class="empty-state">
+          <div class="empty-content">
+            <h3>Aucune demande trouvée</h3>
+            <p>Créez votre première demande de soutenance</p>
+            <button class="btn-primary" (click)="currentView.set('create')">
+              Créer une demande
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="demandes-grid">
+          @for (demande of demandes(); track demande.id) {
+            <div class="demande-card" (click)="viewDetail(demande)">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>{{ demande.titreThese }}</h3>
+                  <span class="status-pill" [class]="'status-' + demande.statut">
+                    {{ getStatusLabel(demande.statut) }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="card-body">
+                <div class="info-row">
+                  <span class="label">Doctorant</span>
+                  <span class="value">{{ demande.doctorantEmail }}</span>
+                </div>
+                
+                <div class="info-row">
+                  <span class="label">Directeur</span>
+                  <span class="value">{{ demande.directeurEmail }}</span>
+                </div>
+                
+                <div class="info-row">
+                  <span class="label">Date de création</span>
+                  <span class="value">{{ formatDate(demande.dateCreation) }}</span>
+                </div>
+
+                @if (demande.dateSoutenance) {
+                  <div class="info-row">
+                    <span class="label">Date de soutenance</span>
+                    <span class="value">{{ formatDate(demande.dateSoutenance) }}</span>
+                  </div>
+                }
+              </div>
+              
+              <div class="card-footer">
+                <span class="view-details">Voir les détails →</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Create View -->
+  @if (currentView() === 'create') {
+    <div class="create-view">
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Nouvelle Demande de Soutenance</h2>
+          <p>Remplissez les informations pour créer une nouvelle demande</p>
+        </div>
+
+        <form class="premium-form" (ngSubmit)="createDemande()">
+          <div class="form-section">
+            <h3 class="section-title">Informations de la thèse</h3>
+            
+            <div class="form-group">
+              <label for="titre">Titre de la thèse</label>
+              <input 
+                type="text" 
+                id="titre" 
+                class="form-input"
+                [(ngModel)]="newDemande.titre"
+                name="titre"
+                placeholder="Entrez le titre complet de votre thèse"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="specialite">Spécialité</label>
+              <input 
+                type="text" 
+                id="specialite" 
+                class="form-input"
+                [(ngModel)]="newDemande.specialite"
+                name="specialite"
+                placeholder="Ex: Informatique, Mathématiques..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="resume">Résumé de la thèse</label>
+              <textarea 
+                id="resume" 
+                class="form-textarea"
+                [(ngModel)]="newDemande.resume"
+                name="resume"
+                rows="6"
+                placeholder="Rédigez un résumé détaillé de votre thèse (objectifs, méthodologie, résultats)"
+                required
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">Encadrement</h3>
+            
+            <div class="form-group">
+              <label for="directeurEmail">Email du directeur de thèse</label>
+              <input 
+                type="email" 
+                id="directeurEmail" 
+                class="form-input"
+                [(ngModel)]="newDemande.directeurEmail"
+                name="directeurEmail"
+                placeholder="directeur@universite.fr"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="coDirecteurEmail">Email du co-directeur (optionnel)</label>
+              <input 
+                type="email" 
+                id="coDirecteurEmail" 
+                class="form-input"
+                [(ngModel)]="newDemande.coDirecteurEmail"
+                name="coDirecteurEmail"
+                placeholder="codirecteur@universite.fr"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="currentView.set('list')">
+              Annuler
+            </button>
+            <button type="submit" class="btn-primary">
+              Créer la demande
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Assets Section -->
+      <div class="assets-section">
+        <div class="asset-card">
+          <img src="assets/soutenance/Documents à Fournir.png" alt="Documents requis" />
+          <h4>Documents à fournir</h4>
+        </div>
+        <div class="asset-card">
+          <img src="assets/soutenance/Success Rate.png" alt="Taux de réussite" />
+          <h4>Taux de réussite</h4>
+        </div>
+        <div class="asset-card">
+          <img src="assets/soutenance/Support Available.png" alt="Support disponible" />
+          <h4>Support disponible</h4>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Detail View -->
+  @if (currentView() === 'detail' && selectedDemande()) {
+    <div class="detail-view">
+      <!-- Banner -->
+      <div class="detail-banner">
+        <img src="assets/soutenance/banner (1).png" alt="Banner" class="banner-image" />
+        <div class="banner-overlay">
+          <h2>{{ selectedDemande()!.titreThese }}</h2>
+            <div class="banner-meta">
+              <span class="status-pill large" [class]="'status-' + selectedDemande()!.statut">
+                {{ getStatusLabel(selectedDemande()!.statut) }}
+              </span>
+            </div>
+        </div>
+      </div>
+
+      <div class="detail-content">
+        <!-- Main Info -->
+        <div class="detail-section info-section">
+          <h3>Informations générales</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Doctorant</span>
+              <span class="value">{{ selectedDemande()!.doctorantEmail }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Directeur</span>
+              <span class="value">{{ selectedDemande()!.directeurEmail }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Date de création</span>
+              <span class="value">{{ formatDate(selectedDemande()!.dateCreation) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Date de soutenance</span>
+              <span class="value">{{ formatDate(selectedDemande()!.dateSoutenance || '') }}</span>
+            </div>
+          </div>
+
+          <div class="resume-block">
+            <h4>Résumé de la thèse</h4>
+            <p>{{ selectedDemande()!.resume }}</p>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="detail-section prerequis-section">
+          <div class="section-header">
+            <h3>Prérequis de soutenance</h3>
+            <div class="progress-indicator">
+              <span class="progress-text">{{ getPrerequisProgress() }}% complété</span>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="getPrerequisProgress()"></div>
+              </div>
+            </div>
+          </div>
+
+          @if (!prerequis()) {
+            <div class="empty-message">
+              <p>Aucun prérequis enregistré</p>
+            </div>
+          } @else {
+            <div class="prerequis-list">
+              <!-- Publications -->
+              <div class="prerequis-card" [class.validated]="prerequis()!.publicationsValides">
+                <div class="prerequis-indicator">
+                  <div class="indicator-dot" [class.active]="prerequis()!.publicationsValides"></div>
+                </div>
+                <div class="prerequis-content">
+                  <h4>Publications scientifiques</h4>
+                  <p>{{ prerequis()!.nombrePublications }} / {{ prerequis()!.nombrePublicationsRequises }} publications requises</p>
+                </div>
+                <div class="prerequis-status">
+                  @if (prerequis()!.publicationsValides) {
+                    <span class="status-badge validated">Validé</span>
+                  } @else {
+                    <span class="status-badge pending">En attente</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Credits Formation -->
+              <div class="prerequis-card" [class.validated]="prerequis()!.creditsValides">
+                <div class="prerequis-indicator">
+                  <div class="indicator-dot" [class.active]="prerequis()!.creditsValides"></div>
+                </div>
+                <div class="prerequis-content">
+                  <h4>Crédits de formation</h4>
+                  <p>{{ prerequis()!.creditsFormation }} / {{ prerequis()!.creditsFormationRequis }} crédits obtenus</p>
+                </div>
+                <div class="prerequis-status">
+                  @if (prerequis()!.creditsValides) {
+                    <span class="status-badge validated">Validé</span>
+                  } @else {
+                    <span class="status-badge pending">En attente</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Documents -->
+              <div class="prerequis-card" [class.validated]="prerequis()!.demandeManuscrite">
+                <div class="prerequis-indicator">
+                  <div class="indicator-dot" [class.active]="prerequis()!.demandeManuscrite"></div>
+                </div>
+                <div class="prerequis-content">
+                  <h4>Demande manuscrite</h4>
+                  <p>Document requis pour la soutenance</p>
+                </div>
+                <div class="prerequis-status">
+                  @if (prerequis()!.demandeManuscrite) {
+                    <span class="status-badge validated">Fourni</span>
+                  } @else {
+                    <span class="status-badge pending">En attente</span>
+                  }
+                </div>
+              </div>
+
+              <div class="prerequis-card" [class.validated]="prerequis()!.rapportThese">
+                <div class="prerequis-indicator">
+                  <div class="indicator-dot" [class.active]="prerequis()!.rapportThese"></div>
+                </div>
+                <div class="prerequis-content">
+                  <h4>Rapport de thèse</h4>
+                  <p>Manuscrit complet de la thèse</p>
+                </div>
+                <div class="prerequis-status">
+                  @if (prerequis()!.rapportThese) {
+                    <span class="status-badge validated">Fourni</span>
+                  } @else {
+                    <span class="status-badge pending">En attente</span>
+                  }
+                </div>
+              </div>
+
+              <div class="prerequis-card" [class.validated]="prerequis()!.rapportAntiPlagiat">
+                <div class="prerequis-indicator">
+                  <div class="indicator-dot" [class.active]="prerequis()!.rapportAntiPlagiat"></div>
+                </div>
+                <div class="prerequis-content">
+                  <h4>Rapport anti-plagiat</h4>
+                  <p>Certificat d'authenticité du travail</p>
+                </div>
+                <div class="prerequis-status">
+                  @if (prerequis()!.rapportAntiPlagiat) {
+                    <span class="status-badge validated">Fourni</span>
+                  } @else {
+                    <span class="status-badge pending">En attente</span>
+                  }
+                </div>
+              </div>
+
+              <div class="prerequis-card" [class.validated]="prerequis()!.attestationsFormation">
+                <div class="prerequis-indicator">
+                  <div class="indicator-dot" [class.active]="prerequis()!.attestationsFormation"></div>
+                </div>
+                <div class="prerequis-content">
+                  <h4>Attestations de formation</h4>
+                  <p>Preuves des formations suivies</p>
+                </div>
+                <div class="prerequis-status">
+                  @if (prerequis()!.attestationsFormation) {
+                    <span class="status-badge validated">Fourni</span>
+                  } @else {
+                    <span class="status-badge pending">En attente</span>
+                  }
+                </div>
+              </div>
+
+              <div class="prerequis-card" [class.validated]="prerequis()!.autorisationSoutenance">
+                <div class="prerequis-indicator">
+                  <div class="indicator-dot" [class.active]="prerequis()!.autorisationSoutenance"></div>
+                </div>
+                <div class="prerequis-content">
+                  <h4>Autorisation de soutenance</h4>
+                  <p>Accord du directeur de thèse</p>
+                </div>
+                <div class="prerequis-status">
+                  @if (prerequis()!.autorisationSoutenance) {
+                    <span class="status-badge validated">Fourni</span>
+                  } @else {
+                    <span class="status-badge pending">En attente</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Jury Composition -->
+        <div class="detail-section jury-section">
+          <div class="section-header">
+            <h3>Composition du jury</h3>
+            <button class="btn-primary" (click)="showJuryForm.set(!showJuryForm())">
+              {{ showJuryForm() ? 'Annuler' : 'Ajouter un membre' }}
+            </button>
+          </div>
+
+          @if (showJuryForm()) {
+            <form class="jury-form premium-form" (ngSubmit)="addJuryMember()">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="nom">Nom</label>
+                  <input 
+                    type="text" 
+                    id="nom" 
+                    class="form-input"
+                    [(ngModel)]="newMember.nom"
+                    name="nom"
+                    placeholder="Nom"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="prenom">Prénom</label>
+                  <input 
+                    type="text" 
+                    id="prenom" 
+                    class="form-input"
+                    [(ngModel)]="newMember.prenom"
+                    name="prenom"
+                    placeholder="Prénom"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input"
+                    [(ngModel)]="newMember.email"
+                    name="email"
+                    placeholder="email@universite.fr"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="role">Rôle</label>
+                  <select 
+                    id="role" 
+                    class="form-input"
+                    [(ngModel)]="newMember.role"
+                    name="role"
+                    required
+                  >
+                    <option value="PRESIDENT">Président</option>
+                    <option value="RAPPORTEUR">Rapporteur</option>
+                    <option value="EXAMINATEUR">Examinateur</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="grade">Grade</label>
+                  <input 
+                    type="text" 
+                    id="grade" 
+                    class="form-input"
+                    [(ngModel)]="newMember.grade"
+                    name="grade"
+                    placeholder="Ex: Professeur"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="etablissement">Établissement</label>
+                  <input 
+                    type="text" 
+                    id="etablissement" 
+                    class="form-input"
+                    [(ngModel)]="newMember.etablissement"
+                    name="etablissement"
+                    placeholder="Nom de l'établissement"
+                  />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                  Ajouter au jury
+                </button>
+              </div>
+            </form>
+          }
+
+          @if (juryMembers().length === 0) {
+            <div class="empty-message">
+              <p>Aucun membre du jury ajouté</p>
+            </div>
+          } @else {
+            <div class="jury-grid">
+              @for (member of juryMembers(); track member.id) {
+                <div class="jury-card">
+                  <div class="jury-header">
+                    <div class="jury-avatar">
+                      {{ member.prenom.charAt(0) }}{{ member.nom.charAt(0) }}
+                    </div>
+                    <div class="jury-info">
+                      <h4>{{ member.prenom }} {{ member.nom }}</h4>
+                      <p class="jury-role">{{ member.role }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="jury-details">
+                    @if (member.grade) {
+                      <div class="detail-item">
+                        <span class="label">Grade</span>
+                        <span class="value">{{ member.grade }}</span>
+                      </div>
+                    }
+                    @if (member.etablissement) {
+                      <div class="detail-item">
+                        <span class="label">Établissement</span>
+                        <span class="value">{{ member.etablissement }}</span>
+                      </div>
+                    }
+                    <div class="detail-item">
+                      <span class="label">Email</span>
+                      <span class="value">{{ member.email }}</span>
+                    </div>
+                  </div>
+
+                  @if (member.avisRendu !== undefined) {
+                    <div class="jury-avis">
+                      @if (member.avisRendu) {
+                        <span class="avis-badge" [class.favorable]="member.avisFavorable">
+                          {{ member.avisFavorable ? 'Avis favorable' : 'Avis défavorable' }}
+                        </span>
+                      } @else {
+                        <span class="avis-badge pending">Avis en attente</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Assets -->
+        <div class="detail-section assets-section-detail">
+          <h3>Ressources</h3>
+          <div class="assets-grid">
+            <img src="assets/soutenance/Active Researchers.png" alt="Chercheurs actifs" />
+            <img src="assets/soutenance/Transform Your Doctoral Journey.png" alt="Parcours doctoral" />
+            <img src="assets/soutenance/our Platform (1).png" alt="Notre plateforme" />
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

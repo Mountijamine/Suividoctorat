@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription</title>
+</head>
+<body>
+<h2>Inscription</h2>
+<div th:if="${error}" style="color:red"> <p th:text="${error}"></p> </div>
+<form method="post" th:action="@{/signup}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <label>Prénom: <input type="text" name="firstName" required/></label><br/>
+    <label>Nom: <input type="text" name="lastName" required/></label><br/>
+    <label>Email: <input type="email" name="email" required/></label><br/>
+    <label>Mot de passe: <input type="password" name="password" required/></label><br/>
+    <label>Confirmer mot de passe: <input type="password" name="confirmPassword" required/></label><br/>
+    <label>Téléphone (optionnel): <input type="text" name="phone"/></label><br/>
+        <label>Affiliation (école/institution): <input type="text" name="affiliation"/></label><br/>
+    <!-- Role selection removed at signup. Admin will assign roles after review. -->
+    <label><input type="checkbox" name="acceptTerms" required/> J'accepte les conditions</label><br/>
+    <button type="submit">S'inscrire</button>
+</form>
+<p>Déjà inscrit ? <a th:href="@{/login}">Connexion</a></p>
+</body>
+</html>

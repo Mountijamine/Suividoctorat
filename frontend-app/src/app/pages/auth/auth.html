@@ -1,0 +1,372 @@
+<div class="auth-portal">
+  <div class="auth-container">
+    <!-- Left Panel: Branding & Information -->
+    <div class="brand-panel">
+      <div class="brand-content">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d="M20 4L4 12V20C4 29.941 10.845 36 20 36C29.155 36 36 29.941 36 20V12L20 4Z" fill="currentColor" opacity="0.2"/>
+              <path d="M20 4L4 12V20C4 29.941 10.845 36 20 36C29.155 36 36 29.941 36 20V12L20 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 14V22M20 26H20.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="logo-text">SuiviDoctorat</span>
+        </div>
+        
+        <h2 class="brand-headline">Your PhD Journey, <br/>Expertly Managed</h2>
+        
+        <ul class="feature-list">
+          <li>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M16.667 5L7.5 14.167L3.333 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Track research milestones and deadlines</span>
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M16.667 5L7.5 14.167L3.333 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Collaborate with supervisors seamlessly</span>
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M16.667 5L7.5 14.167L3.333 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Secure document management</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="brand-footer">
+        <p>Trusted by researchers worldwide</p>
+      </div>
+    </div>
+
+    <!-- Right Panel: Authentication Form -->
+    <div class="form-panel">
+      <div class="form-wrapper">
+        <!-- Sticky Header: Tab Switcher + Logo -->
+        <div class="sticky-header">
+          <!-- Tab Switcher -->
+          <div class="tab-switcher">
+            <button 
+              [class.active]="mode() === 'signin'" 
+              (click)="switch('signin')"
+              type="button">
+              Sign In
+            </button>
+            <button 
+              [class.active]="mode() === 'signup'" 
+              (click)="switch('signup')"
+              type="button">
+              Sign Up
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Form Content -->
+        <div class="form-content">
+          <!-- Form Header -->
+        <div class="form-header">
+          <h1 *ngIf="mode() === 'signin'">Welcome Back</h1>
+          <h1 *ngIf="mode() === 'signup'">Create Your Account</h1>
+          <p *ngIf="mode() === 'signin'" class="form-subtitle">
+            Sign in to continue your research journey
+          </p>
+          <p *ngIf="mode() === 'signup'" class="form-subtitle">
+            Join the academic community today
+          </p>
+          <!-- Moved Logo: now below title and subtitle -->
+          <div class="form-logo">
+            <img src="/assets/logo_white.png" alt="SuiviDoctorat Logo" />
+          </div>
+        </div>
+
+        <!-- Sign In Form -->
+        <form *ngIf="mode() === 'signin'" [formGroup]="signinForm" (ngSubmit)="submitSignin()" class="auth-form">
+          <div class="form-group">
+            <label for="signin-email">Email Address</label>
+            <input 
+              id="signin-email"
+              type="email" 
+              formControlName="email" 
+              placeholder="your.email@university.edu"
+              autocomplete="email" />
+            <div class="error-message" *ngIf="signinForm.controls.email?.invalid && signinForm.controls.email?.touched">
+              <span *ngIf="signinForm.controls.email?.errors?.required">Email is required</span>
+              <span *ngIf="signinForm.controls.email?.errors?.email">Please enter a valid email address</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signin-password">Password</label>
+            <input 
+              id="signin-password"
+              type="password" 
+              formControlName="password" 
+              placeholder="Enter your password"
+              autocomplete="current-password" />
+            <div class="error-message" *ngIf="signinForm.controls.password?.invalid && signinForm.controls.password?.touched">
+              <span *ngIf="signinForm.controls.password?.errors?.required">Password is required</span>
+            </div>
+          </div>
+
+          <!-- Error/Success Messages -->
+          <div *ngIf="serverError()" class="alert alert-error">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>{{ serverError() }}</span>
+          </div>
+          
+          <div *ngIf="successMessage()" class="alert alert-success">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ successMessage() }}</span>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Sign In
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div style="display:flex; justify-content:flex-end; margin-top:0.5rem;">
+            <button type="button" class="btn-secondary" (click)="openForgot()">Forgot password?</button>
+          </div>
+        </form>
+
+        <!-- Sign Up Form -->
+        <form *ngIf="mode() === 'signup'" [formGroup]="signupForm" (ngSubmit)="submitSignup()" class="auth-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="signup-firstname">First Name</label>
+              <input 
+                id="signup-firstname"
+                type="text" 
+                formControlName="firstName" 
+                placeholder="John"
+                autocomplete="given-name" />
+            </div>
+            <div class="form-group">
+              <label for="signup-lastname">Last Name</label>
+              <input 
+                id="signup-lastname"
+                type="text" 
+                formControlName="lastName" 
+                placeholder="Doe"
+                autocomplete="family-name" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-email">Email Address</label>
+            <input 
+              id="signup-email"
+              type="email" 
+              formControlName="email" 
+              placeholder="your.email@university.edu"
+              autocomplete="email" />
+            <div class="error-message" *ngIf="signupForm.controls.email?.invalid && signupForm.controls.email?.touched">
+              <span *ngIf="signupForm.controls.email?.errors?.required">Email is required</span>
+              <span *ngIf="signupForm.controls.email?.errors?.email">Please enter a valid email address</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-phone">Phone Number</label>
+            <input 
+              id="signup-phone"
+              type="tel" 
+              formControlName="phone" 
+              placeholder="+212 600 000 000"
+              autocomplete="tel" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="signup-password">Password</label>
+              <input 
+                id="signup-password"
+                type="password" 
+                formControlName="password" 
+                placeholder="Min. 6 characters"
+                autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label for="signup-confirm">Confirm Password</label>
+              <input 
+                id="signup-confirm"
+                type="password" 
+                formControlName="confirmPassword" 
+                placeholder="Re-enter password"
+                autocomplete="new-password" />
+            </div>
+          </div>
+          <div class="error-message" *ngIf="signupForm.controls.password?.invalid && signupForm.controls.password?.touched">
+            <span *ngIf="signupForm.controls.password?.errors?.required">Password is required</span>
+            <span *ngIf="signupForm.controls.password?.errors?.minlength">Password must be at least 6 characters</span>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="acceptTerms" />
+              <span class="checkbox-text">
+                I accept the <a href="#" (click)="openTerms($event)">Terms and Services</a>
+              </span>
+            </label>
+            <div class="error-message" *ngIf="signupForm.controls.acceptTerms?.invalid && signupForm.controls.acceptTerms?.touched">
+              You must accept the terms and services
+            </div>
+          </div>
+
+          <!-- Error/Success Messages -->
+          <div *ngIf="invalidFields()" class="alert alert-error">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Please correct: <strong>{{ invalidFields()!.join(', ') }}</strong></span>
+          </div>
+
+          <div *ngIf="serverError()" class="alert alert-error">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>{{ serverError() }}</span>
+          </div>
+          
+          <div *ngIf="successMessage()" class="alert alert-success">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ successMessage() }}</span>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Create Account
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+        </div><!-- /form-content -->
+      </div>
+    </div>
+
+    <!-- Back button overlay on the left brand image (top-left) -->
+    <button type="button" class="brand-back" (click)="goBack()" aria-label="Retour">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Terms Modal -->
+  <div class="modal-overlay" *ngIf="showTerms()" (click)="closeTerms()">
+    <div class="modal-container" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3>Terms and Services</h3>
+        <button class="modal-close" (click)="closeTerms()" aria-label="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <iframe [src]="termsUrl" frameborder="0"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeTerms()" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Verification Modal -->
+  <div class="modal-overlay" *ngIf="showVerification()" (click)="closeVerification()">
+    <div class="modal-container" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3>Email Verification Required</h3>
+        <button class="modal-close" (click)="closeVerification()" aria-label="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p *ngIf="verificationInfo()" style="margin-top:0; font-size:0.95rem; line-height:1.5;">{{ verificationInfo() }}</p>
+        <p style="font-size:0.85rem; color:#475569;">Email: <strong>{{ verificationEmail() }}</strong></p>
+
+        <div class="form-group" style="margin-top:1rem;">
+          <label for="verification-code">Verification Code</label>
+          <input id="verification-code" type="text" maxlength="6" [value]="verificationCode()" (input)="verificationCode.set($any($event.target).value)" placeholder="Enter 6-digit code" />
+        </div>
+
+        <div *ngIf="verificationError()" class="alert alert-error" style="margin-top:1rem;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+            <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>{{ verificationError() }}</span>
+        </div>
+        <div *ngIf="verificationSuccess()" class="alert alert-success" style="margin-top:1rem;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+            <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>{{ verificationSuccess() }}</span>
+        </div>
+        <div *ngIf="resendStatus()" style="margin-top:0.75rem; font-size:0.75rem; color:#475569;">{{ resendStatus() }}</div>
+      </div>
+      <div class="modal-footer" style="gap:0.5rem;">
+        <button class="btn-secondary" type="button" (click)="resendCode()">Resend Code</button>
+        <button class="btn-primary" type="button" (click)="submitVerificationCode()" [disabled]="verifying()">{{ verifying() ? 'Verifying...' : 'Verify & Continue' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" *ngIf="showForgot()" (click)="closeForgot()">
+    <div class="modal-container" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3>Reset your password</h3>
+        <button class="modal-close" (click)="closeForgot()" aria-label="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-top:0; font-size:0.95rem; line-height:1.5;">Enter your account email and we'll send a password reset link.</p>
+        <div class="form-group" style="margin-top:1rem;">
+          <label for="forgot-email">Email</label>
+          <input id="forgot-email" type="email" [value]="forgotEmail()" (input)="forgotEmail.set($any($event.target).value)" placeholder="your.email@university.edu" />
+        </div>
+        <div *ngIf="forgotError()" class="alert alert-error" style="margin-top:1rem;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+            <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>{{ forgotError() }}</span>
+        </div>
+        <div *ngIf="forgotSuccess()" class="alert alert-success" style="margin-top:1rem;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+            <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>{{ forgotSuccess() }}</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeForgot()">Cancel</button>
+        <button class="btn-primary" (click)="submitForgot()" [disabled]="forgetting()">{{ forgetting() ? 'Sending...' : 'Send reset link' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

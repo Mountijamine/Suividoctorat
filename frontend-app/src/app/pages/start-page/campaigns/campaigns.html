@@ -1,0 +1,186 @@
+<public-navbar *ngIf="!isLoggedIn"></public-navbar>
+<candidat-navbar *ngIf="isLoggedIn"></candidat-navbar>
+
+<div class="campaigns-shell">
+  <!-- Hero / Title -->
+  <header class="campaigns-hero">
+    <div class="hero-inner">
+      <h1 class="hero-title">Doctoral Campaigns</h1>
+      <p class="hero-sub">Explore, track and apply to curated PhD opportunities worldwide.</p>
+      <div class="hero-actions">
+        <button class="btn-outline" (click)="refresh()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 0 1 15-6l2-2v7h-7l3-3A6 6 0 1 0 6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Refresh</span>
+        </button>
+        <button class="btn-primary" [routerLink]="['/auth']" *ngIf="!isLoggedIn">Create Account</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Controls Bar -->
+  <section class="campaigns-controls">
+    <div class="controls-row">
+      <!-- Search -->
+      <div class="control search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="search" [(ngModel)]="searchQuery" (input)="applyFilters()" placeholder="Search title, university..."/>
+      </div>
+
+      <!-- Domains Multi-select -->
+      <div class="control multi">
+        <button class="multi-trigger" (click)="toggleDomains()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>{{ selectedDomains.length ? selectedDomains.length + ' domains' : 'Filter domains' }}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" [class.open]="showDomains"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="multi-panel" *ngIf="showDomains" (click)="$event.stopPropagation()">
+          <div class="multi-options">
+            <label *ngFor="let d of allDomains" class="chk">
+              <input type="checkbox" [value]="d" (change)="toggleDomain(d, $event.target.checked)" [checked]="selectedDomains.includes(d)" />
+              <span>{{ d }}</span>
+            </label>
+          </div>
+          <div class="multi-actions">
+            <button class="btn-xs" (click)="clearDomains()">Clear</button>
+            <button class="btn-xs primary" (click)="applyFilters()">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="control select">
+        <select [(ngModel)]="filterStatus" (change)="applyFilters()">
+          <option value="all">All Status</option>
+          <option value="open">Open</option>
+          <option value="closing-soon">Closing Soon</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+
+      <!-- Sort -->
+      <div class="control select">
+        <select [(ngModel)]="sortKey" (change)="sortCampaigns()">
+          <option value="relevance">Sort: Relevance</option>
+          <option value="deadline">Deadline</option>
+          <option value="positions">Positions</option>
+          <option value="recent">Recently Added</option>
+        </select>
+      </div>
+
+      <!-- Favorites Toggle -->
+      <div class="control favs">
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="showFavorites" (change)="applyFilters()"/>
+          <span>Favorites Only</span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Strip -->
+  <div class="stats-strip">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg>
+      </div>
+      <div class="stat-info">
+        <div class="stat-val">{{ totalCampaigns }}</div>
+        <div class="stat-label">Total Campaigns</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon visible">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="stat-info">
+        <div class="stat-val">{{ filteredCampaigns.length }}</div>
+        <div class="stat-label">Visible Now</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon fav">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="stat-info">
+        <div class="stat-val">{{ favorites.size }}</div>
+        <div class="stat-label">Favorites</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon applied">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="stat-info">
+        <div class="stat-val">{{ appliedCampaignIds.size }}</div>
+        <div class="stat-label">Applied</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <section class="campaign-grid" *ngIf="filteredCampaigns.length; else emptyState">
+    <article class="campaign-card" *ngFor="let c of visibleCampaigns; trackBy: trackById">
+      <div class="card-header">
+        <div class="banner-wrapper">
+          <img [src]="c.bannerUrl" [alt]="c.title" (error)="onImgError($event)" class="banner" />
+          <div class="overlay-gradient"></div>
+          <div class="status-badge" [ngClass]="'st-' + c.status">{{ getStatusLabel(c.status) }}</div>
+          <button class="fav-btn" [class.active]="isFavorite(c.id)" (click)="toggleFavorite(c.id)" title="Favorite">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path [attr.fill]="isFavorite(c.id)?'currentColor':'none'" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="logo-box">
+          <img [src]="c.universityLogo" [alt]="c.university" (error)="onImgError($event)" />
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <div class="uni-name">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {{ c.university }}
+        </div>
+        <h2 class="card-title" [title]="c.title">{{ c.title }}</h2>
+        
+        <div class="card-tags">
+          <span class="tag" *ngFor="let t of c.tags.slice(0,3)">{{ t }}</span>
+          <span class="tag more" *ngIf="c.tags.length > 3">+{{ c.tags.length - 3 }}</span>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="label">Deadline</span>
+            <span class="value" [class.urgent]="isClosingSoon(c.deadline)">{{ c.deadline | date:'mediumDate' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Positions</span>
+            <span class="value">{{ c.positions }} Open</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Funding</span>
+            <span class="value highlight">{{ c.fundingAmount || 'Yes' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-details" (click)="viewDetails(c)">View Details</button>
+        <button class="btn-apply" (click)="applyToCampaign(c)" [disabled]="hasApplied(c.id) || c.status==='closed'">
+          {{ hasApplied(c.id) ? 'Applied' : 'Apply Now' }}
+        </button>
+      </div>
+    </article>
+  </section>
+
+  <!-- Pagination / Load More -->
+  <div class="load-more" *ngIf="visibleCampaigns.length < filteredCampaigns.length">
+    <button class="btn-load" (click)="loadMore()">Load More</button>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v4H4zM4 12h16v8H4z" stroke="currentColor" stroke-width="2"/></svg>
+      <h3>No campaigns match your filters.</h3>
+      <button class="btn-outline" (click)="resetFilters()">Reset Filters</button>
+    </div>
+  </ng-template>
+</div>
