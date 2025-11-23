@@ -146,7 +146,7 @@ If you still hit problems when approving a user:
 2. Verify your browser is including the CSRF token in the form POSTs (the admin UI forms include CSRF token as a cookie-based repository).
 3. If you compiled the app with a custom build step that removes parameter names, ensure controller parameters carry explicit `@RequestParam("name")` annotations.
 
-## Module 1 API endpoints (auth + user POVs)
+## Module 1 API endpoints (auth + user POVs).
 
 Authentication / signup
 
