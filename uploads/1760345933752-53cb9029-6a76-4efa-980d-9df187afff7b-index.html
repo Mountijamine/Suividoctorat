@@ -1,0 +1,271 @@
+Cahier des Charges - Application Web MERN de Gestion de l'Entretien de Véhicules
+Titre du projet : Application Web de Gestion de l'Entretien de Véhicules
+
+1. Introduction
+L'application vise à fournir une plateforme en ligne permettant aux clients de consulter et de 
+réserver des services d'entretien pour leurs véhicules . Les clients pourront naviguer facilement 
+à travers les services et produits disponibles,  sans avoir besoin de s'identifier ni de consulter l'historique des services passés. 
+Les administrateurs, quant à eux, pourront gérer les services, produits et réservations.
+
+2. Objectifs 
+
+Pour les clients :
+
+Parcourir les produits et services proposés selon la marque du véhicule ou par nom de produit.
+Réserver des services en ligne .
+Accéder aux informations des produits (description, prix, disponibilité;nom;).
+Pour les administrateurs :
+
+Ajouter, modifier ou supprimer des produits et services.
+Gérer les réservations effectuées par les clients.
+Gérer les utilisateurs (clients).
+3. Technologies
+L'application sera développée avec la pile MERN (MongoDB, Express, React, Node.js).
+
+Frontend : React (avec Redux pour la gestion de l’état)
+Backend : Node.js + Express
+Base de données : MongoDB
+Authentification : Aucun besoin d'authentification pour les clients.
+Déploiement : Heroku, AWS, ou tout autre service similaire.
+4. Fonctionnalités
+4.1 Pour les clients
+Page d’accueil :
+
+Présentation des services et produits disponibles.
+Accès rapide aux catégories de services et produits populaires.
+Information sur l'atelier, ses services, et ses horaires d'ouverture.
+Page Produits :
+
+Filtrage des produits par marque de véhicule.
+Recherche par nom de produit (pneus, batteries, huiles, etc.).
+Détails du produit (description, prix, disponibilité).
+Page Services :
+
+Liste des services proposés par l'atelier (vidange, freinage, suspension, etc.).
+Réservation d’un service dans l'atelier fixe.
+Détails des services (description, durée estimée, prix).
+Espace de réservation :
+
+Les clients peuvent réserver un service directement, choisir une plage horaire disponible.
+Confirmation de la réservation sans besoin de créer un compte utilisateur.
+4.2 Pour les administrateurs
+Page de gestion des produits :
+
+Ajouter, modifier, supprimer des produits (pneus, huiles, batteries, etc.).
+Associer les produits aux marques de véhicules disponibles.
+Page de gestion des services :
+
+Ajouter, modifier, supprimer des services (vidange, freinage, suspension, etc.).
+Définir des horaires et disponibilités pour les services proposés dans l'atelier fixe.
+Gestion des utilisateurs :
+
+Consultation des informations sur les clients ayant effectué des réservations.
+Gestion des réservations :
+
+Suivi des réservations effectuées par les clients (sans historique détaillé par client).
+Visualisation des services réservés, des horaires et des produits associés.
+5. Architecture de l’application
+5.1 Frontend (React)
+Composants principaux :
+Header : Navigation (Accueil, Produits, Services).
+Page d’accueil : Carrousel avec les services et produits populaires, boutons d’action rapide.
+Page Produits : Liste des produits avec filtres (marque de véhicule, type de produit, etc.).
+Page Services : Liste des services avec descriptions et options de réservation.
+Page de réservation : Espace pour réserver un service à une heure donnée.
+5.2 Backend (Node.js + Express)
+API RESTful pour gérer les produits, services et réservations.
+Authentification et autorisation :
+Aucun système d’authentification nécessaire pour les clients.
+Les administrateurs auront un accès sécurisé via un tableau de bord (utilisation de JWT pour l'admin).
+5.3 Base de données (MongoDB)
+Collections principales :
+Produits : Liste des produits disponibles (pneus, huiles, batteries).
+Services : Liste des services (vidange, freinage, etc.).
+Réservations : Détails des réservations effectuées par les clients (sans besoin d'historique détaillé pour chaque client).
+6. Sécurité
+Protection des données administratives : Authentification sécurisée pour les administrateurs via JWT.
+Sécurisation des données de réservation : Chiffrement des informations sensibles liées aux réservations.
+Protection contre les attaques XSS et CSRF.
+7. Design de l’interface utilisateur
+Responsive Design : L'application doit être compatible avec les appareils mobiles et desktop.
+Esthétique moderne : Interface épurée, facile à utiliser, avec une navigation claire.
+Accessibilité : Conformité aux normes WCAG (Web Content Accessibility Guidelines).
+8. Tests
+Tests unitaires : Utilisation de Jest pour tester les composants React et les routes API.
+Tests d’intégration : Tester l’interaction entre le frontend et le backend.
+Tests de performance : Vérification de la rapidité de l'application, surtout lors des requêtes d’ajout/modification/suppression de produits/services.
+9. Déploiement
+Environnement de développement : Local avec Docker ou un serveur de développement.
+Environnement de production : Heroku, AWS, ou tout autre service cloud pour le déploiement.
+CI/CD : Intégration continue avec GitHub Actions ou GitLab CI pour automatiser les tests et déploiements.
+10. Suivi et maintenance
+Suivi des erreurs : Utilisation d’outils comme Sentry pour la gestion des erreurs en production.
+Mise à jour régulière des services et produits.
+Support client : Intégration d’une fonctionnalité de chat en direct ou d’un support par email.
+Conclusion
+Ce cahier des charges décrit une application web simplifiée de gestion d'entretien de véhicules. Les clients peuvent réserver des services sans avoir besoin de créer un compte ou de consulter un historique. L'application sera facile à utiliser, avec des fonctionnalités de gestion simples pour les administrateurs. L'architecture MERN permettra de maintenir l'application sécurisée et performante.
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+**Cahier des Charges : Application Web MERN de Gestion de l'Entretien de Véhicules**
+
+---
+
+### **1. Contexte et Objectifs**
+
+#### **1.1. Contexte**
+L’application web de gestion de l’entretien de véhicules vise à simplifier le suivi et la planification des services d’entretien pour les propriétaires de véhicules et les garages. Elle permettra de gérer les entretiens, de recevoir des rappels, et de trouver des garages pour effectuer des services variés tels que la vidange, le freinage, la pneumatique, la suspension, et la batterie.
+
+#### **1.2. Objectifs**
+- Offrir une solution numérique accessible via navigateur pour suivre l’entretien des véhicules.
+- Faciliter la planification des services d’entretien pour les utilisateurs.
+- Proposer un outil de gestion pour les garages afin de suivre leurs clients et leurs rendez-vous.
+- Améliorer l’interaction entre conducteurs et garages.
+
+---
+
+### **2. Fonctionnalités**
+
+#### **2.1. Fonctionnalités pour les utilisateurs (conducteurs)**
+1. **Gestion de profils de véhicules**
+   - Ajouter un véhicule (marque, modèle, année, kilométrage actuel).
+   - Modifier ou supprimer un profil de véhicule.
+
+2. **Suivi des services d’entretien**
+   - Enregistrer les détails des services réalisés (vidange, freinage, pneumatique, etc.).
+   - Calculer et afficher les prochains entretiens à effectuer.
+
+3. **Historique d’entretien**
+   - Consulter l’historique des services effectués.
+
+4. **Planification des rendez-vous**
+   - Consulter une liste de garages proches.
+   - Réserver un rendez-vous pour des services spécifiques (vidange, freinage, etc.).
+
+5. **Notifications et rappels**
+   - Recevoir des alertes pour les prochains services d’entretien (basé sur la date ou le kilométrage).
+
+6. **Localisation des garages**
+   - Trouver des garages proches via une carte interactive.
+
+#### **2.2. Fonctionnalités pour les garages**
+1. **Gestion des rendez-vous**
+   - Visualiser les demandes de rendez-vous des utilisateurs.
+   - Accepter, modifier ou refuser les rendez-vous.
+
+2. **Enregistrement des services**
+   - Ajouter les détails des services effectués (type d’huile, état des freins, changement de batterie, etc.).
+
+3. **Suivi des clients**
+   - Gérer une base de données des utilisateurs et leurs historiques d’entretien.
+
+4. **Statistiques et rapports**
+   - Générer des rapports sur les fréquences d’entretien, les types de services les plus demandés, etc.
+
+---
+
+### **3. Architecture Technique**
+
+#### **3.1. Frontend**
+- **Technologie :** React.js.
+- Interfaces adaptées à deux types d’utilisateurs : conducteurs et garages.
+
+#### **3.2. Backend**
+- **Technologie :** Node.js avec Express.
+- **API :** REST API pour la communication entre frontend et backend.
+
+#### **3.3. Base de données**
+- **Technologie :** MongoDB.
+- Modélisation des données pour gérer les utilisateurs, véhicules, rendez-vous et historiques d’entretien.
+
+#### **3.4. Services tiers**
+- Notifications push : Firebase Cloud Messaging (FCM).
+- Cartes et localisation : Google Maps API.
+- Paiements (optionnel) : Stripe ou PayPal.
+
+#### **3.5. Infrastructure**
+- Serveur cloud : AWS, Azure ou Heroku.
+- Déploiement CI/CD avec GitHub Actions ou GitLab CI.
+
+---
+
+### **4. Déroulement du Projet**
+
+#### **4.1. Étapes du projet**
+1. **Conception**
+   - Analyse des besoins.
+   - Rédaction des spécifications fonctionnelles.
+   - Création de maquettes (wireframes).
+
+2. **Développement**
+   - Implémentation des fonctionnalités frontend avec React.
+   - Développement du backend avec Node.js et Express.
+   - Configuration et connexion de MongoDB.
+   - Intégration des services tiers (Google Maps, notifications, etc.).
+
+3. **Tests**
+   - Tests unitaires et intégrés.
+   - Tests sur différents navigateurs (Chrome, Firefox, Safari).
+
+4. **Déploiement**
+   - Déploiement sur un serveur cloud.
+   - Maintenance et mises à jour.
+
+#### **4.2. Planning prévisionnel**
+- **Conception :** 2 semaines.
+- **Développement :** 8 semaines.
+- **Tests :** 2 semaines.
+- **Déploiement :** 1 semaine.
+
+---
+
+### **5. Contraintes et Prérequis**
+
+#### **5.1. Contraintes techniques**
+- Compatibilité avec les navigateurs modernes (Chrome, Firefox, Edge, Safari).
+- Connexion internet requise pour certaines fonctionnalités (localisation, synchronisation).
+
+#### **5.2. Prérequis**
+- Accès aux API de Google Maps et Firebase.
+- Création d’un environnement de développement MERN (MongoDB, Express, React, Node.js).
+
+---
+
+### **6. Budget et Ressources**
+
+#### **6.1. Budget estimé**
+- Développement : 20 000 €.
+- Serveurs et services tiers : 1 000 €/an.
+- Maintenance : 2 500 €/an.
+
+#### **6.2. Équipe projet**
+- 1 Chef de projet.
+- 2 Développeurs frontend (React).
+- 1 Développeur backend (Node.js).
+- 1 Designer UI/UX.
+- 1 Testeur QA.
+
+---
+
+### **7. Livrables**
+1. Application web MERN déployée.
+2. Documentation technique (API, architecture).
+3. Manuel d’utilisation pour les conducteurs et les garages.
+
+---
+
+### **8. Conclusion**
+Ce projet permettra de créer une application web moderne et intuitive pour la gestion de l’entretien de véhicules, accessible depuis tout navigateur. Une attention particulière sera accordée à l’expérience utilisateur, la performance et la scalabilité.
+

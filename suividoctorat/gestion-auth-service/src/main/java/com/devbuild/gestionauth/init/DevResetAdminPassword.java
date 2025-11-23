@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * Development helper: resets the seeded admin user's password to a known value (admin123).
- * Remove or disable this class in production.
  */
 @Component
 @Profile("dev")

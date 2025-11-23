@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Candidat Dashboard</title>
+    <link rel="stylesheet" href="/css/app.css" />
+    </head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+<h1>Candidat - Mon espace</h1>
+<p>Bienvenue sur votre tableau de bord candidat. Ici vous pourrez suivre l'avancement de votre dossier de thèse, soumettre des documents, et voir le statut de votre profil.</p>
+
+<ul>
+    <li><a th:href="@{/profile}">Mon profil</a></li>
+    <li><a th:href="@{/candidat/documents}">Mes documents</a></li>
+    <li><a href="#">Suivi des étapes</a></li>
+</ul>
+
+</body>
+</html>

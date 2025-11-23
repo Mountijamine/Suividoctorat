@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Mon profil</title>
+    </head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+<h1>Mon profil</h1>
+<div th:if="${message}" style="color:green"><p th:text="${message}"></p></div>
+<div th:if="${user}">
+    <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+    <p><strong>Statut approuvé:</strong> <span th:text="${user.approved}"></span></p>
+    <p><strong>Rôles:</strong> <span th:text="${user.roles}"></span></p>
+
+    <form method="post" th:action="@{/profile}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <label>Prénom: <input type="text" name="firstName" th:value="${user.firstName}" /></label><br/>
+        <label>Nom: <input type="text" name="lastName" th:value="${user.lastName}" /></label><br/>
+        <label>Téléphone: <input type="text" name="phone" th:value="${user.phone}" /></label><br/>
+    <label>Affiliation: <input type="text" name="affiliation" th:value="${user.affiliation}" /></label><br/>
+        <label>Profil demandé:
+            <select name="requestedProfile">
+                <option value="">Aucun</option>
+                <option value="ROLE_CANDIDAT" th:selected="${user.requestedProfile == 'ROLE_CANDIDAT'}">Candidat</option>
+                <option value="ROLE_ENCADRANT" th:selected="${user.requestedProfile == 'ROLE_ENCADRANT'}">Encadrant</option>
+                <option value="ROLE_PERSONNEL" th:selected="${user.requestedProfile == 'ROLE_PERSONNEL'}">Personnel administratif</option>
+            </select>
+        </label><br/>
+        <button type="submit">Mettre à jour</button>
+    </form>
+</div>
+<p><a th:href="@{/dashboard}">Retour</a> | <a th:href="@{/logout}">Logout</a></p>
+</body>
+</html>

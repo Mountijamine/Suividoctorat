@@ -31,7 +31,6 @@ public class TokenFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
             token = header.substring(7);
         } else {
-            // try cookie named JWT
             if (request.getCookies() != null) {
                 for (jakarta.servlet.http.Cookie c : request.getCookies()) {
                     if ("JWT".equals(c.getName()) && StringUtils.hasText(c.getValue())) {
@@ -46,12 +45,16 @@ public class TokenFilter extends OncePerRequestFilter {
                 Claims claims = jwtUtil.parseClaims(token);
                 String username = claims.getSubject();
                 String roles = (String) claims.get("roles");
-                Set authorities = Arrays.stream(roles.split(",")).map(r -> new org.springframework.security.core.authority.SimpleGrantedAuthority(r)).collect(Collectors.toSet());
+                try { System.err.println("[TokenFilter] token valid for user=" + username + " roles=" + roles); } catch (Throwable t) {}
+                Set authorities = java.util.Collections.emptySet();
+                if (roles != null && !roles.isBlank()) {
+                    authorities = Arrays.stream(roles.split(",")).map(r -> new org.springframework.security.core.authority.SimpleGrantedAuthority(r)).collect(Collectors.toSet());
+                }
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception ex) {
-                // ignore token errors for demo
+                try { System.err.println("[TokenFilter] token parse error: " + ex.getClass().getName() + ": " + ex.getMessage()); ex.printStackTrace(); } catch (Throwable t) {}
             }
         }
         filterChain.doFilter(request, response);
