@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,10 +25,12 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final boolean devApiOpen;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    public SecurityConfig(UserDetailsService userDetailsService, JwtUtil jwtUtil, org.springframework.core.env.Environment env) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.devApiOpen = Boolean.parseBoolean(env.getProperty("app.dev.api-open", "false"));
     }
 
     @Bean
@@ -36,18 +41,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         TokenFilter tokenFilter = new TokenFilter(jwtUtil);
-        http.csrf().disable()
-            .sessionManagement().sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeHttpRequests()
-            // permit access to static resources and form endpoints
-            .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-            .requestMatchers(HttpMethod.GET, "/login", "/signup").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login", "/signup", "/login").permitAll()
-            .anyRequest().authenticated()
-            // do NOT enable HTTP Basic; we use JWT bearer tokens only
-            .and()
-            .addFilterBefore(tokenFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> {
+                // Allow signup/login/verification endpoints without auth
+                auth.requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login",
+                    "/api/auth/send-verification-code", "/api/auth/verify-code",
+                    "/api/auth/password-reset/request", "/api/auth/password-reset/confirm").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/api/auth/confirm").permitAll();
+                auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll();
+            
+                auth.requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/favicon.ico").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/profile").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/profile").authenticated();
+                auth.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN");
+               
+                auth.requestMatchers("/api/**").authenticated();
+                auth.anyRequest().denyAll();
+            })
+            .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

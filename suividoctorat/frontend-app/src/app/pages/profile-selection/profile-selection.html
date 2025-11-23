@@ -1,0 +1,274 @@
+<user-navbar></user-navbar>
+<div class="wrap">
+  <!-- Left Side - Role Selection -->
+  <div class="left-panel">
+    <div class="left-header">
+      <div class="step-badge">
+        <span>Étape obligatoire</span>
+      </div>
+      <h1 class="left-title">Choisissez votre profil</h1>
+      <p class="left-subtitle">Cette étape est obligatoire après la connexion</p>
+    </div>
+
+    <div class="roles-grid">
+      <div (click)="canSelectRole() ? choose('candidat') : null" [class.selected]="selected() === 'candidat'" [class.disabled]="!canSelectRole() && selected() !== 'candidat'" class="role-card">
+        <div class="role-header">
+          <h3 class="role-title">Candidat / Doctorant</h3>
+          <span [class]="selected() === 'candidat' ? 'role-tag selected' : 'role-tag default'">Étudiant</span>
+        </div>
+        <p class="role-desc">Soumettre dossiers, suivre l'avancement, déposer thèse.</p>
+        <div *ngIf="selected() === 'candidat'" class="role-indicator"></div>
+      </div>
+
+      <div (click)="canSelectRole() ? choose('directeur') : null" [class.selected]="selected() === 'directeur'" [class.disabled]="!canSelectRole() && selected() !== 'directeur'" class="role-card">
+        <div class="role-header">
+          <h3 class="role-title">Directeur de Thèse / Encadrant</h3>
+          <span [class]="selected() === 'directeur' ? 'role-tag selected' : 'role-tag default'">Encadrement</span>
+        </div>
+        <p class="role-desc">Encadrer des doctorants. Validation admin requise pour activation.</p>
+        <div *ngIf="selected() === 'directeur'" class="role-indicator"></div>
+      </div>
+
+      <div (click)="canSelectRole() ? choose('admin') : null" [class.selected]="selected() === 'admin'" [class.disabled]="!canSelectRole() && selected() !== 'admin'" class="role-card">
+        <div class="role-header">
+          <h3 class="role-title">Personnel Administratif</h3>
+          <span [class]="selected() === 'admin' ? 'role-tag selected' : 'role-tag default'">Administration</span>
+        </div>
+        <p class="role-desc">Gérer les processus administratifs et valider les dossiers.</p>
+        <div *ngIf="selected() === 'admin'" class="role-indicator"></div>
+      </div>
+    </div>
+
+    <div class="left-footer">
+      <p>Les directeurs de thèse nécessitent une validation administrative avant activation complète du compte.</p>
+    </div>
+  </div>
+
+  <!-- Right Side - Form -->
+  <div class="right-panel">
+    <div class="right-content">
+      <!-- Form Header -->
+      <div class="right-header" style="display:flex; align-items:center; justify-content:space-between; gap:1rem">
+        <div>
+          <h2 class="right-title">Informations complémentaires</h2>
+          <p class="right-subtitle">Veuillez remplir tous les champs requis pour compléter votre inscription</p>
+        </div>
+        <!-- small decorative/logo area so right side is not empty -->
+        <div class="right-logo" aria-hidden="true">
+          <!-- simple academic cap SVG -->
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="logo">
+            <path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2z" fill="#0f172a" opacity="0.95"/>
+            <path d="M11 12.5v7.5h2v-6.2c1.4-.3 2.5-1.3 2.5-2.8 0-1.6-1.3-2.9-2.9-2.9S10 9.5 10 11.1c0 1.5 1 2.5 1 2.9z" fill="#06b6d4" opacity="0.95"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Form Content -->
+      <div class="form-section" *ngIf="!showForm() && !awaiting()">
+        <div class="empty-state">
+          <div class="empty-content">
+           <h3 class="empty-title">Choisissez un rôle à gauche</h3>
+            <div class="empty-illustration" aria-hidden="true">
+              <!-- Display the profile selection banner and caption. -->
+              <!-- Place your banner at: assets/images/profileselectionbanner.jpg (or .png) -->
+              <img src="assets/profileselectionbanner.jpg" class="empty-image banner-image" alt="profileselection banner" (error)="onIllustrationError()" />
+               
+            <p class="empty-subtitle">Sélectionnez l'un des rôles (Candidat, Encadrant, Admin) pour continuer.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidat - Immediate Action -->
+      <div class="form-section" *ngIf="selected() === 'candidat' && !awaiting()">
+        <p style="color:#64748b; margin-bottom:2rem">Le rôle candidat sera appliqué immédiatement après confirmation.</p>
+        <button class="btn-primary" [disabled]="sending()" (click)="confirmSelection()">
+          Confirmer et continuer
+        </button>
+      </div>
+
+      <!-- Director/Admin Form -->
+      <div *ngIf="showForm()">
+        <!-- Director Fields -->
+        <div *ngIf="selected() === 'directeur'">
+          <div class="form-section">
+            <label class="form-label">Affiliation / Institution</label>
+            <input type="text" class="form-input" [(ngModel)]="extra.affiliation" placeholder="Entrez votre institution" />
+          </div>
+
+          <div class="form-section">
+            <label class="form-label">Justification / Motivation</label>
+            <textarea class="form-input" rows="4" [(ngModel)]="extra.justification" placeholder="Décrivez votre motivation et expérience"></textarea>
+          </div>
+        </div>
+
+        <!-- Admin Fields -->
+        <div *ngIf="selected() === 'admin'">
+          <div class="form-section">
+            <label class="form-label">Nom d'utilisateur</label>
+            <input type="text" class="form-input" [(ngModel)]="extraAdmin.username" placeholder="Entrez votre nom complet" />
+          </div>
+
+          <div class="form-section">
+            <label class="form-label">Province</label>
+            <input type="text" class="form-input" [(ngModel)]="extraAdmin.province" placeholder="Sélectionnez votre province" />
+          </div>
+        </div>
+
+        <!-- File Uploads (role-specific) -->
+        <div *ngIf="selected() === 'directeur'" class="form-section">
+          <label class="form-label">Carte d'identité</label>
+          <div class="file-grid">
+            <div class="file-upload">
+              <p class="file-label">Photo Recto</p>
+              <label class="file-drop" (dragover)="onDragOver($event,'front')" (dragleave)="onDragLeave($event,'front')" (drop)="onDrop($event,'front')">
+                <div [style.border]="dragActiveFront() ? '2px dashed #3b82f6' : 'none'" class="preview-box">
+                  <img *ngIf="extraPreview.frontUrl" [src]="extraPreview.frontUrl" alt="front" />
+                  <div *ngIf="!extraPreview.frontUrl" style="color:#9ca3af">Recto</div>
+                </div>
+                <div class="file-meta" style="flex:1">
+                  <div class="file-name" [title]="extra.frontIdFile?.name">{{ extra.frontIdFile?.name || 'Aucune photo' }}</div>
+                  <div class="file-controls">
+                    <input type="file" (change)="handleFile($event,'front')" style="display:none" #frontInput />
+                    <button class="btn-outline" type="button" (click)="frontInput.click()">Choisir</button>
+                    <button class="icon-btn" type="button" *ngIf="extraPreview.frontUrl" (click)="viewFile('front')" title="Voir" aria-label="Voir le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"></path>
+                        <circle cx="12" cy="12" r="2.5"></circle>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" type="button" *ngIf="extraPreview.frontUrl" (click)="clearFile('front')" title="Effacer" aria-label="Effacer le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M9 3v1H4v2h16V4h-5V3H9zm2 5v9h2V8h-2zm4 0v9h2V8h-2zM7 8v9h2V8H7z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="file-upload">
+              <p class="file-label">Photo Verso</p>
+              <label class="file-drop" (dragover)="onDragOver($event,'back')" (dragleave)="onDragLeave($event,'back')" (drop)="onDrop($event,'back')">
+                <div [style.border]="dragActiveBack() ? '2px dashed #3b82f6' : 'none'" class="preview-box">
+                  <img *ngIf="extraPreview.backUrl" [src]="extraPreview.backUrl" alt="back" />
+                  <div *ngIf="!extraPreview.backUrl" style="color:#9ca3af">Verso</div>
+                </div>
+                <div class="file-meta" style="flex:1">
+                  <div class="file-name" [title]="extra.backIdFile?.name">{{ extra.backIdFile?.name || 'Aucune photo' }}</div>
+                  <div class="file-controls">
+                    <input type="file" (change)="handleFile($event,'back')" style="display:none" #backInput />
+                    <button class="btn-outline" type="button" (click)="backInput.click()">Choisir</button>
+                    <button class="icon-btn" type="button" *ngIf="extraPreview.backUrl" (click)="viewFile('back')" title="Voir" aria-label="Voir le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"></path>
+                        <circle cx="12" cy="12" r="2.5"></circle>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" type="button" *ngIf="extraPreview.backUrl" (click)="clearFile('back')" title="Effacer" aria-label="Effacer le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M9 3v1H4v2h16V4h-5V3H9zm2 5v9h2V8h-2zm4 0v9h2V8h-2zM7 8v9h2V8H7z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="selected() === 'admin'" class="form-section">
+          <label class="form-label">Carte d'identité</label>
+          <div class="file-grid">
+            <div class="file-upload">
+              <p class="file-label">Photo Recto</p>
+              <label class="file-drop" (dragover)="onDragOver($event,'front')" (dragleave)="onDragLeave($event,'front')" (drop)="onDrop($event,'front')">
+                <div [style.border]="dragActiveFront() ? '2px dashed #3b82f6' : 'none'" class="preview-box">
+                  <img *ngIf="extraAdminPreview.frontUrl" [src]="extraAdminPreview.frontUrl" alt="front" />
+                  <div *ngIf="!extraAdminPreview.frontUrl" style="color:#9ca3af">Recto</div>
+                </div>
+                <div class="file-meta" style="flex:1">
+                  <div class="file-name" [title]="extraAdmin.frontIdFile?.name">{{ extraAdmin.frontIdFile?.name || 'Aucune photo' }}</div>
+                    <div class="file-controls">
+                    <input type="file" (change)="handleFile($event,'front')" style="display:none" #adminFrontInput />
+                    <button class="btn-outline" type="button" (click)="adminFrontInput.click()">Choisir</button>
+                    <button class="icon-btn" type="button" *ngIf="extraAdminPreview.frontUrl" (click)="viewFile('front')" title="Voir" aria-label="Voir le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"></path>
+                        <circle cx="12" cy="12" r="2.5"></circle>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" type="button" *ngIf="extraAdminPreview.frontUrl" (click)="clearFile('front')" title="Effacer" aria-label="Effacer le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M9 3v1H4v2h16V4h-5V3H9zm2 5v9h2V8h-2zm4 0v9h2V8h-2zM7 8v9h2V8H7z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="file-upload">
+              <p class="file-label">Photo Verso</p>
+              <label class="file-drop" (dragover)="onDragOver($event,'back')" (dragleave)="onDragLeave($event,'back')" (drop)="onDrop($event,'back')">
+                <div [style.border]="dragActiveBack() ? '2px dashed #3b82f6' : 'none'" class="preview-box">
+                  <img *ngIf="extraAdminPreview.backUrl" [src]="extraAdminPreview.backUrl" alt="back" />
+                  <div *ngIf="!extraAdminPreview.backUrl" style="color:#9ca3af">Verso</div>
+                </div>
+                <div class="file-meta" style="flex:1">
+                  <div class="file-name" [title]="extraAdmin.backIdFile?.name">{{ extraAdmin.backIdFile?.name || 'Aucune photo' }}</div>
+                    <div class="file-controls">
+                    <input type="file" (change)="handleFile($event,'back')" style="display:none" #adminBackInput />
+                    <button class="btn-outline" type="button" (click)="adminBackInput.click()">Choisir</button>
+                    <button class="icon-btn" type="button" *ngIf="extraAdminPreview.backUrl" (click)="viewFile('back')" title="Voir" aria-label="Voir le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"></path>
+                        <circle cx="12" cy="12" r="2.5"></circle>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" type="button" *ngIf="extraAdminPreview.backUrl" (click)="clearFile('back')" title="Effacer" aria-label="Effacer le fichier">
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M9 3v1H4v2h16V4h-5V3H9zm2 5v9h2V8h-2zm4 0v9h2V8h-2zM7 8v9h2V8H7z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy Notice -->
+        <div class="privacy-notice">
+          <p>Vos informations personnelles sont protégées et utilisées uniquement dans le cadre de votre inscription. Conformément à la réglementation en vigueur.</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button class="btn-secondary" (click)="showForm.set(false)" [disabled]="sending()">Annuler</button>
+          <button class="btn-primary" [disabled]="sending() || !isFormValid()" (click)="submitRequest()">
+            Soumettre la demande
+          </button>
+        </div>
+      </div>
+
+      <!-- Awaiting Approval -->
+      <div *ngIf="awaiting()" class="form-section">
+        <div style="padding:2rem; border-radius:0.75rem; background:#fef3c7; border:1px solid #f59e0b">
+          <h3 style="margin:0 0 1rem 0; color:#92400e; font-size:1.25rem">Demande envoyée — en attente d'approbation</h3>
+          <p style="color:#92400e; margin-bottom:1rem">Votre demande pour le rôle <strong>{{ selected() }}</strong> a été reçue et sera examinée par l'administration.</p>
+          <p style="color:#64748b; margin-bottom:1.5rem">
+            Statut: <strong>{{ pendingRequest?.status || 'PENDING' }}</strong>
+            <span *ngIf="remainingLabel() && remainingLabel() !== 'expired'"> — expirera dans {{ remainingLabel() }}</span>
+            <span *ngIf="remainingLabel() === 'expired'"> — délai dépassé, vous pouvez contacter l'administration.</span>
+          </p>
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap">
+            <button class="btn-secondary" (click)="checkPendingRequests()">Actualiser</button>
+            <button class="btn-secondary" *ngIf="canCancel()" (click)="cancelPendingRequest()">Annuler la demande</button>
+            <button class="btn-primary" (click)="router.navigate(['/'])">Retour à l'accueil</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

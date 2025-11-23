@@ -26,12 +26,13 @@ public class WebController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login";
+        // Redirect to SPA entry; Angular will render the login page client-side.
+        return "redirect:/";
     }
 
     @GetMapping("/signup")
     public String signupPage() {
-        return "signup";
+        return "redirect:/";
     }
 
     @PostMapping(value = "/signup", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -42,23 +43,27 @@ public class WebController {
         String firstName = params.get("firstName");
         String lastName = params.get("lastName");
     String phone = params.get("phone");
+    String affiliation = params.get("affiliation");
     String accept = params.get("acceptTerms");
-    String requestedProfile = params.get("requestedProfile");
         if (email == null || password == null || confirm == null) { model.addAttribute("error","Missing fields"); return "signup"; }
         if (!password.equals(confirm)) { model.addAttribute("error","Passwords do not match"); return "signup"; }
         if (!"on".equalsIgnoreCase(accept) && !"true".equalsIgnoreCase(accept)) { model.addAttribute("error","You must accept terms"); return "signup"; }
-    userService.createUserWithProfile(email, password, firstName, lastName, phone, true, requestedProfile);
+    // Users sign up as generic users; requested profile is collected later via profile update
+    userService.createUserWithProfile(email, password, firstName, lastName, phone, true, null, affiliation);
         return "redirect:/login";
     }
 
 
     @GetMapping("/")
     public String index(Model model) {
-        return "login";
+        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        // Let the SPA decide routing for authenticated/anonymous users.
+        // Forward to Angular index (resources/static/index.html) so the SPA can handle client-side routing.
+        return "forward:/index.html";
     }
 
     @PostMapping(value = "/login", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String loginForm(@org.springframework.web.bind.annotation.RequestParam java.util.Map<String, String> params, org.springframework.ui.Model model, HttpServletResponse response, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String loginForm(@org.springframework.web.bind.annotation.RequestParam java.util.Map<String, String> params, org.springframework.ui.Model model, HttpServletResponse response, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes, jakarta.servlet.http.HttpServletRequest request) {
         String email = params.get("email");
         String password = params.get("password");
         if (email == null || password == null) { model.addAttribute("error","Missing credentials"); return "login"; }
@@ -77,7 +82,12 @@ public class WebController {
             String token = jwtUtil.generateToken(u.getEmail(), roles);
             Cookie cookie = new Cookie("JWT", token);
             cookie.setHttpOnly(true);
-            cookie.setSecure(false); // set to true if you use HTTPS in production
+            // mark Secure only when request uses HTTPS
+            try {
+                cookie.setSecure(request.isSecure());
+            } catch (Exception ignored) {
+                cookie.setSecure(false);
+            }
             cookie.setPath("/");
             cookie.setMaxAge(60 * 60 * 24); // 1 day
             response.addCookie(cookie);
@@ -87,6 +97,24 @@ public class WebController {
                 return "redirect:/admin/users";
             }
         }
-        return "redirect:/";
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletResponse response, jakarta.servlet.http.HttpServletRequest request, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        // remove JWT cookie
+        Cookie cookie = new Cookie("JWT", "");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        try { cookie.setSecure(request.isSecure()); } catch (Exception ignored) {}
+        response.addCookie(cookie);
+        // invalidate server session if present
+        try {
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session != null) session.invalidate();
+        } catch (Exception ignored) {}
+        redirectAttributes.addFlashAttribute("message", "Logged out");
+        return "redirect:/login";
     }
 }

@@ -29,6 +29,10 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
+        <!-- Spring Cloud version (matches the imported BOM) -->
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <!-- Align Spring Boot with Spring Cloud release train (use 3.4.x for full compatibility) -->
+        <spring-boot.version>3.4.8</spring-boot.version>
     </properties>
     <modules>
     <module>gestion-auth-service</module>
@@ -36,6 +40,8 @@
     <module>soutenance-service</module>
     <module>notification-service</module>
     <module>gateway</module>
+    <module>eureka-server</module>
+    <module>config-server</module>
     </modules>
 
     <dependencyManagement>
@@ -43,10 +49,18 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.5.6</version>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+                <!-- Spring Cloud BOM for Netflix Eureka (compatible release train) -->
+                <dependency>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-dependencies</artifactId>
+                    <version>2024.0.0</version>
+                    <type>pom</type>
+                    <scope>import</scope>
+                </dependency>
         </dependencies>
     </dependencyManagement>
 

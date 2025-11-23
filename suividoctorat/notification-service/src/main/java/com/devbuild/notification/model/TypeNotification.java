@@ -1,0 +1,12 @@
+package com.devbuild.notification.model;
+
+public enum TypeNotification {
+    INSCRIPTION_SOUMISE,
+    INSCRIPTION_VALIDE,
+    INSCRIPTION_REJETEE,
+    SOUTENANCE_AUTORISEE,
+    RAPPEL_ECHEANCE,
+    JURY_PROPOSE,
+    RAPPORT_DEPOSE,
+    SOUTENANCE_PLANIFIEE
+}

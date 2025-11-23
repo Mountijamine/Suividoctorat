@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 /**
  * Startup helper: ensures an admin user exists and that the stored password is BCrypt-encoded.
  * If missing or the password doesn't look like BCrypt, it will be set to "admin123" (encoded).
- * This is intended for local development convenience — remove in production.
  */
 @Component
 public class EnsureAdminPassword implements CommandLineRunner {
