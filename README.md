@@ -5,7 +5,7 @@ Configuration
 
 - `app.upload.dir` (property) controls where uploaded files are stored. Default `./uploads`.
 
-Security notes
+Security notes:
 
 - Document endpoints check ownership and roles. Files are served from disk; in production consider using a secure object store and signed URLs.
 
